@@ -1,6 +1,6 @@
 import React from 'react';
 // import zh_CN from 'antd/es/locale/zh_CN';
-import { Table, Pagination, ConfigProvider } from 'antd';
+import { Table, Pagination } from 'antd';
 import { formatCurrency } from '@/utils/common';
 import styles from './index.module.less';
 

@@ -2,18 +2,19 @@
     // width: 100%;
     height: 100%;
     position: relative;
-    width: 150px;
+    width: 170px;
     min-width: 0;
-    max-width: 150px;
-    flex: 0 0 150px;
+    max-width: 170px;
+    flex: 0 0 170px;
     transition: all 0.2s;
     display: flex;
     flex-direction: column;
-    background-color: #222834;
+    // background-color: #f5f4f4;
     .layout-logo {
         height: 50px;
         line-height: 50px;
         // padding: 8px 16px;
+        background-color: rgba(48, 48, 53, 1);
         .layout-logo-wrapper {
             height: 100%;
             display: flex;
@@ -26,7 +27,7 @@
         }
     }
     .layout-title {
-        color: #fff;
+        color: #000;
         font-size: 16px;
         margin-top: 0;
         margin-bottom: 0;
@@ -48,6 +49,7 @@
     .sider-menu-container {
         flex: 1;
         overflow: auto;
+        padding: 10px;
         &::-webkit-scrollbar-track {
             border-radius: 10px;
             background: transparent;
@@ -73,17 +75,25 @@
         //     // background: #000c17;
         // }
         .ant-menu-dark {
-            color: rgba(255, 255, 255, 0.65);
-            background: #222834;
+            color: rgba(251, 251, 254, 0.75);
+            // background-color: #f6f7f9;
+            background: none;
         }
         .ant-menu-item {
             margin-inline: 0 !important;
             margin-block: 0 !important;
             width: 100% !important;
-            border-radius: 0 !important;
+            border-radius: 10px !important;
+        }
+        .ant-menu-item-active {
+            color: rgba(251, 251, 254, 0.75) !important;
+            background-color: rgba(238, 238, 246, 0.11) !important;
         }
         .ant-menu-item-selected {
-            background-color: #009688 !important;
+            // font-weight: 600 !important;
+            color: rgba(251, 251, 254, 0.75) !important;
+            background-color: rgba(238, 238, 246, 0.11) !important;
+            box-shadow: 0 0 #0000, 0 0 #0000, 0px 1px 1px 0px rgba(0, 0, 0, .08);
         }
     }
 }

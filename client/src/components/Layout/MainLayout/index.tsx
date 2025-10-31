@@ -14,7 +14,6 @@ const NoMatch = () => (
 interface MainLayoutProps {
     title?: string;
     location?: any;
-    user?: any;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = props => {
@@ -181,7 +180,6 @@ const MainLayout: React.FC<MainLayoutProps> = props => {
                             <Headers 
                                 visible={collapsed}
                                 onTrigger={onTrigger}
-                                user={props.user}
                             />
                         </div>
                     </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import {
     Layout,
     Menu,
@@ -25,9 +26,6 @@ import history from '@/utils/history';
 import { loginOut } from '@/api';
 import styles from './index.module.less';
 
-let userObj: any = localStorage.getItem('user');
-userObj = JSON.parse(userObj);
-
 interface HeadersProps {
     user?: any;
     visible?: boolean;
@@ -35,10 +33,9 @@ interface HeadersProps {
 }
 
 const Headers: React.FC<HeadersProps> = props => {
+    const state: any = useSelector(state => state);
     const [showChangePSW, setShowChangePSW] = useState(false);
     const [form] = Form.useForm();
-
-    
 
     const onChangePSWFormFinish = async () => {
         try {
@@ -100,7 +97,7 @@ const Headers: React.FC<HeadersProps> = props => {
                     <div className={styles['headers-menu-right-inner']}>
                         <span className={styles['user-info-label']}>
                             <span className={styles['user-tip-label']}>用户:</span>
-                            <span className={styles['user-name-label']}>{userObj.username}</span>
+                            <span className={styles['user-name-label']}>{state.login.user.username}</span>
                         </span>
                         <span className={styles['user-header-label']}>
                             <Avatar className={styles['headers-avatar']} size="small" src={props.user?.avatar} icon={<UserOutlined />} style={{ backgroundColor: 'rgb(0, 150, 136)' }}/>

@@ -1,0 +1,48 @@
+.docViewer-container {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+
+    .docViewer-content {
+        // max-width: 648px;
+        width: 100%;
+        overflow: auto;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        flex: 1;
+        padding: 20px;
+
+        :global {
+            .ProseMirror {
+                word-wrap: break-word;
+                white-space: pre-wrap;
+                white-space: break-spaces;
+                -webkit-font-variant-ligatures: none;
+                font-variant-ligatures: none;
+                font-feature-settings: "liga" 0;
+                // font-family: "Inter", sans-serif;
+            }
+
+            .tiptap.ProseMirror {
+                // white-space: pre-wrap;
+                // outline: none;
+                // caret-color: rgba(98, 41, 255, 1);
+                // font-family: "DM Sans", sans-serif;
+                font-family: "Inter", sans-serif;
+            }
+
+            .tiptap.ProseMirror.simple-editor {
+                width: 100%;
+                max-width: 820px;
+                padding: 3rem 3rem 30vh;
+                border-radius: .625rem;
+                outline: 0;
+                background: #fff;
+                box-shadow: 0 0 #0000, 0 0 rgb(0, 0, 0, 0), 0 0 #0000, 0 0 #0000, 0px 12px 33px 0px rgba(0, 0, 0, .06), 0px 3.618px 9.949px 0px rgba(0, 0, 0, .04), 0px 1.503px 4.132px 0px rgba(0, 0, 0, .03), 0px 0.543px 1.495px 0px rgba(0, 0, 0, .02);
+            }
+        }
+
+    }
+}
