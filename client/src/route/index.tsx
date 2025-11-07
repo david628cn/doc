@@ -5,7 +5,7 @@ import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 
 const Login = React.lazy(() => import('../pages/Login'));
 // const Home = React.lazy(() => import('@/pages/Home'));
-// const Editor = React.lazy(() => import('@/pages/Editor'));
+const Doc = React.lazy(() => import('@/pages/Doc'));
 // const Screen = React.lazy(() => import('@/pages/Screen'));
 // const Test = React.lazy(() => import('@/pages/Test'));
 const Layout = React.lazy(() => import('../components/Layout/MainLayout'));
@@ -24,6 +24,7 @@ const IRoutes = () => {
             <React.Suspense fallback>
                 <Switch>
                     <Route path='/login' component={(props: any) => <Login {...props} />} />
+                    <Route path='/doc' component={(props: any) => <Doc {...props} />} />
                     {/* <Route path="/platform" component={(props: any) => <Editor {...props} />} />
                     <Route path="/screen" component={(props: any) => <Screen {...props} />} />
                     <Route path="/test" component={(props: any) => <Test {...props} />} /> */}

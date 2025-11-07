@@ -19,24 +19,6 @@ export const loginOut = async (params?: any) => {
     return result;
 }
 
-export const register = async (params: any) => {
-    const result = await request.post({
-        url: `${ contextPath }/oauth/register`,
-        data: JSON.stringify(params)
-    });
-    return result;
-}
-
-export const checkUsername = async (params?: any) => {
-    const result = await request.get({
-        url: `${ contextPath }/oauth/checkUsername`,
-        data: params
-    });
-    return result;
-}
-
-
-
 export const addProject = async (params: any) => {
     const result = await request.post({
         url: `${ contextPath }/api/project/create`,

@@ -1,23 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import DocViewer from '@/components/DocViewer';
+import DocEditer from '@/components/DocEditer';
 
 interface IProps {
 }
 
 const Page: React.FC<IProps> = props => {
-    const state: any = useSelector(state => state);
     return (
         <div style={{
             width: '100%',
-            height: '100%'
+            height: '100%',
+            display: 'flex',
+            padding: '30px 0',
+            justifyContent: 'center',
+            backgroundColor: '#f5f4f4'
         }}>
-            <DocViewer
-                params={{
-                    user: state.login.user,
-                    docId: '0'
-                }}
-            />
+            <div style={{
+                width: '960px',
+                height: '100%'
+            }}>
+                <DocEditer/>
+            </div>
+            
         </div>
     );
 }
