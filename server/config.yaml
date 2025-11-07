@@ -1,0 +1,32 @@
+server:
+  port: 8000
+  env: "dev" #production
+proxy:
+  allow_origins: ["http://127.0.0.1:3000", "http://localhost:3000", "http://127.0.0.1:3100", "http://localhost:3100"]
+  allow_methods: ["*"]
+  allow_headers: ["*"]
+#  allow_credentials: false
+#  max_age: 12
+  trusted_proxies: ["127.0.0.1"]
+database:
+  dsn: "root:root123@tcp(127.0.0.1:3306)/qoue?charset=utf8mb4&parseTime=True&loc=Local"
+jwt:
+#  secret_type: "jwt"
+  secret_key: "__abcd__"
+#  algorithm: "HS256"
+  access_token_expire_minutes: 604800000
+zap:
+  level: "debug"
+  file_path: "./logs/app.log"
+  max_size: 100
+  max_backups: 7
+  max_age: 30
+  compress: true
+  console_output: true
+upload:
+  path: "./uploads"
+web:
+  static: ["./web/static"]
+  index_html: "./web/index.html"
+#templates:
+#  path: "templates/*"
