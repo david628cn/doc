@@ -1,11 +1,11 @@
 import { RenderElementProps } from 'slate-react';
-import Default from './Elements/Default';
-import Code from './Elements/Code';
+import Default from './Default';
+import Code from './Code';
 // import { CustomEditor, CustomElement } from './custom-types.d';
 
 const CustomElement = (props: RenderElementProps) => {
     const { attributes, children, element } = props;
-    console.log('currentProps', props)
+    // console.log('currentProps', props)
     switch (element.type) {
         case 'code':
             return <Code>{children}</Code>;

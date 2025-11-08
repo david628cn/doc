@@ -22,7 +22,7 @@ import {
     CodeIcon,
     UnderlinedIcon,
     HighlightIcon,
-    TextColorIcon,
+    ColorIcon,
     LinkIcon,
     ImageIcon,
     SuperscriptIcon,
@@ -166,17 +166,17 @@ const TOOLBAR_CONFIG: any = {
         label: "Underlined",
         icon: UnderlinedIcon
     },
+    color: {
+        group: "mark",
+        key: "color",
+        label: "Color",
+        icon: ColorIcon
+    },
     highlight: {
         group: "mark",
         key: "highlight",
         label: "Highlight",
         icon: HighlightIcon
-    },
-    textColor: {
-        group: "mark",
-        key: "textColor",
-        label: "Text Color",
-        icon: TextColorIcon
     },
     link: {
         group: "mark",

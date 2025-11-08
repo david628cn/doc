@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Dropdown } from 'antd';
 import FormatButton from '../FormatButton';
-import { DropdownIcon, TextColorIcon } from '../Icon';
+import { DropdownIcon, ColorIcon } from '../Icon';
 import './index.less';
 
 const TEXT_COLORS = [
@@ -57,7 +57,7 @@ const FormatTextColor = (props: FormatTextColorProps) => {
             color: 'rgba(31,35,41,1)',
             highlight: 'rgba(255,255,255,0)'
         });
-    }, [props.value])
+    }, [props.value]);
 
     // const handlePointerDown = (e: any) => {
     //     e.preventDefault();
@@ -69,8 +69,8 @@ const FormatTextColor = (props: FormatTextColorProps) => {
                 ...value,
                 color: item['value']
             }
-            // onSelect?.(newValue);
-            setValue(newValue);
+            onSelect?.('color', item['value'], newValue);
+            // setValue(newValue);
         }
     }
 
@@ -80,8 +80,8 @@ const FormatTextColor = (props: FormatTextColorProps) => {
                 ...value,
                 highlight: item['value']
             }
-            // onSelect?.(newValue);
-            setValue(newValue);
+            onSelect?.('highlight', item['value'], newValue);
+            // setValue(newValue);
         }
     }
 

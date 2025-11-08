@@ -1,4 +1,4 @@
-import { CustomEditor } from './custom-types';
+import { CustomEditor } from '../custom-types';
 
 const withHtml = (editor: CustomEditor) => {
     const { insertData, isInline, isVoid } = editor

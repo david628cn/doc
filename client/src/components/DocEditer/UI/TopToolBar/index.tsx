@@ -2,34 +2,26 @@ import { useEffect, useState } from 'react';
 import ToolbarBase, { Separator, Space } from '../ToolbarBase';
 import FormatButton from '../FormatButton';
 import FormatDropdown from '../FormatDropdown';
-import FormatTextColor from '../FormatTextColor';
+// import FormatTextColor from '../FormatTextColor';
 import { TOOLBAR_CONFIG } from '../config';
 import './index.less';
+import MarkBar from '../MarkBar';
 
-const getActiveKeys = (ds: any): Array<string> => {
-    const arr: Array<any> = [];
-    for (let key in ds) {
-        if (ds[key]) {
-            arr.push(key);
-        }
-    }
-    return arr;
-}
-
-interface ToolbarProps {
+interface TopToolBarProps {
     // className?: string;
     // children?: any;
     data?: any;
     onSelect?: Function;
 }
 
-const Toolbar: React.FC<ToolbarProps> = props => {
-    const { data = {}, onSelect } = props;
-    // const [activeKeys, setActiveKeys] = useState(getActiveKeys(data));
+const TopToolBar: React.FC<TopToolBarProps> = props => {
+    const { data = {
+        mark: {}
+    }, onSelect } = props;
 
-    // useEffect(() => {
-    //     setActiveKeys(getActiveKeys(active));
-    // }, [active]);
+    const onSelectMark = (activeKey: any, v: any, ds: any) => {
+        handleClickFunc(activeKey, v);
+    }
 
     const handleSelect = (activeKey: any) => {
         return (e: any) => {
@@ -49,6 +41,7 @@ const Toolbar: React.FC<ToolbarProps> = props => {
         //     ...data,
         //     [activeKey]: value
         // }
+        console.log('handleClickFunc', activeKey, value);
         onSelect?.({
             // data: newData,
             activeKey,
@@ -171,79 +164,8 @@ const Toolbar: React.FC<ToolbarProps> = props => {
                 />
             </FormatButton.Group>            
             <Separator />
-            <FormatButton.Group>
-                <FormatButton 
-                    title={TOOLBAR_CONFIG['bold']['label']}
-                    active={data['bold']} 
-                    onClick={handleClick(TOOLBAR_CONFIG['bold']['key'])}
-                >
-                    {TOOLBAR_CONFIG['bold']['icon']}
-                </FormatButton>
-                <FormatButton 
-                    title={TOOLBAR_CONFIG['italic']['label']} 
-                    active={data['italic']} 
-                    onClick={handleClick(TOOLBAR_CONFIG['italic']['key'])}
-                >
-                    {TOOLBAR_CONFIG['italic']['icon']}
-                </FormatButton>
-                <FormatButton 
-                    title={TOOLBAR_CONFIG['strikethrough']['label']} 
-                    active={data['strikethrough']} 
-                    onClick={handleClick(TOOLBAR_CONFIG['strikethrough']['key'])}
-                >
-                    {TOOLBAR_CONFIG['strikethrough']['icon']}
-                </FormatButton>
-                <FormatButton 
-                    title={TOOLBAR_CONFIG['code']['label']} 
-                    active={data['code']} 
-                    onClick={handleClick(TOOLBAR_CONFIG['code']['key'])}
-                >
-                    {TOOLBAR_CONFIG['code']['icon']}
-                </FormatButton>
-                <FormatButton 
-                    title={TOOLBAR_CONFIG['underlined']['label']} 
-                    active={data['underlined']} 
-                    onClick={handleClick(TOOLBAR_CONFIG['underlined']['key'])}
-                >
-                    {TOOLBAR_CONFIG['underlined']['icon']}
-                </FormatButton>
-                <FormatTextColor
-                    value={data['textColor']}
-                    title={TOOLBAR_CONFIG['textColor']['label']}
-                    onSelect={handleClick(TOOLBAR_CONFIG['textColor']['key'])}
-                />
-                <FormatButton 
-                    title={TOOLBAR_CONFIG['link']['label']} 
-                    active={data['link']} 
-                    onClick={handleClick(TOOLBAR_CONFIG['link']['key'])}
-                >
-                    {TOOLBAR_CONFIG['link']['icon']}
-                </FormatButton>
-                <FormatButton 
-                    title={TOOLBAR_CONFIG['image']['label']} 
-                    active={data['image']} 
-                    onClick={handleClick(TOOLBAR_CONFIG['image']['key'])}
-                >
-                    {TOOLBAR_CONFIG['image']['icon']}
-                </FormatButton>
-            </FormatButton.Group>
+            <MarkBar data={ data.mark } onSelect={onSelectMark} />    
             <Separator />
-            <FormatButton.Group>
-                <FormatButton 
-                    title={TOOLBAR_CONFIG['superscript']['label']} 
-                    active={data['superscript']} 
-                    onClick={handleClick(TOOLBAR_CONFIG['superscript']['key'])}
-                >
-                    {TOOLBAR_CONFIG['superscript']['icon']}
-                </FormatButton>
-                <FormatButton 
-                    title={TOOLBAR_CONFIG['subscript']['label']} 
-                    active={data['subscript']} 
-                    onClick={handleClick(TOOLBAR_CONFIG['subscript']['key'])}
-                >
-                    {TOOLBAR_CONFIG['subscript']['icon']}
-                </FormatButton>
-            </FormatButton.Group>
             <Space/>
             <FormatButton.Group>
                 <FormatButton 
@@ -274,4 +196,4 @@ const Toolbar: React.FC<ToolbarProps> = props => {
     );
 };
 
-export default Toolbar;
+export default TopToolBar;

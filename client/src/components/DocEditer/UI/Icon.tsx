@@ -543,7 +543,7 @@ export const HighlightIcon = <svg
     ></path>
 </svg>;
 
-export const TextColorIcon = <svg
+export const ColorIcon = <svg
     width="24"
     height="24"
     viewBox="0 0 24 24"
