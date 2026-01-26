@@ -1,0 +1,53 @@
+@import url(@/global/index.less);
+
+.@{className}-text-color-dropdown-container {
+    gap: 0;
+    .@{className}-text-color-dropdown {
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        border-radius: 6px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: var(--highlight-color, rgba(28, 19, 1, .11));
+        transition-property: all;
+        transition-duration: 0.2s;
+        transition-timing-function: ease-out;
+        position: relative;
+        &::after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            // filter: brightness(95%);
+            // mix-blend-mode: multiply;
+            opacity: .5;
+            background-color: var(--highlight-color, transparent);
+        }
+    
+        .@{className}-text-color-dropdown-text {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+    }
+    .@{className}-text-color-dropdown-inner {
+        .@{className}-text-color-dropdown-icon {
+            width: 20px;
+            height: 24px;
+            line-height: 28px;
+            display: inline-block;
+            svg {
+                width: 12px;
+                height: 12px;
+            }
+        }
+    }
+}
+

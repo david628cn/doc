@@ -1,0 +1,57 @@
+.dataTable-container {
+    display         : flex;
+    flex-direction  : column;
+    // height          : calc(100% - 48px - 50px);
+    // border-radius   : 4px;
+    // background-color: #fff;
+
+    .dataTable-padding {
+        // padding-top: 20px;
+    }
+
+    .dataTable-header {
+        padding   : 20px;
+        min-height: 33px;
+    }
+
+    .dataTable-conent {
+        flex    : 1;
+        overflow: hidden;
+        border: 1px solid rgba(5, 5, 5, 0.06);
+        border-bottom: 0;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .dataTable-footer {
+        padding: 12px 20px;
+        text-align: right;
+        position: relative;
+        border: 1px solid rgba(5, 5, 5, 0.06);
+        border-top: 0;
+        border-radius: 0 0 8px 8px;
+        background: #fafafa;
+    }
+
+    .dataTable-pagination {
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+    }
+
+    :global {
+        .ant-table-wrapper {
+            .ant-table-tbody {
+                .ant-table-cell {
+                    padding: 10px 16px;
+                }
+            }
+            
+        }
+        
+    }
+    
+}

@@ -1,0 +1,93 @@
+@import url(@/global/index.less);
+
+.@{className}-container {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    box-shadow: 0px 12px 33px 0px rgba(0, 0, 0, 0.06), 0px 3.618px 9.949px 0px rgba(0, 0, 0, 0.04), 0px 1.503px 4.132px 0px rgba(0, 0, 0, 0.03), 0px 0.543px 1.495px 0px rgba(0, 0, 0, 0.02);
+    border-radius: 10px;
+    // min-height: 100%;
+    // border-radius: 10px;
+    // overflow: hidden;
+    // background: #fff;
+    // box-shadow: 0px 12px 33px 0px rgba(0, 0, 0, .06), 0px 3.618px 9.949px 0px rgba(0, 0, 0, .04), 0px 1.503px 4.132px 0px rgba(0, 0, 0, .03), 0px 0.543px 1.495px 0px rgba(0, 0, 0, .02);
+    .@{className}-editor-inner {
+        width: 100%;
+        height: 100%;
+        // min-height: 100%;
+        display: flex;
+        flex-direction: column;
+        // overflow: auto;
+        align-items: center;
+        position: relative;
+        scrollbar-width: thin;
+        scrollbar-color: hsl(lab(90.952% 0 -.0000119209)) transparent;
+        .@{className}-editor-header {
+            width: 100%;
+            // height: 44px;
+            // line-height: 44px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 1px solid rgba(15, 22, 36, 0.05);
+            // background: #fff;
+        }
+        .@{className}-editor-content {
+            width: 100%;
+            // max-width: 880px;
+            // min-height: 100%;
+            display: flex;
+            flex: 1;
+            padding: 0;
+            position: relative;
+            // background: #fff;
+            // box-shadow: 0px 12px 33px 0px rgba(0, 0, 0, 0.06), 0px 3.618px 9.949px 0px rgba(0, 0, 0, 0.04), 0px 1.503px 4.132px 0px rgba(0, 0, 0, 0.03), 0px 0.543px 1.495px 0px rgba(0, 0, 0, 0.02);
+            // border-radius: 10px;
+            .@{className}-editor-body {
+                // position: absolute;
+                // left: 0;
+                // right: 0;
+                // top: 0;
+                // bottom: 0;
+                width: 100%;
+                // min-height: 100%;
+                // height: 100%;
+                // overflow: auto;
+                outline: none;
+            }
+        }
+    }
+    // .@{className}-editor-empty {
+    //     // background: rgba(15,22,36,0.05);
+    //     // border-radius: 0.25rem;
+    //     // outline: 5.5px solid rgba(15,22,36,0.05);
+    //     position: relative;
+    //     font-size: 16px;
+    //     line-height: 1.5;
+    //     &:has(br.ProseMirror-trailingBreak) {
+    //         &::before {
+    //             width: 100%;
+    //             height: 0;
+    //             position: absolute;
+    //             left: 0;
+    //             right: 0;
+    //             color: rgba(40,44,51,0.42);
+    //             text-align: inherit;
+    //             font-style: italic;
+    //             pointer-events: none;
+    //             content: attr(placeholder);
+    //         }
+    //     }
+        
+    //     // &::after {
+    //     //     color: rgba(40,44,51,0.42);
+    //     //     content: attr(data-decoration-content-after);
+    //     //     font-style: italic;
+    //     // }
+    // }
+    // ::selection {
+    //     background: none; /* 移除背景色 */
+    //     color: inherit; /* 使用父元素的文字颜色 */
+    // }
+}
+
