@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import ReactDOM, { findDOMNode, createPortal } from 'react-dom';
-import { Dropdown } from './Dropdown';
-import ColorPanel from './ColorPanel';
+import { Dropdown } from './dropdown';
+import ColorPanel from './colorPanel';
 import './colorPicker.less';
 
 interface ColorPickerProps {

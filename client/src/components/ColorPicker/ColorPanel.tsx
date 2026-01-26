@@ -156,7 +156,6 @@ class ColorPanel extends Component<ColorPanelProps, ColorPanelState> {
         });
     }
     componentWillReceiveProps(nextProps: ColorPanelProps) {
-        console.log('this.action', this.action);
         if('value' in nextProps) {
             if (this.action) {
                 this.action = '';

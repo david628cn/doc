@@ -83,7 +83,8 @@ class Popup extends Component<PopupProps, PopupState> {
         }
     }
     saveRef = (name: string) => (node: any) => {
-        this[name] = node;
+        const scope: any = this;
+        scope[name] = node;
     }
     getCls(is: boolean = false) {
         const { sprefix, isAimated, enter, leave } = this.props;

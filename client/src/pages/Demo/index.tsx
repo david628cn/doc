@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from 'antd';
 import { listProject } from '@/api';
-import { runTasks } from '@/components/Upload/tasksPools';
-import { upload, UploadFile } from '@/components/Upload/upload';
-import { ColorPanel, ColorPicker } from '@/components/ColorPicker';
+import { runTasks } from '@/components/upload/tasksPools';
+import { upload, UploadFile } from '@/components/upload/upload';
+import { ColorPanel, ColorPicker } from '@/components/colorPicker';
 
 const uploadFile = UploadFile();
 

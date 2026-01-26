@@ -1,5 +1,5 @@
-import ColorPanel from './ColorPanel';
-import ColorPicker from './ColorPicker';
+import ColorPanel from './colorPanel';
+import ColorPicker from './colorPicker';
 
 export {
     ColorPanel,

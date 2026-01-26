@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import Kline from '@/components/KlineCanvas';
-import DatePanel from './DatePanel';
+import Kline from '@/components/klineCanvas';
+import DatePanel from './datePanel';
 // import CYQ from '@/components/CYQ';
 
 interface IProps {

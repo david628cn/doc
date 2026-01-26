@@ -9,7 +9,7 @@ import {
     Popconfirm
 } from 'antd';
 import { useIntl } from "react-intl";
-import DataTable from '@/components/DataTable';
+import DataTable from '@/components/dataTable';
 import { addProject, listProject, delProject } from '@/api';
 import styles from './index.module.less';
 

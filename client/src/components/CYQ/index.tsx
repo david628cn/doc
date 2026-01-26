@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import CYQChart from './CYQChart';
+import CYQChart from './cyqChart';
 import styles from './index.module.less';
 
 interface CYQProps {

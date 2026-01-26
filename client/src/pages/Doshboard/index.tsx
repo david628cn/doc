@@ -11,8 +11,8 @@ import {
     Drawer
 } from 'antd';
 import { listStockDoshboard, listStock, listStockTrade } from '@/api';
-import StockTable from '@/components/StockTable';
-import Kline from '@/components/KlineCanvas';
+import StockTable from '@/components/stockTable';
+import Kline from '@/components/klineCanvas';
 import { formatNumberWithUnit, startEnd } from '@/utils/common';
 // import { MAIN_STOCKS_OBJ } from '@/utils/stock_data.module';
 // import { getQtClist } from '@/utils/stock.module';

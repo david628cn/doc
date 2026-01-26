@@ -3,12 +3,12 @@ import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 //import Login from '@/views/login';
 //import Home from '@/views/home';
 
-const Login = React.lazy(() => import('../pages/Login'));
+const Login = React.lazy(() => import('../pages/login'));
 // const Home = React.lazy(() => import('@/pages/Home'));
-const Doc = React.lazy(() => import('@/pages/Doc'));
+const Doc = React.lazy(() => import('@/pages/doc'));
 // const Screen = React.lazy(() => import('@/pages/Screen'));
-// const Test = React.lazy(() => import('@/pages/Test'));
-const Layout = React.lazy(() => import('../components/Layout/MainLayout'));
+const Test = React.lazy(() => import('@/pages/test'));
+const Layout = React.lazy(() => import('../components/layout'));
 
 const PrivateRoute = ({ component: Component, ...rest }: any) => (
     <Route {...rest} render={
@@ -25,6 +25,7 @@ const IRoutes = () => {
                 <Switch>
                     <Route path='/login' component={(props: any) => <Login {...props} />} />
                     <Route path='/doc' component={(props: any) => <Doc {...props} />} />
+                    <Route path='/test' component={(props: any) => <Test {...props} />} />
                     {/* <Route path="/platform" component={(props: any) => <Editor {...props} />} />
                     <Route path="/screen" component={(props: any) => <Screen {...props} />} />
                     <Route path="/test" component={(props: any) => <Test {...props} />} /> */}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getPervMonthLastDays, eq } from './DateUtil';
+import { getPervMonthLastDays, eq } from './dateUtil';
 import styles from './index.module.less';
 
 const WEEK_ARR = [

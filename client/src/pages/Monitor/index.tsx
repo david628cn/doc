@@ -13,7 +13,7 @@ import {
 // import { io } from 'socket.io-client';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { listStockDoshboard, listStock } from '@/api';
-import Kline from '@/components/KlineCanvas';
+import Kline from '@/components/klineCanvas';
 import { formatNumberWithUnit } from '@/utils/common';
 
 import styles from './index.module.less';

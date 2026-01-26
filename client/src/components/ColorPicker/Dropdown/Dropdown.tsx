@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { findDOMNode } from 'react-dom';
-import Popup from './Popup';
+import Popup from './popup';
 import { EventEmit, alignTo } from './dldh';
 
 const func = () => {}
@@ -58,6 +57,7 @@ class Dropdown extends Component<DropdownProps, DropdownState> {
     private hasPopupMouseDown: any;
     private delayTimer: any;
     private _component: any;
+    private containerRef: any;
     constructor(props: DropdownProps) {
         super(props);
         let visible;
@@ -85,7 +85,6 @@ class Dropdown extends Component<DropdownProps, DropdownState> {
     }
     componentDidUpdate(prevProps: DropdownProps, prevState: DropdownState) {
         const state = this.state;
-        //const listRoot = findDOMNode(this._component);
         this.prevVisible = prevState.visible;
         if (state.visible) {
             let currentDocument;
@@ -148,8 +147,7 @@ class Dropdown extends Component<DropdownProps, DropdownState> {
             return;
         }
         const target = event.target;
-        const root: any = findDOMNode(this);
-        //if(!root.contains(target) && !findDOMNode(this._component).contains(target)) {
+        const root: any = this.containerRef;
         if (!root.contains(target) && !this.hasPopupMouseDown) {
             this.setPopupVisible(false);
         }
@@ -198,16 +196,19 @@ class Dropdown extends Component<DropdownProps, DropdownState> {
         const { props } = this;
         const popupContainer = document.createElement('div');
         popupContainer.className = `${props.sprefix}-popup`;
-        const mountNode = props.getPopupContainer ? props.getPopupContainer(findDOMNode(this)) : props.getDocument?.().body;
+        const mountNode = props.getPopupContainer ? props.getPopupContainer(this.containerRef) : props.getDocument?.().body;
         mountNode.appendChild(popupContainer);
         return popupContainer;
     }
     handlePortalUpdate = (prevProps: DropdownProps, node: any) => {
         if (this.state.visible) {
-            const target: any = findDOMNode(this);
-            const listNode: any = findDOMNode(node);
-            listNode.style.width = this.props.width || target.offsetWidth + 'px';
-            alignTo(listNode, target, this.props.placement);
+            if (this.containerRef) {
+                const target: any = this.containerRef;
+                const listNode: any = node;
+                listNode.style.width = this.props.width || target.offsetWidth + 'px';
+                alignTo(listNode, target, this.props.placement);
+            }
+            
         }
         if (this.prevVisible !== this.state.visible) {
             this.props.afterPopupVisibleChange?.(this.state.visible);
@@ -339,15 +340,17 @@ class Dropdown extends Component<DropdownProps, DropdownState> {
             );
         }
         return (
-            <React.Fragment>
-                {
-                    React.Children.map(
-                        this.props.children,
-                        (c) => this.renderChildren(c)
-                    )
-                }
-                {popup}
-            </React.Fragment>
+            <span ref={ ref => this.containerRef = ref }>
+                <React.Fragment>
+                    {
+                        React.Children.map(
+                            this.props.children,
+                            (c) => this.renderChildren(c)
+                        )
+                    }
+                    {popup}
+                </React.Fragment>
+            </span>
         );
     }
 }

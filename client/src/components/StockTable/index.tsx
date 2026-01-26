@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 // import { useIntl } from "react-intl";
 import { Space } from 'antd';
-import DataTable from '@/components/DataTable';
+import DataTable from '@/components/dataTable';
 import { formatNumberWithUnit } from '@/utils/common';
 import styles from './index.module.less';
 

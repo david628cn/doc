@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Kline } from './KlineChart';
+import { Kline } from './klineChart';
 import styles from './index.module.less';
 
 // const getPosByDom = (dom: any) => {

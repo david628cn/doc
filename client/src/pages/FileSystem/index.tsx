@@ -13,7 +13,7 @@ import {
     message,
     Popconfirm
 } from 'antd';
-import DataTable from '@/components/DataTable';
+import DataTable from '@/components/dataTable';
 import { listFiles, delFiles } from '@/api';
 import { deepClone, formatBytes } from '@/utils/common';
 import styles from './index.module.less';
