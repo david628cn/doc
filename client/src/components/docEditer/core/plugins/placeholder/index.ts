@@ -61,7 +61,7 @@ const isNodeEmpty = (node: Node, {
     return false;
 }
 
-const placeholder = ({ editor }: any) => {
+export const placeholder = ({ editor }: any) => {
     const plugin: Plugin = new Plugin({
         key: new PluginKey('placeholder'),
         props: {
@@ -90,4 +90,3 @@ const placeholder = ({ editor }: any) => {
     });
     return plugin;
 }
-export default placeholder;

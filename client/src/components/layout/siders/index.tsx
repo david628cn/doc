@@ -109,6 +109,7 @@ const Siders: React.FC<SidersProps> = props => {
             return <img src={icon} alt="icon" className={`sider-menu-item-img`} />;
         }
         if (typeof icon === 'string') {
+            console.log(IconSvg);
             return <IconSvg type={icon} className="anticon" />;
         }
         return icon;

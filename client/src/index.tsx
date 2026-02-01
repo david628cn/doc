@@ -10,6 +10,7 @@ import { getCurrentLang, getCurrentMessages } from "./locales";
 import App from './app';
 import reportWebVitals from './reportWebVitals';
 import './theme.less';
+import 'virtual:svg-icons-register';
 
 const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement

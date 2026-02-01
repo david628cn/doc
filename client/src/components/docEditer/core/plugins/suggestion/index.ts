@@ -1,7 +1,7 @@
 import { type EditorState, type Transaction, Plugin, PluginKey } from 'prosemirror-state';
 import { type EditorView, Decoration, DecorationSet } from 'prosemirror-view';
-import { type ResolvedPos } from 'prosemirror-model';
-import { getRect } from '@/components/utils/align';
+// import { type ResolvedPos } from 'prosemirror-model';
+// import { getRect } from '@/components/utils/align';
 import { CLASSNAME } from '@/global';
 import './index.less';
 
@@ -41,27 +41,27 @@ import './index.less';
 // customElements.define('zf-collapse', ZfCollapse);
 
 
-interface Trigger {
-    char?: string;
-    allowSpaces?: boolean;
-    allowToIncludeChar?: boolean;
-    allowedPrefixes?: string[];
-    startOfLine?: boolean;
-    $position: ResolvedPos;
-}
+// interface Trigger {
+//     char?: string;
+//     allowSpaces?: boolean;
+//     allowToIncludeChar?: boolean;
+//     allowedPrefixes?: string[];
+//     startOfLine?: boolean;
+//     $position: ResolvedPos;
+// }
 
-type Range = {
-    from: number;
-    to: number;
-}
+// type Range = {
+//     from: number;
+//     to: number;
+// }
 
-type SuggestionMatch = {
-    range: Range;
-    query: string;
-    text: string;
-} | null;
+// type SuggestionMatch = {
+//     range: Range;
+//     query: string;
+//     text: string;
+// } | null;
 
-const findSuggestionMatch = (config: Trigger): SuggestionMatch => {
+const findSuggestionMatch = (config: any) => {
     const {
         char = '/',
         startOfLine = false,
@@ -117,50 +117,78 @@ const findSuggestionMatch = (config: Trigger): SuggestionMatch => {
     return null;
 }
 
-export const pluginKeyRef = new PluginKey('suggestion');
+export const suggestion = ({
+    editor,
+    trigger = '/'
+    // triggers = [
+    //     { name: 'command', trigger: '/' },
+    //     { name: 'mention', trigger: '@' }
+    // ]
+}: any) => {
 
-const suggestion = ({ editor }: any) => {
+    // 使用正則匹配：空格 + / 或 行首 + /
+    // 使用你之前的 RegExp 邏輯
+    // const regex = new RegExp(`\\s*${char}$`);
+    const regex = new RegExp(`\\s*${trigger}$`);
+    // /(?:^)?\/[^\s\/]*/gm   /
+    // /(?:^)?@[^\s@]*/gm    @
+    // /(?:^)?:[^\s:]*/gm    :
+
     const plugin: Plugin = new Plugin({
-        key: pluginKeyRef,
+        key: new PluginKey('suggestion'),
         view(view: EditorView) {
             return {
                 update(view: EditorView, prevState: EditorState) {
                     const prev = plugin.getState(prevState);
                     const next = plugin.getState(view.state);
-                    const moved = prev.active && next.active && prev.range.from !== next.range.from;
-                    const started = !prev.active && next.active;
-                    const stopped = prev.active && !next.active;
-                    const changed = !started && !stopped && prev.query !== next.query;
 
-                    const handleStart = started || (moved && changed);
-                    const handleChange = changed || moved;
-                    const handleExit = stopped || (moved && changed);
+                    // // See how the state changed
+                    // const moved = prev.active && next.active && prev.range.from !== next.range.from;
+                    // const started = !prev.active && next.active;
+                    // const stopped = prev.active && !next.active;
+                    // const changed = !started && !stopped && prev.query !== next.query;
 
-                    // console.log(!handleStart && !handleChange && !handleExit);
+                    // const handleStart = started || (moved && changed);
+                    // const handleChange = changed || moved;
+                    // const handleExit = stopped || (moved && changed);
 
-                    if (!handleStart && !handleChange && !handleExit) {
-                        // const props = {
-                        //     range: prev.range,
-                        //     query: prev.query,
-                        //     text: prev.text,
-                        //     rect: prev.decorationNode ? getRect(prev.decorationNode) : null,
-                        //     visible: false
-                        // };
-                        // editor.emit('suggestion', props);
-                        return;
+                    // // Cancel when suggestion isn't active
+                    // if (!handleStart && !handleChange && !handleExit) {
+                    //     return
+                    // }
+                    // const state = handleExit && !handleStart ? prev : next;
+
+                    const state = next;
+                    const { left, top } = view.coordsAtPos(state.range.from);
+                    let active = state.active;
+                    if (!editor.view.hasFocus()) {
+                        active = false;
                     }
-
-                    const state = handleExit && !handleStart ? prev : next;
-                    console.log('suggestion update', handleExit && !handleStart, prev, next);
-                    const decorationNode: any = state?.decorationId ? view.dom.querySelector(`[data-decoration-id="${state.decorationId}"]`) : null;
-                    const props = {
-                        range: state.range,
-                        query: state.query,
-                        text: state.text,
-                        rect: decorationNode ? getRect(decorationNode) : null,
-                        visible: decorationNode ? true : false
+                    const params = {
+                        editor,
+                        active,
+                        range: active ? state.range : {from: 0, to: 0},
+                        query: active ? state.query : null,
+                        text: active ? state.text : null,
+                        // items: [],
+                        command: (commandProps: any) => {
+                            // return command({
+                            //     editor,
+                            //     range: state.range,
+                            //     props: commandProps,
+                            // })
+                        },
+                        // decorationNode,
+                        rect: active ? {
+                            width: 100,
+                            height: 24,
+                            left,
+                            top
+                        } : null
                     };
-                    editor.emit('suggestion', props);
+
+                    console.log('update', params);
+                    editor.emit('suggestion', params);
                 },
                 destroy() {
 
@@ -171,79 +199,206 @@ const suggestion = ({ editor }: any) => {
             init() {
                 return {
                     active: false,
+                    // deco: DecorationSet.empty,
                     range: {
                         from: 0,
                         to: 0
                     },
                     query: null,
-                    text: null,
-                    decorationId: null
+                    text: null
                 };
             },
             apply(tr: Transaction, prevValue: any, prevState: EditorState, state: EditorState) {
                 const { composing } = editor.view;
                 const { selection } = tr;
-                const { empty, from, $from } = selection;
-                let newValue = {
-                    ...prevValue
+                const { empty, from } = selection;
+                if (!editor.editable || !(empty || composing)) {
+                    return prevValue;
+                }
+                const mate = tr.getMeta('suggestion');
+                const next = {
+                    ...prevValue,
+                    composing
                 };
-                newValue.composing = composing;
-                if (editor.editable && (empty || editor.view.composing)) {
-                    if ((from < prevValue.range.from || from > prevValue.range.to) && !composing && !prevValue.composing) {
-                        newValue.active = false;
+                if (mate) {
+                    // const cotent = state.doc.textBetween(from - 1, from);
+                    // console.log('mate>>>', [from - 1, from], [cotent]);
+                    // const deco = DecorationSet.create(state.doc, [
+                    //     Decoration.inline(from - 1, from, {
+                    //         nodeName: 'span',
+                    //         class: `${CLASSNAME}-suggestion`
+                    //     }, {
+                    //         inclusiveEnd: false,
+                    //         inclusiveStart: false
+                    //     })
+                    // ]);
+                    if (!mate.active) {
+                        return {
+                            ...next,
+                            active: false,
+                            composing: prevValue.composing,
+                            range: {
+                                from: 0,
+                                to: 0
+                            },
+                            query: null,
+                            text: null
+                        };
                     }
-                    const match: any = findSuggestionMatch({
-                        char: '/',
-                        $position: $from
+                    const match = findSuggestionMatch({
+                        trigger,
+                        $position: selection.$from
                     });
-                    const decorationId = `id_${Math.floor(Math.random() * 0xffffffff)}_${new Date().getTime()}`;
-                    if (match) {
-                        newValue.active = true;
-                        newValue.decorationId = prevValue.decorationId ? prevValue.decorationId : decorationId;
-                        newValue.range = match.range;
-                        newValue.query = match.query;
-                        newValue.text = match.text;
-                    } else {
-                        newValue.active = false;
+                    if (!match) {
+                        return {
+                            ...next,
+                            active: false,
+                            range: {
+                                from: 0,
+                                to: 0
+                            },
+                            query: null,
+                            text: null
+                        };
                     }
-                } else {
-                    newValue.active = false;
+                    return {
+                        ...next,
+                        active: true,
+                        range: {
+                            from: match.range.from,
+                            to: match.range.to
+                        },
+                        query: match.query,
+                        text: match.text
+                    };
                 }
 
-                if (!newValue.active) {
-                    newValue.decorationId = null;
-                    newValue.range = { from: 0, to: 0 };
-                    newValue.query = null;
-                    newValue.text = null;
+                // if (next.deco) {
+                // next.deco = next.deco.map(tr.mapping, tr.doc);
+                // console.log('newFrom newTo>>>', next.deco);
+                // }
+                if (next.active) {
+                    if ((from < next.range.from || from > next.range.to) && !composing && !next.composing) {
+                        // return {
+                        //     ...next,
+                        //     active: false,
+                        //     range: {
+                        //         from: 0,
+                        //         to: 0
+                        //     },
+                        //     query: null,
+                        //     text: null
+                        // };
+                        next.active = false;
+                    }
+                    const match = findSuggestionMatch({
+                        trigger,
+                        $position: selection.$from
+                    });
+                    if (!match) {
+                        return {
+                            ...next,
+                            active: false,
+                            range: {
+                                from: 0,
+                                to: 0
+                            },
+                            query: null,
+                            text: null
+                        };
+                    } else {
+                        next.active = true;
+                    }
+                    if (!next.active) {
+                        return {
+                            ...next,
+                            active: false,
+                            range: {
+                                from: 0,
+                                to: 0
+                            },
+                            query: null,
+                            text: null
+                        };
+                    }
+                    next.active = true;
+                    next.range.from = match.range.from;
+                    next.range.to = match.range.to;
+                    next.query = match.query;
+                    next.text = match.text;
                 }
-                return newValue;
+                return next;
             }
         },
         props: {
-            decorations(state: EditorState) {
-                const { active, range, query, decorationId } = plugin.getState(state);
+            handleTextInput(view: EditorView, from: number, to: number, text: string) {
+                // const $from = view.state.doc.resolve(from);
+                // const textBefore = $from.parent.textBetween(Math.max(0, $from.parentOffset - 1), $from.parentOffset, null, '\0') + text;
+                if (regex.test(text)) {
+                    let timer: any;
+                    timer = setTimeout(() => {
+                        clearTimeout(timer);
+                        const { state } = view;
+                        // 計算觸發位置：這裡 from 是斜線插入後的位置
+                        // const start = from - (textBefore.length - textBefore.trim().length) - (text.length - 1);
+                        // const end = to + text.length;
 
-                if (!active) {
+                        // const textLen = text.length;
+                        // let start = from;
+                        // let end = to + 1;
+                        // if (textLen > 1) {
+                        //     start += 1;
+                        // }
+
+                        // 創建一個帶有唯一標記的 Inline Decoration
+                        // const decoration = Decoration.inline(start, end, {
+                        //     class: `${CLASSNAME}-suggestion`,
+                        //     // style: 'background: rgba(0, 0, 255, 0.1);' // 調試用
+                        // });
+
+                        // 通過 Meta 數據更新插件狀態，避開 apply 的自動邏輯
+                        const tr = state.tr.setMeta('suggestion', { active: true });
+
+                        // 手動觸發狀態更新
+                        view.dispatch(tr);
+                    }, 0);
+
+                }
+                return false; // 返回 false 以便文字能正常插入文檔
+            },
+            handleKeyDown(view: EditorView, event: any) {
+                if (event.key === 'Escape' || event.key === 'Esc') {
+
+                }
+            },
+            decorations(state: EditorState) {
+                const pluginState = plugin.getState(state);
+                if (!pluginState.active) {
                     return null;
                 }
-                const isEmpty = !query?.length
+
+                // if (pluginState.deco && pluginState.deco.find().length > 0) {
+                //     return pluginState.deco;
+                // }
+
+                const isEmpty = !pluginState.query?.length;
                 const classNames = [`${CLASSNAME}-suggestion`];
 
                 if (isEmpty) {
-                    classNames.push(`${CLASSNAME}-suggestion-is-empty`);
+                    classNames.push(`${CLASSNAME}-suggestion-empty`)
                 }
 
                 return DecorationSet.create(state.doc, [
-                    Decoration.inline(range.from, range.to, {
+                    Decoration.inline(pluginState.range.from, pluginState.range.to, {
                         nodeName: 'span',
-                        'data-decoration-id': decorationId,
                         class: classNames.join(' '),
-                        'placeholder': '输入关键字...',
-                    }),
-                ])
+                        placeholder: '筛选...'
+                    })
+                ]);
+
+                // return pluginState.deco;
             }
         }
     });
     return plugin;
 }
-export default suggestion;

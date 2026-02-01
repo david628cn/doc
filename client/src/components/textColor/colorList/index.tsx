@@ -25,7 +25,7 @@ export const ColorList = (props: ColorListProps) => {
             e.preventDefault();
             props.onChange?.({
                 domEvent: e,
-                value: item.value,
+                value: item.value || (props.colors || [])[0].value,
                 rgba: color,
                 item
             });
@@ -39,13 +39,13 @@ export const ColorList = (props: ColorListProps) => {
             const colorObj = getRgba(arr[i].value);
             const color = rgbaToString(colorObj);
             const itemCls = [`${CLASSNAME}-color-list-item`];
-            if (arr[i].type === 'highlight') {
+            if (arr[i].type === 'backgroundColor') {
                 itemCls.push(`${CLASSNAME}-color-list-highlight-item`);
             }
             if (colorObj.a === 0) {
                 itemCls.push(`${CLASSNAME}-color-list-transparent`);
             }
-            const valueColor = rgbaToString(getRgba(props.value || ''));
+            const valueColor = rgbaToString(getRgba(props.value || (props.colors || [])[0].value));
             if (valueColor === color) {
                 itemCls.push(`${CLASSNAME}-color-list-selected`);
             }
@@ -63,7 +63,7 @@ export const ColorList = (props: ColorListProps) => {
                     >
                         <span className={`${CLASSNAME}-color-list-text`}>
                             {
-                                arr[i].type === 'text' ? <svg
+                                arr[i].type === 'color' ? <svg
                                     width="16"
                                     height="16"
                                     viewBox="0 0 24 24"

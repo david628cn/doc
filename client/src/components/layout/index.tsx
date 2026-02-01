@@ -6,6 +6,7 @@ import history from '@/utils/history';
 import Headers from './headers';
 import Siders from './siders';
 import styles from './index.module.less';
+const allModules = import.meta.glob('@/pages/**/index.tsx', { eager: true });
 
 const NoMatch = () => (
     <div></div>
@@ -142,13 +143,15 @@ const MainLayout: React.FC<MainLayoutProps> = props => {
                     getRedirect(children);
                 });
             } else {
+                const pageKey = `/src/pages/${item.name}/index.tsx`; 
+                const mod = allModules[pageKey] as any;
                 try {
                     redirectData.push({
                         name: `${item.name}`,
                         path: `${item.path}`,
                         title: `${item.title}`,
                         icon: `${item.icon}`,
-                        component: require(`@/pages/${item.name}`).default
+                        component: mod.default
                     });
                 } catch(err) {
                 }

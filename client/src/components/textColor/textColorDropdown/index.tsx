@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Dropdown } from '@/components/dropdown';
 import { Button } from '@/components/button';
 import { TextColorPanel } from '../textColorPanel';
-import { Tooltip } from '@/components/dropdown';
+import { TEXT_COLORS, HIGHLIGHT_COLORS } from '../colors';
 import { CLASSNAME } from '@/global';
 import './index.less';
 
@@ -18,8 +18,8 @@ export type TextColorDropdownProps = {
     keyName?: string;
     onChange?: Function;
     onDropdownChange?: Function;
-    textColors?: Array<any>;
-    highlightColors?: Array<any>;
+    colors?: Array<any>;
+    backgroundColors?: Array<any>;
     // [key: string]: unknown
 }
 
@@ -27,19 +27,26 @@ export const TextColorDropdown = (props: TextColorDropdownProps) => {
     const textColorProps: any = {
         onChange: props.onChange,
         keyName: props.keyName,
-        textColors: props.textColors,
-        highlightColors: props.highlightColors
+        colors: props.colors,
+        backgroundColors: props.backgroundColors
     };
 
+    let curTextColorValue = props.value
+
     if (('defaultValue' in props)) {
-        textColorProps.defaultValue = props.defaultValue;
+        curTextColorValue = textColorProps.defaultValue = {
+            color: props.defaultValue.color || TEXT_COLORS[0].value,
+            backgroundColor: props.defaultValue.backgroundColor || HIGHLIGHT_COLORS[0].value
+        };
     }
 
     if (('value' in props)) {
-        textColorProps.value = props.value;
+        curTextColorValue = textColorProps.value = {
+            color: props.value.color || TEXT_COLORS[0].value,
+            backgroundColor: props.value.backgroundColor || HIGHLIGHT_COLORS[0].value
+        };
     }
 
-    const value = textColorProps.value || textColorProps.defaultValue;
 
     const dropdownProps: any = {
         placement: props.placement || 'tl-bl?',
@@ -59,22 +66,21 @@ export const TextColorDropdown = (props: TextColorDropdownProps) => {
         <Button
             className={`${CLASSNAME}-text-color-dropdown-container`}
             type={"link"}
-            title={props.title || 'Text color'}
-        // active={props.value !== '' && value !== undefined}
+            title={props.title}
         >
             <div className={`${CLASSNAME}-text-color-dropdown`}
                 style={{
-                    '--highlight-color': value?.highlightColor
+                    '--highlight-color': curTextColorValue.backgroundColor
                 } as any}
                 onClick={() => {
                     props.onChange?.({
-                        value
+                        value: curTextColorValue
                     });
                 }}
             >
                 <span className={`${CLASSNAME}-text-color-dropdown-text`}
                     style={{
-                        '--highlight-color': value?.highlightColor
+                        '--highlight-color': curTextColorValue.backgroundColor
                     } as any}
                 >
                     <svg
@@ -84,7 +90,7 @@ export const TextColorDropdown = (props: TextColorDropdownProps) => {
                         fill="currentColor"
                         xmlns="http://www.w3.org/2000/svg"
                         style={{
-                            color: value?.textColor,
+                            color: curTextColorValue.color,
                             flexGrow: 1
                         }}
                     >

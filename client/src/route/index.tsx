@@ -3,12 +3,12 @@ import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 //import Login from '@/views/login';
 //import Home from '@/views/home';
 
-const Login = React.lazy(() => import('../pages/login'));
+const Login = React.lazy(() => import('@/pages/login'));
 // const Home = React.lazy(() => import('@/pages/Home'));
 const Doc = React.lazy(() => import('@/pages/doc'));
 // const Screen = React.lazy(() => import('@/pages/Screen'));
 const Test = React.lazy(() => import('@/pages/test'));
-const Layout = React.lazy(() => import('../components/layout'));
+const Layout = React.lazy(() => import('@/components/layout'));
 
 const PrivateRoute = ({ component: Component, ...rest }: any) => (
     <Route {...rest} render={

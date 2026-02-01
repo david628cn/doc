@@ -24,7 +24,7 @@ export type popupProps = {
     rect?: any;
     items?: ReactNode;
     placement?: string;
-    gap?: Array<number>;
+    gap?: number;
     container?: any;
     onChange?: Function;
     children?: ReactNode;
@@ -37,8 +37,34 @@ export const Popup: React.FC<popupProps> = props => {
     } = props;
     const [open, setOpen] = useState(props.open || props.defaultOpen || false);
     // const anchorRef: any = useRef(null);
-    const portal: any = useRef(null);
+    // const portal: any = useRef(null);
     const popupRef: any = useRef(null);
+    const curOpenRef: any = useRef(null);
+    curOpenRef.current = open;
+
+    useEffect(() => {
+            const handleDocClick = (e: any) => {
+                // e.preventDefault();
+                if (!popupRef.current?.contains(e.target)) {
+                    if (curOpenRef.current !== false) {
+                        if (!('open' in props)) {
+                            setOpen(false);
+                        }
+                        props.onChange?.({
+                            open: false,
+                            domEvent: e
+                        });
+                    }
+                    return;
+                }
+            }
+            document.addEventListener('mousedown', handleDocClick, false);
+            document.addEventListener('touchstart', handleDocClick, { passive: false });
+            return () => {
+                document.removeEventListener('mousedown', handleDocClick);
+                document.removeEventListener('touchstart', handleDocClick);
+            }
+        }, []);
 
     useEffect(() => {
         // if ('open' in props) {
@@ -53,10 +79,10 @@ export const Popup: React.FC<popupProps> = props => {
     }, [props.defaultOpen]);
 
     useEffect(() => {
-        if (popupRef.current && props.rect) {
+        if (popupRef.current) {
             // if (open && popupRef.current && anchorRef.current) {
             // if (open && popupRef.current) {
-            if (open) {
+            if (open && props.rect) {
                 // popupRef.current.classList.remove(`slideOutUp`);
                 // popupRef.current.classList.add(`slideInUp`);
                 popupRef.current.style.display = 'block';
@@ -92,25 +118,24 @@ export const Popup: React.FC<popupProps> = props => {
         cls.push(props.className);
     }
 
+    let portal;
     if (open) {
-        if (!portal.current) {
-            portal.current = ReactDOM.createPortal(
-                <div
-                    className={cls.join(' ')}
-                    ref={popupRef}
-                    // style={{
-                    //     left: `${pos.left}px`,
-                    //     top: `${pos.top}px`,
-                    //     display: `${open ? 'block' : 'none'}`
-                    // }}
-                >
-                    {props.items}
-                </div>,
-                props.container ? props.container : document.body
-            );
-        }
+        portal = ReactDOM.createPortal(
+            <div
+                className={cls.join(' ')}
+                ref={popupRef}
+                // style={{
+                //     left: `${pos.left}px`,
+                //     top: `${pos.top}px`,
+                //     display: `${open ? 'block' : 'none'}`
+                // }}
+            >
+                {props.children}
+            </div>,
+            props.container ? props.container : document.body
+        );
         
     }
 
-    return portal.current;
+    return <>{portal}</>;
 }

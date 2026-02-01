@@ -2,7 +2,20 @@ import { type ReactNode, useEffect, useRef, useCallback, createContext, useConte
 import { Editor as EditorCompent } from '@/components/docEditer/core/editor';
 import { Popup } from '@/components/dropdown';
 import { ToolBar } from '@/components/toolBar';
-// import { ToolBar, BlockMenu } from '../../react/ui';
+import { Menu } from '@/components/menu';
+import {
+    TextIcon,
+    Heading1Icon,
+    Heading2Icon,
+    Heading3Icon,
+    Heading4Icon,
+    BulletListIcon,
+    OrderedListIcon,
+    TaskListIcon,
+    BlockquoteIcon, 
+    CodeBlockIcon,
+    TableIcon
+} from '@/assets/Icon';
 import { CLASSNAME } from '@/global';
 import './index.less';
 
@@ -36,25 +49,64 @@ export const DocEditor: React.FC<DocEditorProps> = props => {
         open: false
     });
 
+    const [toolBarData, setToolBarData] = useState({
+        textAlign: '',
+        strong: false,
+        em: false,
+        s: false,
+        u: false,
+        link: false,
+        code: false,
+        textStyle: {
+            color: 'rgba(0,0,0,1)',
+            backgroundColor: 'rgba(255,255,255,0)'
+        },
+        sup: false,
+        sub: false
+    });
+
     const contentRef = useRef(null);
     const editorRef: any = useRef(null);
     const handleSuggestion = (params: any) => {
         console.log('handleSuggestion', params);
         setSuggestionState({
-            open: params.visible,
+            open: params.active,
             rect: params.rect,
             query: params.query
         });
     }
 
-    const handleSelectionEnd = (params: any) => {
-        console.log('handleSelectionEnd', params);
+    const handleSelection = (params: any) => {
+        const open = !params.rect ? false : true;
+        if (open) {
+            setToolBarData({
+                textAlign: editorRef.current.getTextAlign(),
+                strong: editorRef.current.hasMark('strong'),
+                em: editorRef.current.hasMark('em'),
+                s: editorRef.current.hasMark('s'),
+                u: editorRef.current.hasMark('u'),
+                link: editorRef.current.hasMark('link'),
+                code: editorRef.current.hasMark('code'),
+                textStyle: {
+                    color: editorRef.current.getTextStyle('color'),
+                    backgroundColor: editorRef.current.getTextStyle('backgroundColor')
+                },
+                sup: editorRef.current.hasMark('sup'),
+                sub: editorRef.current.hasMark('sub')
+            });
+        }
         setSelectionUpdate({
-            // visible: params.visible,
-            open: true,
+            open,
             rect: params.rect
         });
     }
+
+    // const handleBlur = () => {
+    //     setSelectionUpdate({
+    //         open: false,
+    //         rect: null
+    //     });
+    // }
 
     useEffect(() => {
         if (contentRef.current) {
@@ -63,7 +115,8 @@ export const DocEditor: React.FC<DocEditorProps> = props => {
                 content,
                 editable: editable === false ? false : true,
                 onSuggestion: handleSuggestion,
-                onSelectionEnd: handleSelectionEnd
+                onSelection: handleSelection
+                // onBlur: handleBlur
                 // content: `<h1>
                 //             This is a very unique heading.
                 //         </h1>
@@ -96,38 +149,17 @@ export const DocEditor: React.FC<DocEditorProps> = props => {
         }
     }, [content]);
 
-    const handleSuggestionPopupVisibleChange = (vs: any) => {
-        // console.log('handleSuggestionPopupVisibleChange', vs)
-        setSuggestionState({
-            ...suggestionState,
-            open: vs.open
-        })
-    }
-
-    const handleSelectionPopupVisibleChange = (vs: any) => {
-        // console.log('handleSelectionPopupVisibleChange>>>>>>>>>>>', vs)
-        setSelectionUpdate({
-            ...selectionUpdate,
-            open: vs.open
-        })
-    }
-
     return (
         // <ParentContext.Provider value={editorRef}>
         <div className={`${CLASSNAME}-container`}>
             <div className={`${CLASSNAME}-editor-inner`}>
                 <div className={`${CLASSNAME}-editor-header`} style={{
                     padding: '20px',
-                    display: 'Flex',
+                    display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
                 }}>
-                    <ToolBar 
-                        onChange={(params: any) => {
-                            console.log('params', params);
-                            editorRef.current.toggleMark(params.name, params.value);
-                        }}
-                    />
+
                 </div>
                 <div className={`${CLASSNAME}-editor-content`}>
                     <div
@@ -150,14 +182,96 @@ export const DocEditor: React.FC<DocEditorProps> = props => {
                             items={<ToolBar />}
                             onChange={handleSuggestionPopupVisibleChange}
                         ></Popup>
+                        */}
                         <Popup
-                            {...selectionUpdate}
                             placement='tl-bl?'
-                            items={<ToolBar />}
-                            onChange={handleSelectionPopupVisibleChange}
-                        >
+                            // container={contentRef.current}
+                            {...suggestionState}
 
-                        </Popup> */}
+                        // onChange={handleSelectionPopupVisibleChange}
+                        >
+                            <Menu 
+                                items={[
+                                    {
+                                        label: 'Text',
+                                        key: 'text',
+                                        icon: TextIcon
+                                    },
+                                    {
+                                        label: 'Heading 1',
+                                        key: 'heading1',
+                                        icon: Heading1Icon
+                                    },
+                                    {
+                                        label: 'Heading 2',
+                                        key: 'heading2',
+                                        icon: Heading2Icon
+                                    },
+                                    {
+                                        label: 'Heading 3',
+                                        key: 'heading3',
+                                        icon: Heading3Icon
+                                    },
+                                    {
+                                        label: 'Heading 4',
+                                        key: 'heading4',
+                                        icon: Heading4Icon
+                                    },
+                                    {
+                                        label: 'Bullet list',
+                                        key: 'bulletList',
+                                        icon: BulletListIcon
+                                    },
+                                    {
+                                        label: 'Ordered list',
+                                        key: 'orderedList',
+                                        icon: OrderedListIcon
+                                    },
+                                    {
+                                        label: 'Task list',
+                                        key: 'taskList',
+                                        icon: TaskListIcon
+                                    },
+
+                                    {
+                                        label: 'Blockquote',
+                                        key: 'blockquote',
+                                        icon: BlockquoteIcon
+                                    },
+                                    {
+                                        label: 'CodeBlock',
+                                        key: 'codeBlock',
+                                        icon: CodeBlockIcon
+                                    },
+                                    {
+                                        label: 'Table',
+                                        key: 'table',
+                                        icon: TableIcon
+                                    }
+                                ]}
+                            />
+                        </Popup>
+                        <Popup
+                            placement='t-b?'
+                            gap={10}
+                            // container={contentRef.current}
+                            {...selectionUpdate}
+
+                        // onChange={handleSelectionPopupVisibleChange}
+                        >
+                            <ToolBar
+                                data={toolBarData}
+                                onChange={(params: any) => {
+                                    const { type, name, value, data } = params;
+                                    if (type === 'mark') {
+                                        editorRef.current.setMark(name, value);
+                                    } else if (type === 'textAlign') {
+                                        editorRef.current.setTextAlign(value);
+                                    }
+                                    setToolBarData(data);
+                                }}
+                            />
+                        </Popup>
                     </div>
                 </div>
             </div>

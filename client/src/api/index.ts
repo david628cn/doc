@@ -1,7 +1,8 @@
 import request from './request';
 
 // const contextPath = '';
-const contextPath = 'http://127.0.0.1:8000';
+// export const contextPath = 'http://127.0.0.1:8000';
+export const contextPath = 'http://101.37.100.161:8000';
 
 export const login = async (params: any) => {
     const result = await request.post({

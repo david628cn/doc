@@ -8,35 +8,34 @@
  *      import IconSvg from '@/components/IconSvg';
  *      <IconSvg type="svg文件名" className="" style=""/>
  */
- import React from 'react';
- import style from './index.module.less';
+import React from 'react';
+import style from './index.module.less';
 
- const requireEx: any = require;
- 
- const importAll = (requireContext: any) => {
-    return requireContext.keys().forEach(requireContext);
- }
- try {
-   importAll(requireEx.context('@/assets/iconsvg', false, /\.svg$/));
- } catch (error) {
-   // eslint-disable-next-line no-console
-   console.log(error);
- }
- 
- export interface IconSvgProps {
-   type: string;
-   style?: React.CSSProperties;
-   className?: string;
- }
- 
- const IconSvg: React.FC<IconSvgProps> = props => {
-   const { type, className, ...attr } = props;
- 
-   return (
-     <svg className={`${style['icon-svg']} ${className || ''}`} {...attr}>
-       <use xlinkHref={`#${type}`} />
-     </svg>
-   );
- };
- 
- export default IconSvg;
+// const requireEx: any = require;
+
+// const importAll = (requireContext: any) => {
+//    return requireContext.keys().forEach(requireContext);
+// }
+// try {
+//   importAll(requireEx.context('@/assets/iconsvg', false, /\.svg$/));
+// } catch (error) {
+//   // eslint-disable-next-line no-console
+//   console.log(error);
+// }
+
+export interface IconSvgProps {
+  type: string;
+  style?: React.CSSProperties;
+  className?: string;
+}
+
+const IconSvg: React.FC<IconSvgProps> = props => {
+  const { type, className, ...attr } = props;
+  return (
+    <svg className={`${style['icon-svg']} ${className || ''}`} {...attr}>
+      <use xlinkHref={`#icon-${type}`} />
+    </svg>
+  );
+};
+
+export default IconSvg;

@@ -2,14 +2,11 @@
 
 .@{className}-container {
     width: 100%;
-    height: 100%;
-    background: #fff;
-    box-shadow: 0px 12px 33px 0px rgba(0, 0, 0, 0.06), 0px 3.618px 9.949px 0px rgba(0, 0, 0, 0.04), 0px 1.503px 4.132px 0px rgba(0, 0, 0, 0.03), 0px 0.543px 1.495px 0px rgba(0, 0, 0, 0.02);
-    border-radius: 10px;
-    // min-height: 100%;
+    height: 900px;
+    min-height: 100%;
     // border-radius: 10px;
     // overflow: hidden;
-    // background: #fff;
+    background: #f9f9f9;
     // box-shadow: 0px 12px 33px 0px rgba(0, 0, 0, .06), 0px 3.618px 9.949px 0px rgba(0, 0, 0, .04), 0px 1.503px 4.132px 0px rgba(0, 0, 0, .03), 0px 0.543px 1.495px 0px rgba(0, 0, 0, .02);
     .@{className}-editor-inner {
         width: 100%;
@@ -20,27 +17,29 @@
         // overflow: auto;
         align-items: center;
         position: relative;
-        scrollbar-width: thin;
-        scrollbar-color: hsl(lab(90.952% 0 -.0000119209)) transparent;
+        // scrollbar-width: thin;
+        // scrollbar-color: hsl(lab(90.952% 0 -.0000119209)) transparent;
         .@{className}-editor-header {
             width: 100%;
-            // height: 44px;
-            // line-height: 44px;
-            position: sticky;
+            height: 60px;
+            line-height: 60px;
+            // position: sticky;
+            position: fixed;
             top: 0;
             z-index: 10;
-            border-bottom: 1px solid rgba(15, 22, 36, 0.05);
-            // background: #fff;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+            background: #fff;
         }
         .@{className}-editor-content {
             width: 100%;
             // max-width: 880px;
             // min-height: 100%;
             display: flex;
+            justify-content: center;
             flex: 1;
-            padding: 0;
+            padding: 40px 0 20px 0;
             position: relative;
-            // background: #fff;
+            background: #f7f7f7;
             // box-shadow: 0px 12px 33px 0px rgba(0, 0, 0, 0.06), 0px 3.618px 9.949px 0px rgba(0, 0, 0, 0.04), 0px 1.503px 4.132px 0px rgba(0, 0, 0, 0.03), 0px 0.543px 1.495px 0px rgba(0, 0, 0, 0.02);
             // border-radius: 10px;
             .@{className}-editor-body {
@@ -49,11 +48,15 @@
                 // right: 0;
                 // top: 0;
                 // bottom: 0;
-                width: 100%;
+                width: 948px;
                 // min-height: 100%;
                 // height: 100%;
                 // overflow: auto;
                 outline: none;
+                border-radius: 0 0 10px 10px;
+                background: #fff;
+                border: 1px solid rgba(0, 0, 0, 0.15);
+                box-shadow: 0px 12px 33px 0px rgba(0, 0, 0, 0.06), 0px 3.618px 9.949px 0px rgba(0, 0, 0, 0.04), 0px 1.503px 4.132px 0px rgba(0, 0, 0, 0.03), 0px 0.543px 1.495px 0px rgba(0, 0, 0, 0.02);
             }
         }
     }

@@ -1,38 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { ColorList } from '../colorList';
 import { Usage } from '@/components/utils/usage';
+import { TEXT_COLORS, HIGHLIGHT_COLORS } from '../colors';
 import { CLASSNAME } from '@/global';
 import './index.less';
-
-const TEXT_COLORS = [
-    { label: '黑色', value: 'rgba(31,35,41,1)', type: 'text' },
-    { label: '灰色', value: 'rgba(143,149,158,1)', type: 'text' },
-    { label: '红色', value: 'rgba(216,57,49,1)', type: 'text' },
-    { label: '橙色', value: 'rgba(222,120,2,1)', type: 'text' },
-    { label: '黄色', value: 'rgba(220,155,4,1)', type: 'text' },
-    { label: '绿色', value: 'rgba(46,161,33,1)', type: 'text' },
-    { label: '蓝色', value: 'rgba(36,91,219,1)', type: 'text' },
-    { label: '紫色', value: 'rgba(100,37,208,1)', type: 'text' }
-];
-
-const HIGHLIGHT_COLORS = [
-    { label: '透明', value: 'rgba(255,255,255,0)', type: 'highlight' },
-    { label: '浅灰色', value: 'rgba(242,243,245,1)', type: 'highlight' },
-    { label: '浅红色', value: 'rgba(251,191,188,1)', type: 'highlight' },
-    { label: '浅橙色', value: 'rgba(254,212,164,0.8)', type: 'highlight' },
-    { label: '浅黄色', value: 'rgba(255,246,122,0.8)', type: 'highlight' },
-    { label: '浅绿色', value: 'rgba(183,237,177,0.8)', type: 'highlight' },
-    { label: '浅蓝色', value: 'rgba(186,206,253,0.7)', type: 'highlight' },
-    { label: '浅紫色', value: 'rgba(205,178,250,0.7)', type: 'highlight' },
-    { label: '中灰色', value: 'rgba(222,224,227,0.8)', type: 'highlight' },
-    { label: '灰色', value: 'rgba(187,191,196,1)', type: 'highlight' },
-    { label: '红色', value: 'rgba(247,105,100,1)', type: 'highlight' },
-    { label: '橙色', value: 'rgba(255,165,61,1)', type: 'highlight' },
-    { label: '黄色', value: 'rgba(255,233,40,1)', type: 'highlight' },
-    { label: '绿色', value: 'rgba(98,210,86,1)', type: 'highlight' },
-    { label: '蓝色', value: 'rgba(78,131,253,0.55)', type: 'highlight' },
-    { label: '紫色', value: 'rgba(147,90,246,0.55)', type: 'highlight' }
-];
 
 export type TextColorPanelProps = {
     value?: any;
@@ -41,8 +12,8 @@ export type TextColorPanelProps = {
     className?: string;
     keyName?: string;
     onChange?: Function;
-    textColors?: Array<any>;
-    highlightColors?: Array<any>;
+    colors?: Array<any>;
+    backgroundColors?: Array<any>;
     [key: string]: unknown
 }
 
@@ -112,12 +83,12 @@ export const TextColorPanel = (props: TextColorPanelProps) => {
                         ...value
                     };
                     let isHas = false;
-                    if (params.item.type === 'text') {
-                        isHas = params.item.value === value?.textColor;
-                        newValue.textColor = isHas ?  (props.textColors || TEXT_COLORS)[0].value : params.item.value;
-                    } else if (params.item.type === 'highlight') {
-                        isHas = params.item.value === value?.highlightColor;
-                        newValue.highlightColor = isHas ?  (props.highlightColors || HIGHLIGHT_COLORS)[0].value : params.item.value;
+                    if (params.item.type === 'color') {
+                        isHas = params.item.value === value?.color;
+                        newValue.color = isHas ?  (props.colors || TEXT_COLORS)[0].value : params.item.value;
+                    } else if (params.item.type === 'backgroundColor') {
+                        isHas = params.item.value === value?.backgroundColor;
+                        newValue.backgroundColor = isHas ?  (props.backgroundColors || HIGHLIGHT_COLORS)[0].value : params.item.value;
                     }
                     doChange({
                         domEvent: params.domEvent,
@@ -130,18 +101,18 @@ export const TextColorPanel = (props: TextColorPanelProps) => {
             />
             <ColorList
                 label="文本颜色"
-                colors={props.textColors || TEXT_COLORS}
-                value={value?.textColor}
+                colors={props.colors || TEXT_COLORS}
+                value={value?.color}
                 onChange={(params: any) => {
-                    const isHas = params.item.value === value?.textColor;
+                    const isHas = params.item.value === value?.color;
                     const newValue = {
                         ...value,
-                        textColor: isHas ?  (props.textColors || TEXT_COLORS)[0].value : params.item.value
-                        // highlightColor: ''
+                        color: isHas ?  (props.colors || TEXT_COLORS)[0].value : params.item.value
+                        // backgroundColor: ''
                     }
                     doChange({
                         domEvent: params.domEvent,
-                        type: 'text',
+                        type: 'color',
                         item: params.item,
                         rgba: params.rgba,
                         value: newValue
@@ -150,18 +121,18 @@ export const TextColorPanel = (props: TextColorPanelProps) => {
             />
             <ColorList
                 label="背景颜色"
-                colors={props.highlightColors || HIGHLIGHT_COLORS}
-                value={value?.highlightColor}
+                colors={props.backgroundColors || HIGHLIGHT_COLORS}
+                value={value?.backgroundColor}
                 onChange={(params: any) => {
-                    const isHas = params.item.value === value?.highlightColor;
+                    const isHas = params.item.value === value?.backgroundColor;
                     const newValue = {
                         ...value,
-                        // textColor: '',
-                        highlightColor: isHas ?  (props.highlightColors || HIGHLIGHT_COLORS)[0].value : params.item.value
+                        // color: '',
+                        backgroundColor: isHas ?  (props.backgroundColors || HIGHLIGHT_COLORS)[0].value : params.item.value
                     }
                     doChange({
                         domEvent: params.domEvent,
-                        type: 'highlight',
+                        type: 'backgroundColor',
                         item: params.item,
                         rgba: params.rgba,
                         value: newValue

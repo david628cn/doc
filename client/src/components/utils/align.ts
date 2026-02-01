@@ -211,6 +211,129 @@ export const getAnchor = (rect: Rect, pos: string, isAnchor: boolean = false): p
     };
 }
 
+// export const getAlignPos = (rectDom: Rect | HTMLElement, anchorDom: Rect | HTMLElement, config: any): position => {
+//     let curPos = config.pos || config.placement;
+//     const gap = config.gap || 0;
+//     if (!curPos) {
+//         curPos = 'tl-bl';
+//     } else if (curPos === '?') {
+//         curPos = 'tl-bl?';
+//     } else if (curPos.indexOf('-') === -1) {
+//         curPos = 'tl-' + curPos;
+//     }
+//     curPos = curPos.toLowerCase();
+//     const posArr: any = curPos.match(/^([a-z]+)-([a-z]+)(\?)?$/);
+//     // const pos = posArr[0];
+//     const pos1 = posArr[1];
+//     const pos2 = posArr[2];
+//     const p1x = pos1.charAt(pos1.length - 1);
+//     const p1y = pos1.charAt(0);
+//     const p2x = pos2.charAt(pos2.length - 1);
+//     const p2y = pos2.charAt(0);
+//     const isAuto = posArr[3];
+
+//     let rect = rectDom;
+//     let anchorRect = anchorDom;
+//     if (rect instanceof HTMLElement) {
+//         rect = getRect(rect);
+//     }
+//     if (anchorRect instanceof HTMLElement) {
+//         anchorRect = getRect(anchorRect);
+//     }
+//     const portalPos = getAnchor(rect, pos1);
+//     const anchorRectPos = getAnchor(anchorRect, pos2, true);
+
+//     const container = config.container || document.body;
+
+//     let positionNode = findParentWithPosition(container);
+//     let positionNodeRect = getRect(positionNode);
+
+//     let gapLeft = 0;
+//     let gapTop = 0;
+
+//     let swapX = false;
+//     let swapY = false;
+
+//     if (p1x === 'r' && p2x === 'l') {
+//         gapLeft -= gap;
+//         swapX = true;
+//     } else if (p1x === 'l' && p2x === 'r') {
+//         gapLeft += gap;
+//         swapX = true;
+//     }
+//     if (p1y === 't' && p2y === 'b') {
+//         gapTop += gap;
+//         swapY = true;
+//     } else if (p1y === 'b' && p2y === 't') {
+//         gapTop -= gap;
+//         swapY = true;
+//     }
+
+//     let docScroll = getScroll(document.body);
+//     let positionNodeScroll = {
+//         left: 0,
+//         top: 0
+//     };
+//     if (document.body !== positionNode) {
+//         positionNodeScroll = getScroll(positionNode);
+//     }
+
+//     let left = anchorRectPos.left - portalPos.left - positionNodeRect.left + gapLeft - docScroll.left + positionNodeScroll.left;
+//     let top = anchorRectPos.top - portalPos.top - positionNodeRect.top + gapTop - docScroll.top + positionNodeScroll.top;
+
+//     if (isAuto) {
+//         const dxy = {
+//             left: 0,
+//             top: 0
+//         };
+
+//         // const viewWidth = (document.documentElement.clientWidth || document.body.clientWidth);
+//         // const viewHeight = (document.documentElement.clientHeight || document.body.clientHeight);
+
+//         // const positionNodeWidth = positionNode.clientWidth;
+//         // const positionNodeHeight = positionNode.clientHeight;
+
+//         const docRect = getRect(document.body);
+
+//         const getRelativeLeft = (x: number) => {
+//             return x + positionNodeRect.left + positionNodeScroll.left - positionNodeScroll.left - positionNodeScroll.left;
+//         }
+//         const getRelativeTop = (y: number) => {
+//             return y + positionNodeRect.top + positionNodeScroll.top - positionNodeScroll.top - positionNodeScroll.top;
+//         }
+//         // console.log(700 + positionNodeRect.left - positionNodeScroll.left + docScroll.left, anchorRect.left + docScroll.left);
+
+//         // console.log(positionNodeRect.left + docScroll.left, docRect.left + docScroll.left, 700 + positionNodeRect.left + docScroll.left);
+
+//         // console.log(docRect.left, positionNodeRect.left);
+
+//         if ((swapX || swapY) && left + positionNodeRect.left + rect.width - positionNodeScroll.left - docScroll.left + dxy.left > Math.min(docRect.right, positionNodeRect.right)) {
+//             left = left - rect.width - anchorRect.width - 2 * gapLeft;
+//         }
+//         // console.log('>>> ', 420 + positionNodeRect.left + positionNodeScroll.left - positionNodeScroll.left - positionNodeScroll.left, anchorRect.left)
+//         // console.log('>>> ', getRelativeLeft(left - dxy.left), positionNodeRect.left)
+//         // console.log('>>> ', left + positionNodeRect.left + docScroll.left < dxy.left + docScroll.left + docScroll.left)
+//         if ((swapX || swapY) && (getRelativeLeft(left - dxy.left) < 0 || (getRelativeLeft(left - dxy.left) < positionNodeRect.left))) {
+//             left = left + rect.width + anchorRect.width - 2 * gapLeft;
+//             // left = left + rect.width + anchorRect.width - 2 * gapLeft;
+//         }
+//         if ((swapX || swapY) && top + positionNodeRect.top + rect.height - positionNodeScroll.top - docScroll.top + dxy.top > Math.min(docRect.bottom, positionNodeRect.bottom)) {
+//             top = top - rect.height - anchorRect.height - 2 * gapTop;
+//         }
+//         if ((swapX || swapY) && (getRelativeTop(top - dxy.top) < 0 || (getRelativeTop(top - dxy.top) < positionNodeRect.top))) {
+//             top = top + rect.height + anchorRect.height - 2 * gapTop;
+//         }
+
+//         // console.log(docRect, positionNodeRect, viewWidth, viewHeight, positionNodeWidth, positionNodeHeight);
+
+//     }
+
+//     return {
+//         left,
+//         top
+//     }
+// }
+
 export const getAlignPos = (rectDom: Rect | HTMLElement, anchorDom: Rect | HTMLElement, config: any): position => {
     let curPos = config.pos || config.placement;
     const gap = config.gap || 0;
@@ -247,26 +370,19 @@ export const getAlignPos = (rectDom: Rect | HTMLElement, anchorDom: Rect | HTMLE
 
     let positionNode = findParentWithPosition(container);
     let positionNodeRect = getRect(positionNode);
-    
+
     let gapLeft = 0;
     let gapTop = 0;
 
-    let swapX = false;
-    let swapY = false;
-
     if (p1x === 'r' && p2x === 'l') {
         gapLeft -= gap;
-        swapX = true;
     } else if (p1x === 'l' && p2x === 'r') {
         gapLeft += gap;
-        swapX = true;
     }
     if (p1y === 't' && p2y === 'b') {
         gapTop += gap;
-        swapY = true;
     } else if (p1y === 'b' && p2y === 't') {
         gapTop -= gap;
-        swapY = true;
     }
 
     let docScroll = getScroll(document.body);
@@ -283,48 +399,45 @@ export const getAlignPos = (rectDom: Rect | HTMLElement, anchorDom: Rect | HTMLE
 
     if (isAuto) {
         const dxy = {
-            left: 0,
-            top: 0
+            x: config.dxy?.x || 20,
+            y: config.dxy?.y || 20
         };
 
-        // const viewWidth = (document.documentElement.clientWidth || document.body.clientWidth);
-        // const viewHeight = (document.documentElement.clientHeight || document.body.clientHeight);
+        const swapX = ((p1x === 'r' && p2x === 'l') || (p1x === 'l' && p2x === 'r'));
+        const swapY = ((p1y === 't' && p2y === 'b') || (p1y === 'b' && p2y === 't'));
+
+        const viewWidth = (document.documentElement.clientWidth || document.body.clientWidth);
+        const viewHeight = (document.documentElement.clientHeight || document.body.clientHeight);
 
         // const positionNodeWidth = positionNode.clientWidth;
         // const positionNodeHeight = positionNode.clientHeight;
 
-        const docRect = getRect(document.body);
+        // const docRect = getRect(document.documentElement);
 
-        const getRelativeLeft = (x: number) => {
-            return x + positionNodeRect.left + positionNodeScroll.left - positionNodeScroll.left - positionNodeScroll.left;
-        }
-        const getRelativeTop = (y: number) => {
-            return y + positionNodeRect.top + positionNodeScroll.top - positionNodeScroll.top - positionNodeScroll.top;
-        }
-        // console.log(700 + positionNodeRect.left - positionNodeScroll.left + docScroll.left, anchorRect.left + docScroll.left);
+        // const getRelativeLeft = (x: number) => {
+        //     return x + positionNodeRect.left + positionNodeScroll.left - positionNodeScroll.left - positionNodeScroll.left;
+        // }
+        // const getRelativeTop = (y: number) => {
+        //     return y + positionNodeRect.top + positionNodeScroll.top - positionNodeScroll.top - positionNodeScroll.top;
+        // }
 
-        // console.log(positionNodeRect.left + docScroll.left, docRect.left + docScroll.left, 700 + positionNodeRect.left + docScroll.left);
 
-        // console.log(docRect.left, positionNodeRect.left);
-        
-        if ((swapX || swapY) && left + positionNodeRect.left + rect.width - positionNodeScroll.left - docScroll.left + dxy.left > Math.min(docRect.right, positionNodeRect.right)) {
-            left = left - rect.width - anchorRect.width - 2 * gapLeft;
+        if (left + positionNodeRect.left - positionNodeScroll.left + rect.width + dxy.x > viewWidth) {
+            left = swapX ? left - anchorRect.width - rect.width - 2 * gapLeft : viewWidth - positionNodeRect.left - rect.width + positionNodeScroll.left;
+            // left = viewWidth - positionNodeRect.left - rect.width + positionNodeScroll.left;
         }
-        // console.log('>>> ', 420 + positionNodeRect.left + positionNodeScroll.left - positionNodeScroll.left - positionNodeScroll.left, anchorRect.left)
-        // console.log('>>> ', getRelativeLeft(left - dxy.left), positionNodeRect.left)
-        // console.log('>>> ', left + positionNodeRect.left + docScroll.left < dxy.left + docScroll.left + docScroll.left)
-        if ((swapX || swapY) && (getRelativeLeft(left - dxy.left) < 0 || (getRelativeLeft(left - dxy.left) < positionNodeRect.left))) {
-            left = left + rect.width + anchorRect.width - 2 * gapLeft;
-            // left = left + rect.width + anchorRect.width - 2 * gapLeft;
+
+        if (left + positionNodeRect.left - positionNodeScroll.left < dxy.x) {
+            left = swapX ? left + anchorRect.width + rect.width - 2 * gapLeft : positionNodeRect.left + positionNodeScroll.left + docScroll.left + docScroll.left;
         }
-        if ((swapX || swapY) && top + positionNodeRect.top + rect.height - positionNodeScroll.top - docScroll.top + dxy.top > Math.min(docRect.bottom, positionNodeRect.bottom)) {
-            top = top - rect.height - anchorRect.height - 2 * gapTop;
+        if (top + positionNodeRect.top - positionNodeScroll.top + rect.height + dxy.y > viewHeight) {
+            top = swapY ? top - anchorRect.height - rect.height - 2 * gapTop : viewHeight - positionNodeRect.top - rect.height + positionNodeScroll.top;
+            // top = viewHeight - positionNodeRect.top - rect.height + positionNodeScroll.top;
         }
-        if ((swapX || swapY) && (getRelativeTop(top - dxy.top) < 0 || (getRelativeTop(top - dxy.top) < positionNodeRect.top))) {
-            top = top + rect.height + anchorRect.height - 2 * gapTop;
+
+        if (top + positionNodeRect.top - positionNodeScroll.top < dxy.y) {
+            top = swapY ? top + anchorRect.height + rect.height - 2 * gapTop : positionNodeRect.top + positionNodeScroll.top + docScroll.top + docScroll.top;
         }
-        
-        // console.log(docRect, positionNodeRect, viewWidth, viewHeight, positionNodeWidth, positionNodeHeight);
 
     }
 
@@ -352,4 +465,39 @@ export const setAlignPos = (rectDom: HTMLElement, anchorDom: Rect | HTMLElement,
         setPos(rectDom, pos, is);
     }
     return pos;
+}
+
+export const isTouchEvent = (event: any) => {
+    return (
+        (event.touches && event.touches.length) ||
+        (event.changedTouches && event.changedTouches.length)
+    );
+}
+export const getPosition = (event: any) => {
+    if (event.touches && event.touches.length) {
+        return {
+            x: event.touches[0].pageX,
+            y: event.touches[0].pageY,
+            left: event.touches[0].pageX,
+            top: event.touches[0].pageY
+        };
+    } else if (event.changedTouches && event.changedTouches.length) {
+        return {
+            x: event.changedTouches[0].pageX,
+            y: event.changedTouches[0].pageY,
+            left: event.changedTouches[0].pageX,
+            top: event.changedTouches[0].pageY
+        };
+    } else {
+        return {
+            x: event.pageX,
+            y: event.pageY,
+            left: event.pageX,
+            top: event.pageY
+        };
+    }
+}
+
+export const isValidPosition = (pos: number | null | undefined): pos is number => {
+    return typeof pos === 'number' && pos >= 0;
 }
