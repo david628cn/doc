@@ -9,6 +9,7 @@ yarn-debug.log*
 yarn-error.log*
 .eslintcache
 .vite/
+web/
 
 # 環境變量（包含敏感信息）
 .env
