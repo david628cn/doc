@@ -1,0 +1,108 @@
+@import url(@/global/index.less);
+
+.@{className}-table-view {
+    position: relative;
+    overflow-x: auto;
+
+    .@{className}-table-view-toolbar {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        pointer-events: none;
+        background: #eeeeee30;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        overflow: hidden;
+        border-spacing: 0;
+        word-break: break-word;
+        // cursor: text;
+        table-layout: fixed;
+        position: relative;
+    }
+
+    tr {
+        height: 40px;
+    
+        &:first-child {
+    
+            th,
+            td {
+                border-top: 1px solid #dee0e3;
+            }
+        }
+    }
+    
+    td, th {
+        padding: 8px;
+        margin: 0;
+        min-height: 39px;
+        min-width: 50px;
+        font-size: 12px;
+        word-break: break-word;
+        line-height: 1.8;
+        position: relative;
+        height: 1px;
+        vertical-align: top;
+        overflow: hidden;
+        display: table-cell;
+        border-right: 1px solid #dee0e3;
+        border-bottom: 1px solid #dee0e3;
+    
+        &:first-child {
+            border-left: 1px solid #dee0e3;
+            // border-top: 1px solid #dee0e3;
+        }
+        p {
+            margin: 0 !important;
+        }
+    }
+    
+    td:not([data-colwidth]):not(.column-resize-dragging),
+    th:not([data-colwidth]):not(.column-resize-dragging) {
+        /* if there's no explicit width set and the column is not being resized, set a default width */
+        min-width: var(--default-cell-min-width);
+    }
+
+    th {
+        background: rgba(15,22,36,0.05);
+        font-weight: 700;
+    }
+    
+    .column-resize-handle {
+        height: calc(100% + 2px);
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        z-index: 1;
+        background-color: #2383e2;
+        pointer-events: none;
+    }
+
+    /* Give selected cells a blue overlay */
+    .selectedCell {
+        &::after {
+            z-index: 2;
+            position: absolute;
+            content: '';
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            background: rgba(200, 200, 255, 0.4);
+            pointer-events: none;
+        }
+        
+    }
+}
+
+.ProseMirror.resize-cursor {
+    cursor: ew-resize;
+    cursor: col-resize;
+}
