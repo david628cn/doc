@@ -7,7 +7,8 @@ import {
     CellSelection,
     cellAround
 } from 'prosemirror-tables';
-import { TableEx } from './tableEx';
+import { TableViewEx } from './tableViewEx';
+import { TableCell } from './tableCell';
 
 import './index.less';
 
@@ -162,12 +163,12 @@ export const table = ({
             },
         },
         props: {
-            // nodeViews: {
-            //     table: (node: Node, view: EditorView, getPos: () => number) => {
-            //         console.log(['1']);
-            //         return new TableEx(node, 100, view, getPos);
-            //     }
-            // } as any,
+            nodeViews: {
+                table_cell: (node: Node, view: EditorView, getPos: () => number) => {
+                    console.log(['1']);
+                    return new TableCell(node, view, getPos);
+                }
+            } as any,
             handleDOMEvents: {
                 mousemove: (view, event) => {
 
@@ -185,7 +186,7 @@ export const table = ({
         }
     });
     const columnResize = columnResizing({
-        View: TableEx as any,
+        View: TableViewEx as any,
         // handleWidth: 10
     });
     return [columnResize, tableEditing(), plugin];

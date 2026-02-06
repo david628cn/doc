@@ -10,7 +10,7 @@ import { CLASSNAME } from '@/global';
 
 
 
-export class TableEx extends TableView {
+export class TableViewEx extends TableView {
     view: EditorView;
     getPos: Function;
     toolbar: HTMLDivElement;
