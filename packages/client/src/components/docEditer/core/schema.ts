@@ -434,6 +434,12 @@ const schema: any = {
             selectable: true,
             allowGapCursor: true, // 某些版本插件需要此显式标记
             group: "block",
+            attrs: {
+                dataBlockId: {
+                    default: null,
+                    validate: "string|null"
+                }
+            },
             parseDOM: [{
                 tag: "table"
             }],

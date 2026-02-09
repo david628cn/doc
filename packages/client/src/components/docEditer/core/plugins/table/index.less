@@ -2,18 +2,23 @@
 
 .@{className}-table-view {
     position: relative;
-    overflow-x: auto;
+    margin-top: 28px;
+    // overflow-x: auto;
 
-    .@{className}-table-view-toolbar {
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        left: 0;
-        top: 0;
-        pointer-events: none;
-        background: #eeeeee30;
+    // .@{className}-table-view-toolbar {
+    //     width: 100%;
+    //     height: 100%;
+    //     position: absolute;
+    //     left: 0;
+    //     top: 0;
+    //     pointer-events: none;
+    //     background: #eeeeee30;
+    // }
+    .@{className}-table-view-inner {
+        position: relative;
+        overflow: auto;
+        // display: inline-block;
     }
-
     table {
         border-collapse: collapse;
         width: 100%;
@@ -100,6 +105,31 @@
         }
         
     }
+
+    .@{className}-table-view-col-toolbar {
+        width: 100%;
+        height: 10px;
+        position: absolute;
+        top: -10px;
+        left: 0;
+        z-index: 4;
+        border-radius: 4px 4px 0 0;
+        // overflow: hidden;
+        background: #eff0f1;
+    }
+
+    .@{className}-table-view-row-toolbar {
+        width: 10px;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: -10px;
+        z-index: 4;
+        border-radius: 4px 0 0 4px;
+        // overflow: hidden;
+        background: #eff0f1;
+    }
+    
 }
 
 .ProseMirror.resize-cursor {
