@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { createTableControl } from './tableUtil';
+import { TableControl } from './tableControl';
 import './index.less';
 
 interface IProps {
@@ -10,7 +10,8 @@ const Page: React.FC<IProps> = props => {
     const tableRef = useRef(null);
 
     useEffect(() => {
-        createTableControl(tableRef.current, containerRef.current);
+        const tableControl = new TableControl();
+        tableControl.load(tableRef.current, containerRef.current);
     }, []);
 
     return (
@@ -23,7 +24,7 @@ const Page: React.FC<IProps> = props => {
             height: '600px',
             position: 'absolute'
         }}>
-            <div className="dui-doc-table-view" ref={containerRef}>
+            <div className="dui-doc-table-view">
                 <div className="dui-doc-table-view-inner">
                     <table style={{ minWidth: '400px' }} ref={tableRef}>
                         <colgroup>
@@ -102,6 +103,7 @@ const Page: React.FC<IProps> = props => {
                         </tbody>
                     </table>
                 </div>
+                <div className="dui-doc-table-view-ctrolpanel" ref={containerRef}></div>
             </div>
 
         </div>

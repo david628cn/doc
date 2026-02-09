@@ -41,6 +41,8 @@ export class TableViewEx {
         this.table.appendChild(this.colgroup);
         updateColumnsOnResize(node, this.colgroup, this.table, this.defaultCellMinWidth);
         this.contentDOM = this.table.appendChild(document.createElement('tbody'));
+        const ctrolpanel = this.createCtrolpanel();
+        this.dom.appendChild(ctrolpanel);
         // this.createColToolbar();
         // this.createRowToolbar();
         // this.table.__nodeView = this;
@@ -77,7 +79,12 @@ export class TableViewEx {
             (record.target == this.table || this.colgroup.contains(record.target))
         );
     }
-
+    createCtrolpanel() {
+        const ctrolpanel = document.createElement('div');
+        ctrolpanel.className = `${CLASSNAME}-table-view-ctrolpanel`;
+        ctrolpanel.contentEditable = 'false';
+        return ctrolpanel;
+    }
     // 必须处理 stopEvent，防止面板上的点击触发编辑器的选区更改
     // stopEvent(event: any) {
     //     return this.toolbar.contains(event.target);
