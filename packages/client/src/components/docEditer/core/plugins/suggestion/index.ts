@@ -2,6 +2,7 @@ import { type EditorState, type Transaction, Plugin, PluginKey } from 'prosemirr
 import { type EditorView, Decoration, DecorationSet } from 'prosemirror-view';
 // import { type ResolvedPos } from 'prosemirror-model';
 // import { getRect } from '@/components/utils/align';
+import { findSuggestionMatch } from '@/components/docEditer/core/utils';
 import { CLASSNAME } from '@/global';
 import './index.less';
 
@@ -61,66 +62,6 @@ import './index.less';
 //     text: string;
 // } | null;
 
-const findSuggestionMatch = (config: any) => {
-    const {
-        char = '/',
-        startOfLine = false,
-        allowSpaces = false,
-        allowToIncludeChar = false,
-        allowedPrefixes = [' '],
-        $position
-    } = config;
-    let text: any = $position.nodeBefore?.isText && $position.nodeBefore.text;
-    // if (text === null || text === undefined) {
-    //     return null;
-    // }
-    if (!text) {
-        return null;
-    }
-    const textFrom = $position.pos - text.length;
-    const escapedChar = char.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
-    const suffix = new RegExp(`\\s${escapedChar}$`);
-    const prefix = startOfLine ? '^' : '';
-    const finalEscapedChar = allowToIncludeChar ? '' : escapedChar;
-    const regexp = allowSpaces
-        ? new RegExp(`${prefix}${escapedChar}.*?(?=\\s${finalEscapedChar}|$)`, 'gm')
-        : new RegExp(`${prefix}(?:^)?${escapedChar}[^\\s${finalEscapedChar}]*`, 'gm');
-    const match: any = Array.from(text.matchAll(regexp)).pop();
-    if (!match || match.input === undefined || match.index === undefined) {
-        return null;
-    }
-    const matchPrefix = match.input.slice(Math.max(0, match.index - 1), match.index);
-    let matchPrefixIsAllowed = new RegExp(`^[${allowedPrefixes?.join('')}+\0]?$`).test(matchPrefix);
-    if (matchPrefix.length > 0 && matchPrefix.trim() === '') {
-        matchPrefixIsAllowed = true;
-    }
-    // const matchPrefixIsAllowed = new RegExp(`\\s*$`).test(matchPrefix);
-
-
-    if (allowedPrefixes !== null && !matchPrefixIsAllowed) {
-        return null;
-    }
-
-    const from = textFrom + match.index;
-    let to = from + match[0].length;
-
-    if (allowSpaces && suffix.test(text.slice(to - 1, to + 1))) {
-        match[0] += ' ';
-        to += 1;
-    }
-
-    if (from < $position.pos && to >= $position.pos) {
-        return {
-            range: {
-                from,
-                to
-            },
-            query: match[0].slice(char.length),
-            text: match[0]
-        }
-    }
-    return null;
-}
 
 export const suggestion = ({
     editor,

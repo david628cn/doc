@@ -191,7 +191,7 @@ export class TableControl {
         if (!tableMap) {
             return;
         }
-        
+        console.log('tableMap', tableMap);
         this.createRowBar(tableMap.rows);
         this.createColBar(tableMap.cols);
         

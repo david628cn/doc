@@ -15,6 +15,8 @@ export class TableViewEx {
     dom: HTMLDivElement;
     contentDOM: HTMLDivElement;
     inner: HTMLDivElement;
+    ctrolpanel: HTMLDivElement;
+    cellSelection: HTMLDivElement;
     table: any;
     colgroup: HTMLTableColElement;
     defaultCellMinWidth: number = 100;
@@ -24,25 +26,30 @@ export class TableViewEx {
         // this.getPos = getPos;
         this.dom = document.createElement('div');
         this.dom.className = `${CLASSNAME}-table-view`;
-        this.dom.setAttribute('data-block-id', node.attrs.dataBlockId);
-        this.inner = document.createElement('div');
-        this.inner.className = `${CLASSNAME}-table-view-inner`;
+        // this.dom.setAttribute('data-block-id', node.attrs.dataBlockId);
+
         this.table = document.createElement('table');
         this.table.style.setProperty(
             '--default-cell-min-width',
             `${this.defaultCellMinWidth}px`
         );
 
-        this.inner.appendChild(this.table);
-        this.dom.appendChild(this.inner);
+        const inner = document.createElement('div');
+        inner.className = `${CLASSNAME}-table-view-inner`;
+        inner.appendChild(this.table);
+        this.dom.appendChild(inner);
 
         // this.dom.appendChild(this.table);
         this.colgroup = document.createElement('colgroup');
         this.table.appendChild(this.colgroup);
         updateColumnsOnResize(node, this.colgroup, this.table, this.defaultCellMinWidth);
         this.contentDOM = this.table.appendChild(document.createElement('tbody'));
-        const ctrolpanel = this.createCtrolpanel();
-        this.dom.appendChild(ctrolpanel);
+
+        this.createCtrolpanel();
+        this.createCellSelection();
+
+        // this.dom.appendChild(ctrolpanel);
+        // this.dom.appendChild(cellSelection);
         // this.createColToolbar();
         // this.createRowToolbar();
         // this.table.__nodeView = this;
@@ -76,14 +83,49 @@ export class TableViewEx {
     ignoreMutation(record: ViewMutationRecord): boolean {
         return (
             record.type == 'attributes' &&
-            (record.target == this.table || this.colgroup.contains(record.target))
+            (record.target == this.table
+                || this.colgroup.contains(record.target)
+                || this.cellSelection.contains(record.target)
+                || this.ctrolpanel.contains(record.target)
+            )
         );
     }
+    // ignoreMutation(record: ViewMutationRecord): boolean {
+    //     // 1. 如果变动发生在你自定义的 handle 或其子元素上，忽略它
+    //     if (this.handle && (this.handle === record.target || this.handle.contains(record.target))) {
+    //         return true;
+    //     }
+
+    //     // 2. 如果是属性变动（比如你手动改了 handle 的 style），忽略它
+    //     if (record.type === 'attributes' && record.target === this.handle) {
+    //         return true;
+    //     }
+
+    //     // 3. 其他所有变动（如用户在单元格内打字、删减内容）必须由 ProseMirror 处理
+    //     return false;
+    // }
+    // stopEvent(event) {
+    //     // 如果事件发生在你的自定义 DOM 上
+    //     const isHandleClick = this.handle && this.handle.contains(event.target);
+    //     if (isHandleClick) {
+    //         // 阻止 ProseMirror 处理这个点击事件，防止光标乱跳
+    //         return true;
+    //     }
+    //     return false;
+    // }
     createCtrolpanel() {
-        const ctrolpanel = document.createElement('div');
-        ctrolpanel.className = `${CLASSNAME}-table-view-ctrolpanel`;
-        ctrolpanel.contentEditable = 'false';
-        return ctrolpanel;
+        const dom = document.createElement('div');
+        dom.className = `${CLASSNAME}-table-view-ctrolpanel`;
+        dom.contentEditable = 'false';
+        this.dom.appendChild(dom);
+        this.ctrolpanel = dom;
+    }
+    createCellSelection() {
+        const dom = document.createElement('div');
+        dom.className = `${CLASSNAME}-table-view-cell-selection`;
+        dom.contentEditable = 'false';
+        this.dom.appendChild(dom);
+        this.cellSelection = dom;
     }
     // 必须处理 stopEvent，防止面板上的点击触发编辑器的选区更改
     // stopEvent(event: any) {

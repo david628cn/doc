@@ -15,40 +15,11 @@ import type { Node } from 'prosemirror-model';
 //     splitBlock
 // } from 'prosemirror-commands';
 // import Editor from '../../editor';
+import { getOuterNode, getOuterNodePos, closestBlock } from '@/components/docEditer/core/utils';
 import { CLASSNAME } from '@/global';
 import './index.less';
 
-const getOuterNode = (doc: Node, pos: number): Node | null => {
-    const node = doc.nodeAt(pos);
-    const resolvedPos = doc.resolve(pos);
 
-    let { depth } = resolvedPos;
-    let parent = node;
-
-    while (depth > 0) {
-        const currentNode = resolvedPos.node(depth);
-
-        depth -= 1;
-
-        if (depth === 0) {
-            parent = currentNode;
-        }
-    }
-    return parent;
-}
-
-const getOuterNodePos = (doc: Node, pos: number): number => {
-    const resolvedPos = doc.resolve(pos);
-    const { depth } = resolvedPos;
-
-    if (depth === 0) {
-        return pos;
-    }
-
-    const a = resolvedPos.pos - resolvedPos.parentOffset;
-
-    return a - 1;
-}
 
 // const findClosestTopLevelBlock = (element: any, view: EditorView): HTMLElement | undefined => {
 //     let current: Element | null = element;
@@ -58,16 +29,16 @@ const getOuterNodePos = (doc: Node, pos: number): number => {
 //     return current?.parentElement === view.dom ? (current as HTMLElement) : undefined;
 // }
 
-const findClosestTopLevelBlock = (dom: any, view: EditorView) => {
-    let curDom = dom;
-    while (curDom && curDom !== view.dom) {
-        if (curDom.getAttribute('data-block-id')) {
-            return curDom;
-        }
-        curDom = curDom.parentElement;
-    }
-    return null;
-}
+// const findClosestTopLevelBlock = (dom: any, view: EditorView) => {
+//     let curDom = dom;
+//     while (curDom && curDom !== view.dom) {
+//         if (curDom.getAttribute('data-block-id')) {
+//             return curDom;
+//         }
+//         curDom = curDom.parentElement;
+//     }
+//     return null;
+// }
 
 const handleFactory: any = ({
     container,
@@ -213,7 +184,7 @@ export const dragHandle = ({ editor, container }: any) => {
             if (editor.editable) {
                 const view = editor.view;
                 const state = view.state;
-                const block = findClosestTopLevelBlock(e.target, view);
+                const block = closestBlock(e.target);
                 const rect = getRect(block);
                 const eventPos = getPosition(e);
                 if (block) {
@@ -374,7 +345,7 @@ export const dragHandle = ({ editor, container }: any) => {
                 mousemove(view, e) {
                     if (editor.editable) {
                         // const eventPos = { x: e.clientX, y: e.clientY };
-                        const block = findClosestTopLevelBlock(e.target, view);
+                        const block = closestBlock(e.target);
                         if (block) {
                             const domNodePos = view.posAtDOM(block, 0);
                             const outerNode = getOuterNode(view.state.doc, domNodePos);

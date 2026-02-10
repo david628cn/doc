@@ -53,7 +53,7 @@ import {
 
 import { EventEmitter } from './eventEmitter';
 import {
-    basic,
+    // basic,
     uniqueID,
     // keymaps, 
     link,
@@ -211,9 +211,9 @@ export class Editor extends EventEmitter {
 
 
         let plugins = [
-            basic({
-                editor: this
-            }),
+            // basic({
+            //     editor: this
+            // }),
             history(),
             link({
                 editor: this

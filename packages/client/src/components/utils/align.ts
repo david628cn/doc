@@ -501,3 +501,29 @@ export const getPosition = (event: any) => {
 export const isValidPosition = (pos: number | null | undefined): pos is number => {
     return typeof pos === 'number' && pos >= 0;
 }
+
+export const closest = (dom: any, fn: Function) => {
+    let cur: any = dom;
+    while (cur && cur !== document.body) {
+        if (fn(cur)) {
+            return cur;
+        }
+        cur = cur.parentNode;
+    }
+    return null;
+}
+
+// export const closestByNodeName = (dom: any, nodeName: string, fn: Function) => {
+//     let cur = dom;
+
+//     // 向上遍历直到找到 TABLE 标签或到达根节点
+//     while (cur && cur.nodeName !== nodeName) {
+//         // 如果到了编辑器容器外还没找到，就停止
+//         if (fn(cur)) {
+//             break;
+//         }
+//         cur = cur.parentNode;
+//     }
+
+//     return (cur && cur.nodeName === nodeName) ? cur : null;
+// }

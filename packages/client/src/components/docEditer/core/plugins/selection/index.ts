@@ -2,58 +2,10 @@ import { type EditorState, type Transaction, Plugin, PluginKey, NodeSelection, T
 import { type EditorView, Decoration, DecorationSet } from 'prosemirror-view';
 import { Selection } from 'prosemirror-state';
 import { CellSelection } from 'prosemirror-tables';
+import { posToDOMRect } from '@/components/docEditer/core/utils';
 import { getPosition, isValidPosition } from '@/components/utils/align';
-import { CLASSNAME } from '@/global';
+// import { CLASSNAME } from '@/global';
 import './index.less';
-
-const posToDOMRect = (view: EditorView, from: number, to: number): DOMRect => {
-    const minPos = 0
-    const maxPos = view.state.doc.content.size;
-    const resolvedFrom = Math.min(Math.max(from, minPos), maxPos);
-    const resolvedEnd = Math.min(Math.max(to, minPos), maxPos);
-    const start = view.coordsAtPos(resolvedFrom);
-    const end = view.coordsAtPos(resolvedEnd, -1);
-    const top = Math.min(start.top, end.top);
-    const bottom = Math.max(start.bottom, end.bottom);
-    const left = Math.min(start.left, end.left);
-    const right = Math.max(start.right, end.right);
-    const width = right - left;
-    const height = bottom - top;
-    const x = left;
-    const y = top;
-    const data = {
-        top,
-        bottom,
-        left,
-        right,
-        width,
-        height,
-        x,
-        y
-    };
-
-    return {
-        ...data,
-        toJSON: () => data
-    };
-}
-
-const getSelectionBoundingRect = (view: EditorView): DOMRect | null => {
-    const { selection } = view.state;
-    const { ranges } = selection;
-
-    const from = Math.min(...ranges.map((range: any) => range.$from.pos));
-    const to = Math.max(...ranges.map((range: any) => range.$to.pos));
-
-    if (selection instanceof NodeSelection) {
-        const node = view.nodeDOM(from) as HTMLElement;
-        if (node) {
-            return node.getBoundingClientRect();
-        }
-    }
-
-    return posToDOMRect(view, from, to);
-}
 
 // const getSelectionBoundingRect = () => {
 //     const { selection } = this.view.state;
