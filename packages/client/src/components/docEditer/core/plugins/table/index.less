@@ -4,10 +4,14 @@
     position: relative;
     margin-top: 28px;
     // overflow-x: auto;
+    overflow: auto;
     .@{className}-table-view-inner {
         position: relative;
-        overflow: auto;
+        // overflow: auto;
         // display: inline-block;
+    }
+    .column-resize-handle {
+        background: rgba(79, 70, 229, 1);
     }
     .@{className}-table-view-ctrolpanel {
         width:  100%;
@@ -18,12 +22,22 @@
         pointer-events: none;
     }
     .@{className}-table-view-cell-selection {
+        width: 100%;
+        height: 100%;
         position: absolute;
         left: 0;
         top: 0;
-        border: 2px solid rgba(122,82,255,1);
-        background: rgba(200, 200, 255, 0.4);
+        // border: 2px solid rgba(122,82,255,1);
+        // background: rgba(200, 200, 255, 0.4);
         pointer-events: none;
+        .@{className}-table-view-cell-selection-rect {
+            position: absolute;
+            left: 0;
+            top: 0;
+            border: 2px solid rgba(79, 70, 229, 1);
+            background: rgba(200, 200, 255, 0.4);
+            pointer-events: none;
+        }
     }
     table {
         border-collapse: collapse;

@@ -2,13 +2,13 @@ import { type EditorState, type Transaction, Plugin, PluginKey, EditorStateConfi
 import { EditorView } from 'prosemirror-view';
 // import { type Node } from 'prosemirror-model';
 import {
-    // columnResizingPluginKey,
+    columnResizingPluginKey,
     columnResizing,
     tableEditing
     // CellSelection,
     // cellAround
 } from 'prosemirror-tables';
-import { TableViewEx } from './tableViewEx';
+import { TableNode } from './tableNode';
 // import { TableCell } from './tableCell';
 import { 
     closestElement, 
@@ -26,6 +26,38 @@ export const pluginKey = new PluginKey('table');
 export const table = ({
     editor
 }: any) => {
+    const selectionRectDom = document.createElement('div');
+    selectionRectDom.className = `${CLASSNAME}-table-view-cell-selection-rect`;
+    const showSelectRect = (tableWrapper: HTMLElement, rect: any) => {
+        // const node = tableWrapper.querySelector(`.${CLASSNAME}-table-view-cell-selection`);
+        let node;
+        for (let i = 0; i < tableWrapper.childNodes.length; i++) {
+            const child: any = tableWrapper.childNodes[i];
+            if (child.classList.contains(`${CLASSNAME}-table-view-cell-selection`)) {
+                node = child;
+                break;
+            }
+        }
+        console.log('node', node, tableWrapper.childNodes);
+        if (node) {
+            if (selectionRectDom.parentNode && node !== selectionRectDom.parentNode) {
+                selectionRectDom.parentNode.removeChild(selectionRectDom);
+            }
+            selectionRectDom.style.width = `${rect.width}px`;
+            selectionRectDom.style.height = `${rect.height}px`;
+            node.appendChild(selectionRectDom);
+            setAlignPos(selectionRectDom, rect, {
+                placement: 'tl-tl',
+                container: node
+            });
+        }
+    }
+    const hideSelectRect = () => {
+        if (selectionRectDom.parentNode) {
+            selectionRectDom.parentNode.removeChild(selectionRectDom);
+        }
+    }
+
     const plugin: Plugin = new Plugin({
         key: pluginKey,
         view(view: EditorView) {
@@ -36,16 +68,23 @@ export const table = ({
                         return;
                     }
                     const tableInfo = getTableInfoByAnySelection(editor.view);
+                    console.log('tableInfo', tableInfo);
                     if (tableInfo) {
-                        const cellSection: any = tableInfo.tableWrapper.querySelector(`.${CLASSNAME}-table-view-cell-selection`);
-                        cellSection.style.width = `${tableInfo.rect.width}px`;
-                        cellSection.style.height = `${tableInfo.rect.height}px`;
-                        console.log('tableInfo', cellSection, tableInfo.rect);
-                        setAlignPos(cellSection, tableInfo.rect, {
-                            placement: 'tl-tl',
-                            container: tableInfo.tableWrapper
-                        });
+                        showSelectRect(tableInfo.tableWrapper, tableInfo.rect);
+                    } else {
+                        hideSelectRect();
                     }
+                    
+                    // if (tableInfo) {
+                    //     const cellSection: any = tableInfo.tableWrapper.querySelector(`.${CLASSNAME}-table-view-cell-selection`);
+                    //     cellSection.style.width = `${tableInfo.rect.width}px`;
+                    //     cellSection.style.height = `${tableInfo.rect.height}px`;
+                    //     console.log('tableInfo', cellSection, tableInfo.rect);
+                    //     setAlignPos(cellSection, tableInfo.rect, {
+                    //         placement: 'tl-tl',
+                    //         container: tableInfo.tableWrapper
+                    //     });
+                    // }
                     
                     
                 },
@@ -135,22 +174,28 @@ export const table = ({
             // } as any,
             handleDOMEvents: {
                 mousemove: (view: EditorView, event: Event) => {
-                    // const columnResizingPlugState = columnResizingPluginKey.getState(view.state);
-                    // if (columnResizingPlugState.dragging) {
-                    //     // console.log('mousemove>>>', columnResizingPlugState);
+                    // // const columnResizingPlugState = columnResizingPluginKey.getState(view.state);
+                    // // if (columnResizingPlugState.dragging) {
+                    // //     // console.log('mousemove>>>', columnResizingPlugState);
+                    // // }
+                    // // console.log('mousemove>>>', columnResizingPlugState);
+                    // // 1. 获取最近的 table 元素
+                    // const tableDOM = closestElement(event.target, (dom: any) => {
+                    //     return dom && dom.nodeName === 'TABLE';
+                    // });
+                    // if (tableDOM) {
+                    //     const tableContainer = closestElement(tableDOM, (dom: any) => {
+                    //         return dom.classList && dom.classList.contains(`${CLASSNAME}-table-view`);
+                    //     });
+                    //     const ctrolpanel = tableContainer.querySelector(`.${CLASSNAME}-table-view-ctrolpanel`);
+                    //     // console.log('tableDOM', ctrolpanel);
                     // }
-                    // console.log('mousemove>>>', columnResizingPlugState);
-                    // 1. 获取最近的 table 元素
-                    const tableDOM = closestElement(event.target, (dom: any) => {
-                        return dom && dom.nodeName === 'TABLE';
-                    });
-                    if (tableDOM) {
-                        const tableContainer = closestElement(tableDOM, (dom: any) => {
-                            return dom.classList && dom.classList.contains(`${CLASSNAME}-table-view`);
-                        });
-                        const ctrolpanel = tableContainer.querySelector(`.${CLASSNAME}-table-view-ctrolpanel`);
-                        // console.log('tableDOM', ctrolpanel);
+                    const columnResizingPlugState = columnResizingPluginKey.getState(view.state);
+                    if (columnResizingPlugState.dragging) {
+                        const tableInfo = getTableInfoByAnySelection(editor.view);
+                        showSelectRect(tableInfo.tableWrapper, tableInfo.rect);
                     }
+                    
 
                 },
                 mouseleave: (view) => {
@@ -166,7 +211,7 @@ export const table = ({
         }
     });
     const columnResize = columnResizing({
-        View: TableViewEx as any,
+        View: TableNode as any,
         // handleWidth: 10
     });
     return [columnResize, tableEditing(), plugin];

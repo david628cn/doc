@@ -8,7 +8,7 @@ import { pluginKey } from './index';
 import { setAlignPos } from '@/components/utils/align';
 import { CLASSNAME } from '@/global';
 
-export class TableViewEx {
+export class TableNode {
     node: Node;
     view: EditorView;
     getPos: Function;
@@ -81,14 +81,10 @@ export class TableViewEx {
     }
     // 必须处理 ignoreMutation，否则点击面板按钮会导致编辑器重绘
     ignoreMutation(record: ViewMutationRecord): boolean {
-        return (
-            record.type == 'attributes' &&
-            (record.target == this.table
-                || this.colgroup.contains(record.target)
-                || this.cellSelection.contains(record.target)
-                || this.ctrolpanel.contains(record.target)
-            )
-        );
+        if (this.cellSelection.contains(record.target) || this.ctrolpanel.contains(record.target)) {
+            return true;
+        }
+        return record.type == 'attributes' && (record.target == this.table || this.colgroup.contains(record.target));
     }
     // ignoreMutation(record: ViewMutationRecord): boolean {
     //     // 1. 如果变动发生在你自定义的 handle 或其子元素上，忽略它

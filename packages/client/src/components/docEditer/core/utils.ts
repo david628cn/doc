@@ -473,7 +473,7 @@ export const getTableInfoByAnySelection = (view: EditorView) => {
     }
 
     // 3. 安全获取 DOM
-    const tableDOM = view.nodeDOM(tablePos);
+    const tableDOM: any = view.nodeDOM(tablePos);
     if (!tableDOM) {
         return null;
     }
@@ -490,7 +490,7 @@ export const getTableInfoByAnySelection = (view: EditorView) => {
     return {
         tableNode,
         tablePos,
-        tableDOM,
+        tableDOM: tableDOM.querySelector('table'),
         // 如果没找到 wrapper 类名，回退到 tableDOM.parentNode
         tableWrapper: closestTableView(tableDOM),
         $cellPos, // 保留此引用以便后续操作单元格
