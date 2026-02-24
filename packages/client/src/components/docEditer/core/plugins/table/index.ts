@@ -2,6 +2,7 @@ import { type EditorState, type Transaction, Plugin, PluginKey, EditorStateConfi
 import { EditorView } from 'prosemirror-view';
 // import { type Node } from 'prosemirror-model';
 import {
+    TableMap,
     columnResizingPluginKey,
     columnResizing,
     tableEditing
@@ -11,7 +12,7 @@ import {
 import { TableNode } from './tableNode';
 // import { TableCell } from './tableCell';
 import { 
-    closestElement, 
+    getTableInfo, 
     // findParentNodeClosestToPos, 
     getTableInfoByAnySelection
     // getMaxCellRect,
@@ -38,18 +39,21 @@ export const table = ({
                 break;
             }
         }
-        console.log('node', node, tableWrapper.childNodes);
         if (node) {
             if (selectionRectDom.parentNode && node !== selectionRectDom.parentNode) {
                 selectionRectDom.parentNode.removeChild(selectionRectDom);
             }
-            selectionRectDom.style.width = `${rect.width}px`;
-            selectionRectDom.style.height = `${rect.height}px`;
-            node.appendChild(selectionRectDom);
-            setAlignPos(selectionRectDom, rect, {
-                placement: 'tl-tl',
-                container: node
-            });
+            // setTimeout(() => {
+                node.appendChild(selectionRectDom);
+                selectionRectDom.style.width = `${rect.width}px`;
+                selectionRectDom.style.height = `${rect.height}px`;
+                
+                setAlignPos(selectionRectDom, rect, {
+                    placement: 'tl-tl',
+                    container: node
+                });
+            // }, 100);
+            
         }
     }
     const hideSelectRect = () => {
@@ -67,25 +71,14 @@ export const table = ({
                     if (prevState && prevState.selection.eq(view.state.selection)) {
                         return;
                     }
-                    const tableInfo = getTableInfoByAnySelection(editor.view);
-                    console.log('tableInfo', tableInfo);
-                    if (tableInfo) {
-                        showSelectRect(tableInfo.tableWrapper, tableInfo.rect);
-                    } else {
-                        hideSelectRect();
-                    }
-                    
+                    // const tableInfo = getTableInfoByAnySelection(editor.view);
+                    // console.log('tableInfo', tableInfo);
                     // if (tableInfo) {
-                    //     const cellSection: any = tableInfo.tableWrapper.querySelector(`.${CLASSNAME}-table-view-cell-selection`);
-                    //     cellSection.style.width = `${tableInfo.rect.width}px`;
-                    //     cellSection.style.height = `${tableInfo.rect.height}px`;
-                    //     console.log('tableInfo', cellSection, tableInfo.rect);
-                    //     setAlignPos(cellSection, tableInfo.rect, {
-                    //         placement: 'tl-tl',
-                    //         container: tableInfo.tableWrapper
-                    //     });
+                    //     showSelectRect(tableInfo.tableWrapper, tableInfo.rect);
+                    // } else {
+                    //     hideSelectRect();
                     // }
-                    
+
                     
                 },
                 destroy() {
@@ -173,31 +166,28 @@ export const table = ({
             //     }
             // } as any,
             handleDOMEvents: {
-                mousemove: (view: EditorView, event: Event) => {
-                    // // const columnResizingPlugState = columnResizingPluginKey.getState(view.state);
-                    // // if (columnResizingPlugState.dragging) {
-                    // //     // console.log('mousemove>>>', columnResizingPlugState);
-                    // // }
-                    // // console.log('mousemove>>>', columnResizingPlugState);
-                    // // 1. 获取最近的 table 元素
-                    // const tableDOM = closestElement(event.target, (dom: any) => {
-                    //     return dom && dom.nodeName === 'TABLE';
-                    // });
-                    // if (tableDOM) {
-                    //     const tableContainer = closestElement(tableDOM, (dom: any) => {
-                    //         return dom.classList && dom.classList.contains(`${CLASSNAME}-table-view`);
-                    //     });
-                    //     const ctrolpanel = tableContainer.querySelector(`.${CLASSNAME}-table-view-ctrolpanel`);
-                    //     // console.log('tableDOM', ctrolpanel);
+                mousemove: (view: EditorView, event: any) => {  
+                    // const columnResizingPlugState = columnResizingPluginKey.getState(view.state);
+                    // if (columnResizingPlugState.dragging) {
+                    //     const tableInfo = getTableInfoByAnySelection(editor.view);
+                    //     if (tableInfo) {
+                    //         showSelectRect(tableInfo.tableWrapper, tableInfo.rect);
+                    //     }
+                    //     return;
                     // }
-                    const columnResizingPlugState = columnResizingPluginKey.getState(view.state);
-                    if (columnResizingPlugState.dragging) {
-                        const tableInfo = getTableInfoByAnySelection(editor.view);
-                        showSelectRect(tableInfo.tableWrapper, tableInfo.rect);
+                    const tableInfo = getTableInfo(event.target);
+                    if (tableInfo) {
+                        console.log('tableInfo', tableInfo);
                     }
                     
-
                 },
+                // mouseup: (view: EditorView, event: Event) => {
+                //     const columnResizingPlugState = columnResizingPluginKey.getState(view.state);
+                //     if (columnResizingPlugState.dragging) {
+                //         const tableInfo = getTableInfoByAnySelection(editor.view);
+                //         showSelectRect(tableInfo.tableWrapper, tableInfo.rect);
+                //     }
+                // },
                 mouseleave: (view) => {
 
                 },

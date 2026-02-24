@@ -173,7 +173,7 @@ export const findSuggestionMatch = (config: any) => {
     return null;
 }
 
-export const closestElement = (dom: any, fn: Function) => {
+export const closest = (dom: any, fn: Function) => {
     let node = dom;
     // 向上遍历直到找到 TABLE 标签或到达根节点
     while (node && !(node.classList && node.classList.contains('ProseMirror'))) {
@@ -250,72 +250,154 @@ export const getOuterNodePos = (doc: Node, pos: number): number => {
     return a - 1;
 }
 
+// const getTableFromEvent = (event: any) => {
+//     let node = event.target;
+
+//     // 向上遍历直到找到 TABLE 标签或到达根节点
+//     while (node && node.nodeName !== 'TABLE') {
+//         // 如果到了编辑器容器外还没找到，就停止
+//         if (node.classList && node.classList.contains('ProseMirror')) {
+//             break;
+//         }
+//         node = node.parentNode;
+//     }
+
+//     return (node && node.nodeName === 'TABLE') ? node : null;
+// }
+
 export const closestBlock = (dom: any) => {
-    return closestElement(dom, node => node.getAttribute('data-block-id'));
+    return closest(dom, node => node.getAttribute('data-block-id'));
 }
 
 export const closestTableView = (dom: any) => {
-    return closestElement(dom, (dom: any) => dom.classList && dom.classList.contains(`${CLASSNAME}-table-view`));
+    return closest(dom, (dom: any) => dom.classList && dom.classList.contains(`${CLASSNAME}-table-view`));
 }
 
-export const getMaxCellRect = (
-    view: EditorView,
-    selection: any
-) => {
-    if (selection instanceof CellSelection) {
-        const cells: Element[] = []
-        selection.forEachCell((node: Node, pos: number) => {
-            const dom: any = view.nodeDOM(pos);
-            if (dom) {
-                cells.push(dom);
-            }
-        });
-        if (cells.length > 0) {
-            const maxRect = {
-                left: Infinity,
-                top: Infinity,
-                right: -Infinity,
-                bottom: -Infinity,
+export const closestTable = (dom: any) => {
+    return closest(dom, node => node.tagName === 'TABLE');
+}
+
+export const closestCell = (dom: any) => {
+    return closest(dom, node => node.tagName === 'TH' || node.tagName === 'TD');
+}
+
+export const getTableMap = (table: HTMLTableElement) => {
+    if (!table || table.nodeName !== 'TABLE') return null;
+
+    const rows = table.rows;
+    const matrix: any[][] = [];
+
+    // 1. 建立物理矩阵
+    for (let r = 0; r < rows.length; r++) {
+        if (!matrix[r]) matrix[r] = [];
+        const cells = rows[r].cells;
+        let visualCol = 0;
+
+        for (let c = 0; c < cells.length; c++) {
+            const cell = cells[c];
+            const rowSpan = cell.rowSpan || 1;
+            const colSpan = cell.colSpan || 1;
+
+            // 获取物理尺寸（包含 padding 和 border）
+            const rect = cell.getBoundingClientRect();
+            // const text = cell.textContent || "0";
+            // const val = parseFloat(text.replace(/,/g, '')) || 0;
+
+            while (matrix[r][visualCol] !== undefined) {
+                visualCol++;
             }
 
-            cells.forEach((cell) => {
-                const rect: any = cell.getBoundingClientRect();
-                maxRect.left = Math.min(maxRect.left, rect.left);
-                maxRect.top = Math.min(maxRect.top, rect.top);
-                maxRect.right = Math.max(maxRect.right, rect.right);
-                maxRect.bottom = Math.max(maxRect.bottom, rect.bottom);
-            });
-
-            return {
-                width: maxRect.right - maxRect.left,
-                height: maxRect.bottom - maxRect.top,
-                left: maxRect.left,
-                top: maxRect.top,
-                right: maxRect.right,
-                bottom: maxRect.bottom
-            };
+            for (let rs = 0; rs < rowSpan; rs++) {
+                const targetRow = r + rs;
+                if (!matrix[targetRow]) matrix[targetRow] = [];
+                for (let cs = 0; cs < colSpan; cs++) {
+                    matrix[targetRow][visualCol + cs] = {
+                        // value: val,
+                        cell: cell,
+                        // 如果是合并单元格，我们将单个逻辑格子的平均宽度/高度存入，
+                        // 或者存储物理尺寸。这里建议存储物理尺寸，但在计算行列宽时去重。
+                        width: rect.width,
+                        height: rect.height
+                    };
+                }
+            }
+            visualCol += colSpan;
         }
     }
-    return null;
+
+    // 2. 计算行总数及行高 (Row Totals & Heights)
+    const rowTotals = matrix.map((row, rIdx) => {
+        const total = row.reduce((sum, item) => sum + (item ? item.value : 0), 0);
+        // 行高直接取 TR 的物理高度最为准确
+        const rowHeight = rows[rIdx].getBoundingClientRect().height;
+
+        return {
+            // total,
+            height: rowHeight, // 该行的物理高度
+            rowDOM: rows[rIdx],
+            cells: Array.from(new Set(row.map(item => item?.cell))) // 去重后的物理单元格
+        };
+    });
+
+    // 3. 计算列总数及列宽 (Column Totals & Widths)
+    const maxCols = matrix.reduce((max, row) => Math.max(max, row.length), 0);
+    const colTotals = Array.from({ length: maxCols }).map((_, colIdx) => {
+        let total = 0;
+        const columnCells: HTMLTableCellElement[] = [];
+
+        // 计算列宽：取该列中没有 colspan（或 colspan 为 1）的单元格宽度作为基准
+        // 如果全都有 colspan，则取该列逻辑宽度的最小值
+        let colWidth = 0;
+
+        for (let r = 0; r < matrix.length; r++) {
+            const item = matrix[r][colIdx];
+            if (item) {
+                total += item.value;
+                columnCells.push(item.cell);
+
+                // 只有当单元格不跨列时，其宽度才最具代表性
+                if (item.cell.colSpan === 1 && colWidth === 0) {
+                    colWidth = item.cell.getBoundingClientRect().width;
+                }
+            }
+        }
+
+        // 兜底逻辑：如果该列全是合并单元格，取第一个格子宽度除以其跨度
+        if (colWidth === 0 && matrix[0][colIdx]) {
+            const firstItem = matrix[0][colIdx];
+            colWidth = firstItem.cell.getBoundingClientRect().width / firstItem.cell.colSpan;
+        }
+
+        return {
+            // total,
+            width: colWidth, // 估算的列宽
+            index: colIdx,
+            headerCell: matrix[0][colIdx]?.cell,
+            cellsInColumn: Array.from(new Set(columnCells))
+        };
+    });
+
+    return {
+        map: matrix,
+        rows: rowTotals,
+        cols: colTotals
+    };
 }
 
-export const getCellRect = (
-    view: EditorView,
-    cellPos: number
-) => {
-    const cell: any = view.nodeDOM(cellPos);
-    const rect = cell?.getBoundingClientRect();
-    if (rect) {
-        return {
-            width: rect.width,
-            height: rect.height,
-            left: rect.left,
-            top: rect.top,
-            right: rect.right,
-            bottom: rect.bottom
-        };
+export const getTableInfo = (dom: any) => {
+    const cell = closestCell(dom);
+    if (!cell) {
+        return null;
     }
-    return null;
+    const table = closestTable(cell);
+    const tableView = closestTableView(table);
+    const tableInfo = getTableMap(table);
+    return {
+        cell,
+        table,
+        tableView,
+        tableInfo
+    }
 }
 
 // /**
@@ -425,6 +507,65 @@ export const getCellRect = (
 //     // 回调函数中的 pos 是每个单元格的准确位置。如果你要在单元格上做视觉标记（比如弹出一个悬浮菜单），使用这个 pos 配合 view.coordsAtPos(pos) 是标准做法。
 // }
 
+export const getMaxCellRect = (
+    view: EditorView,
+    selection: any
+) => {
+    if (selection instanceof CellSelection) {
+        const cells: Element[] = []
+        selection.forEachCell((node: Node, pos: number) => {
+            const dom: any = view.nodeDOM(pos);
+            if (dom) {
+                cells.push(dom);
+            }
+        });
+        if (cells.length > 0) {
+            const maxRect = {
+                left: Infinity,
+                top: Infinity,
+                right: -Infinity,
+                bottom: -Infinity,
+            }
+
+            cells.forEach((cell) => {
+                const rect: any = cell.getBoundingClientRect();
+                maxRect.left = Math.min(maxRect.left, rect.left);
+                maxRect.top = Math.min(maxRect.top, rect.top);
+                maxRect.right = Math.max(maxRect.right, rect.right);
+                maxRect.bottom = Math.max(maxRect.bottom, rect.bottom);
+            });
+
+            return {
+                width: maxRect.right - maxRect.left,
+                height: maxRect.bottom - maxRect.top,
+                left: maxRect.left,
+                top: maxRect.top,
+                right: maxRect.right,
+                bottom: maxRect.bottom
+            };
+        }
+    }
+    return null;
+}
+
+export const getCellRect = (
+    view: EditorView,
+    cellPos: number
+) => {
+    const cell: any = view.nodeDOM(cellPos);
+    const rect = cell?.getBoundingClientRect();
+    if (rect) {
+        return {
+            width: rect.width,
+            height: rect.height,
+            left: rect.left,
+            top: rect.top,
+            right: rect.right,
+            bottom: rect.bottom
+        };
+    }
+    return null;
+}
 
 /**
  * 统一处理：无论是单元格选区还是普通光标，获取所属表格信息
