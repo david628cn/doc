@@ -16,6 +16,8 @@ export class TableNode {
     contentDOM: HTMLDivElement;
     inner: HTMLDivElement;
     ctrolpanel: HTMLDivElement;
+    colpanel: HTMLDivElement;
+    rowpanel: HTMLDivElement;
     cellSelection: HTMLDivElement;
     table: any;
     colgroup: HTMLTableColElement;
@@ -47,6 +49,7 @@ export class TableNode {
 
         this.createCtrolpanel();
         this.createCellSelection();
+        // this.syncHandleCol(node, this.colpanel, this.colpanel, this.defaultCellMinWidth);
 
         // this.dom.appendChild(ctrolpanel);
         // this.dom.appendChild(cellSelection);
@@ -75,6 +78,7 @@ export class TableNode {
         }
         this.node = node;
         updateColumnsOnResize(node, this.colgroup, this.table, this.defaultCellMinWidth);
+        // this.syncHandleCol(node, this.colpanel, this.colpanel, this.defaultCellMinWidth);
         // this.updateColToolbar();
         // this.updateRowToolbar();
         return true;
@@ -110,19 +114,104 @@ export class TableNode {
     //     return false;
     // }
     createCtrolpanel() {
-        const dom = document.createElement('div');
-        dom.className = `${CLASSNAME}-table-view-ctrolpanel`;
-        dom.contentEditable = 'false';
-        this.dom.appendChild(dom);
-        this.ctrolpanel = dom;
+        this.ctrolpanel = document.createElement('div');
+        this.ctrolpanel.className = `${CLASSNAME}-table-view-ctrolpanel`;
+        this.ctrolpanel.contentEditable = 'false';
+
+        this.colpanel = document.createElement('div');
+        this.colpanel.className = `${CLASSNAME}-table-view-colpanel`;
+        this.colpanel.innerHTML = `<div class="${CLASSNAME}-table-view-colpanel-inner"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12C14 13.1046 13.1046 14 12 14C10.8954 14 10 13.1046 10 12Z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M10 5C10 3.89543 10.8954 3 12 3C13.1046 3 14 3.89543 14 5C14 6.10457 13.1046 7 12 7C10.8954 7 10 6.10457 10 5Z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M10 19C10 17.8954 10.8954 17 12 17C13.1046 17 14 17.8954 14 19C14 20.1046 13.1046 21 12 21C10.8954 21 10 20.1046 10 19Z" fill="currentColor"></path></svg></div>`;
+        this.ctrolpanel.appendChild(this.colpanel);
+
+        this.rowpanel = document.createElement('div');
+        this.rowpanel.className = `${CLASSNAME}-table-view-rowpanel`;
+        this.rowpanel.innerHTML = `<div class="${CLASSNAME}-table-view-rowpanel-inner"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12C14 13.1046 13.1046 14 12 14C10.8954 14 10 13.1046 10 12Z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M10 5C10 3.89543 10.8954 3 12 3C13.1046 3 14 3.89543 14 5C14 6.10457 13.1046 7 12 7C10.8954 7 10 6.10457 10 5Z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M10 19C10 17.8954 10.8954 17 12 17C13.1046 17 14 17.8954 14 19C14 20.1046 13.1046 21 12 21C10.8954 21 10 20.1046 10 19Z" fill="currentColor"></path></svg></div>`;
+        this.ctrolpanel.appendChild(this.rowpanel);
+
+        this.dom.appendChild(this.ctrolpanel);
     }
     createCellSelection() {
-        const dom = document.createElement('div');
-        dom.className = `${CLASSNAME}-table-view-cell-selection`;
-        dom.contentEditable = 'false';
-        this.dom.appendChild(dom);
-        this.cellSelection = dom;
+        this.cellSelection = document.createElement('div');
+        this.cellSelection.className = `${CLASSNAME}-table-view-cell-selection`;
+        this.cellSelection.contentEditable = 'false';
+        this.dom.appendChild(this.cellSelection);
     }
+    // syncHandleCol(
+    //     node: Node,
+    //     colgroup: HTMLDivElement,
+    //     container: HTMLDivElement,
+    //     defaultCellMinWidth: number,
+    //     overrideCol?: number,
+    //     overrideValue?: number
+    // ) {
+    //     let totalWidth = 0;
+    //     let fixedWidth = true;
+    //     let nextDOM = colgroup.firstChild as HTMLElement;
+    //     const row = node.firstChild;
+    //     if (!row) return;
+
+    //     for (let i = 0, col = 0; i < row.childCount; i++) {
+    //         const { colspan, colwidth } = row.child(i).attrs;
+    //         for (let j = 0; j < colspan; j++, col++) {
+    //             const hasWidth =
+    //                 overrideCol === col ? overrideValue : colwidth && colwidth[j];
+    //             const cssWidth = hasWidth ? hasWidth + 'px' : '';
+    //             totalWidth += hasWidth || defaultCellMinWidth;
+    //             if (!hasWidth) fixedWidth = false;
+    //             if (!nextDOM) {
+    //                 const col = document.createElement('div');
+    //                 col.className = `${CLASSNAME}-table-view-handle-inner`;
+    //                 col.style.width = cssWidth;
+    //                 colgroup.appendChild(col);
+    //             } else {
+    //                 if (nextDOM.style.width != cssWidth) {
+    //                     nextDOM.style.width = cssWidth;
+    //                 }
+    //                 nextDOM = nextDOM.nextSibling as HTMLElement;
+    //             }
+    //         }
+    //     }
+
+    //     while (nextDOM) {
+    //         const after = nextDOM.nextSibling;
+    //         nextDOM.parentNode?.removeChild(nextDOM);
+    //         nextDOM = after as HTMLElement;
+    //     }
+
+    //     if (fixedWidth) {
+    //         container.style.width = totalWidth + 'px';
+    //         container.style.minWidth = '';
+    //     } else {
+    //         container.style.width = '';
+    //         container.style.minWidth = totalWidth + 'px';
+    //     }
+    // }
+    // syncRowHandles() {
+    //     const table = this.node;
+    //     const map = TableMap.get(table);
+
+    //     for (let i = 0; i < map.height; i++) {
+    //         // 找到每一行第一个单元格在 Table 中的相对位置
+    //         const cellPos = map.map[i * map.width];
+    //         const cellNode = table.nodeAt(cellPos);
+
+    //         // 获取对应的 DOM 节点（ProseMirror 会自动渲染这些 td）
+    //         // 注意：这里需要通过视图找到该 cell 的 DOM
+    //         // const cellDOM = this.table.querySelector(`[data-cell-pos="${cellPos}"]`) ||
+    //         //     this.table.rows[i].cells[0];
+
+    //         // if (cellDOM && !cellDOM.querySelector('.row-handle')) {
+    //         //     const handle = document.createElement("div");
+    //         //     handle.className = "row-handle";
+    //         //     handle.contentEditable = "false";
+    //         //     // handle.onclick = (e) => {
+    //         //     //     e.stopPropagation();
+    //         //     //     this.selectRow(i);
+    //         //     // };
+    //         //     cellDOM.prepend(handle);
+    //         // }
+    //     }
+    // }
     // 必须处理 stopEvent，防止面板上的点击触发编辑器的选区更改
     // stopEvent(event: any) {
     //     return this.toolbar.contains(event.target);
@@ -157,103 +246,5 @@ export class TableNode {
     //         this.dom.appendChild(toolbar);
 
     //     }
-    //     createRowToolbar() {
-    //         const map = TableMap.get(this.node);
-    //         // --- 2. 定位行锚点 (Left) ---
-    //         const rows = this.table.querySelectorAll('tr');
-
-    //         const toolbar = document.createElement('div');
-    //         toolbar.className = `${CLASSNAME}-table-view-row-toolbar`;
-    //         let accumulatedTop = 0;
-    // console.log(rows, map.height);
-    //         for (let i = 0; i < map.height; i++) {
-    //             const rowDOM = rows[i];
-    //             if (!rowDOM) continue;
-
-    //             const height = rowDOM.getBoundingClientRect().height;
-    //             const anchor = document.createElement('div');
-
-    //             anchor.className = `${CLASSNAME}-table-view-row-anchor`;
-    //             anchor.style.position = "absolute";
-    //             anchor.style.top = `${accumulatedTop}px`;
-    //             anchor.style.height = `${height}px`;
-    //             anchor.innerText = String.fromCharCode(65 + i);
-
-    //             toolbar.appendChild(anchor);
-    //             accumulatedTop += height;
-    //         }
-    //         this.dom.appendChild(toolbar);
-    //     }
-    // createColToolbar() {
-    //     const toolbar = document.createElement('div');
-    //     toolbar.className = `${CLASSNAME}-table-view-col-toolbar`;
-    //     toolbar.contentEditable = 'false';
-    //     // const map = TableMap.get(this.node);
-    //     // const tableNode = this.view.state.doc.nodeAt(this.getPos());
-    //     // const rs = calculateTableTotals(this.table);
-    //     // console.log('map', rs);
-    //     // for (let i = 0; i < map.width; i++) {
-    //     //     const anchor = document.createElement("div");
-    //     //     anchor.className = `${CLASSNAME}-table-view-col-anchor`;
-    //     //     toolbar.appendChild(anchor);
-    //     // }
-    //     this.dom.appendChild(toolbar);
-    //     this.updateColToolbar();
-    // }
-    // updateColToolbar() {
-    //     // setTimeout(() => {
-    //     const tbody: any = this.table.querySelector('tbody');
-    //     // const rows = tbody.childNodes();        
-    //     // }, 0);
-
-    // }
-    // createRowToolbar() {
-    //     const toolbar = document.createElement('div');
-    //     toolbar.className = `${CLASSNAME}-table-view-row-toolbar`;
-    //     toolbar.contentEditable = 'false';
-    //     // const map = TableMap.get(this.node);
-    //     // for (let i = 0; i < map.height; i++) {
-    //     //     const anchor = document.createElement("div");
-    //     //     anchor.className = `${CLASSNAME}-table-view-row-anchor`;
-    //     //     toolbar.appendChild(anchor);
-    //     // }
-    //     this.dom.appendChild(toolbar);
-    //     this.updateRowToolbar();
-    // }
-    // updateRowToolbar() {
-
-    // }
-    // createToolbar() {
-    //     this.toolbar = document.createElement('div');
-    //     this.toolbar.className = `${CLASSNAME}-table-view-toolbar`;
-    //     this.toolbar.contentEditable = 'false'; // 必须！防止光标跳入
-
-    //     this.cellProxy = document.createElement('div');
-    //     // this.cellProxy.style.width = `300px`;
-    //     // this.cellProxy.style.height = `30px`;
-    //     this.cellProxy.style.position = 'absolute';
-    //     this.cellProxy.style.border = '2px solid #2383e2';
-    //     this.cellProxy.style.background = 'transparent';
-
-    //     this.toolbar.appendChild(this.cellProxy);
-    //     // toolbar.innerHTML = `<div class="notion-table-cell" style="isolation: auto;"><div class="notion-simple-table-selector" style="transform: translateX(-50%); top: -3px; inset-inline-start: 50%; width: 18px; height: 6px; opacity: 1; z-index: 4; position: absolute; border-radius: 4px; cursor: pointer; background: var(--c-icoTer); border: 2px solid var(--c-bacPri);"></div><div class="notion-simple-table-selector" style="transform: translateY(-50%); inset-inline-start: -3px; top: 50%; width: 6px; height: 18px; opacity: 1; z-index: 4; position: absolute; border-radius: 4px; cursor: pointer; background: var(--c-icoTer); border: 2px solid var(--c-bacPri);"></div><div id=":r10:" class="notion-table-cell-text content-editable-leaf-rtl notranslate" spellcheck="true" placeholder=" " contenteditable="true" data-content-editable-leaf="true" role="textbox" aria-multiline="true" tabindex="0" aria-roledescription="表格单元格 1 行 1 列" style="max-width: 100%; width: 100%; white-space: break-spaces; word-break: break-word; caret-color: var(--c-texPri); padding: 7px 9px; background-color: transparent; font-size: 14px; line-height: 20px;">a</div><div style="position: absolute; inset-inline-end: 0px; width: 0px; top: 0px; flex-grow: 0; height: 100%; z-index: 1; pointer-events: none;"><div style="position: absolute; width: 3px; margin-inline-start: -1px; margin-top: -1px; height: calc(100% + 2px); transition: background 150ms 50ms; cursor: col-resize; background: rgba(35, 131, 226, 0);"></div></div></div>`;
-
-    //     return toolbar;
-    // }
-    // updateToolbar(node: Node) {
-
-    //     const pluginState = pluginKey.getState(this.view.state);
-    //     console.log('pluginState', pluginState)
-    //     if (pluginState.rect) {
-    //         console.log(this.cellProxy, pluginState.rect);
-    //         this.cellProxy.style.width = `${pluginState.rect.width}px`;
-    //         this.cellProxy.style.height = `${pluginState.rect.height}px`;
-    //         setAlignPos(this.cellProxy, pluginState.rect, {
-    //             placement: 'tl-tl',
-    //             container: this.toolbar
-    //         });
-    //     }
-
-    // }
 
 }
