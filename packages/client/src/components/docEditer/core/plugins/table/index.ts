@@ -25,7 +25,8 @@ import {
     // getMaxCellRect,
     // getCellRect
 } from '@/components/docEditer/core/utils';
-import { setAlignPos } from '@/components/utils/align';
+import { CtrolPanel } from './ctrolPanel';
+// import { setAlignPos } from '@/components/utils/align';
 import { CLASSNAME } from '@/global';
 import './index.less';
 
@@ -34,42 +35,44 @@ export const pluginKey = new PluginKey('table');
 export const table = ({
     editor
 }: any) => {
-    let colpanel: any;
-    let rowpanel: any;
-    const selectionRectDom = document.createElement('div');
-    selectionRectDom.className = `${CLASSNAME}-table-view-cell-selection-rect`;
-    const showSelectRect = (tableWrapper: HTMLElement, rect: any) => {
-        // const node = tableWrapper.querySelector(`.${CLASSNAME}-table-view-cell-selection`);
-        let node;
-        for (let i = 0; i < tableWrapper.childNodes.length; i++) {
-            const child: any = tableWrapper.childNodes[i];
-            if (child.classList.contains(`${CLASSNAME}-table-view-cell-selection`)) {
-                node = child;
-                break;
-            }
-        }
-        if (node) {
-            if (selectionRectDom.parentNode && node !== selectionRectDom.parentNode) {
-                selectionRectDom.parentNode.removeChild(selectionRectDom);
-            }
-            // setTimeout(() => {
-            node.appendChild(selectionRectDom);
-            selectionRectDom.style.width = `${rect.width}px`;
-            selectionRectDom.style.height = `${rect.height}px`;
+    const ctrolPanelMap: WeakMap<HTMLElement, any> = new WeakMap();
+    let ctrolPanel: any;
+    // let colpanel: any;
+    // let rowpanel: any;
+    // const selectionRectDom = document.createElement('div');
+    // selectionRectDom.className = `${CLASSNAME}-table-view-cell-selection-rect`;
+    // const showSelectRect = (tableWrapper: HTMLElement, rect: any) => {
+    //     // const node = tableWrapper.querySelector(`.${CLASSNAME}-table-view-cell-selection`);
+    //     let node;
+    //     for (let i = 0; i < tableWrapper.childNodes.length; i++) {
+    //         const child: any = tableWrapper.childNodes[i];
+    //         if (child.classList.contains(`${CLASSNAME}-table-view-cell-selection`)) {
+    //             node = child;
+    //             break;
+    //         }
+    //     }
+    //     if (node) {
+    //         if (selectionRectDom.parentNode && node !== selectionRectDom.parentNode) {
+    //             selectionRectDom.parentNode.removeChild(selectionRectDom);
+    //         }
+    //         // setTimeout(() => {
+    //         node.appendChild(selectionRectDom);
+    //         selectionRectDom.style.width = `${rect.width}px`;
+    //         selectionRectDom.style.height = `${rect.height}px`;
 
-            setAlignPos(selectionRectDom, rect, {
-                placement: 'tl-tl',
-                container: node
-            });
-            // }, 100);
+    //         setAlignPos(selectionRectDom, rect, {
+    //             placement: 'tl-tl',
+    //             container: node
+    //         });
+    //         // }, 100);
 
-        }
-    }
-    const hideSelectRect = () => {
-        if (selectionRectDom.parentNode) {
-            selectionRectDom.parentNode.removeChild(selectionRectDom);
-        }
-    }
+    //     }
+    // }
+    // const hideSelectRect = () => {
+    //     if (selectionRectDom.parentNode) {
+    //         selectionRectDom.parentNode.removeChild(selectionRectDom);
+    //     }
+    // }
 
     // const colHandle = document.createElement('div');
     // colHandle.className = `${CLASSNAME}-table-view-cell-col-handle`;
@@ -182,66 +185,66 @@ export const table = ({
             // } as any,
             handleDOMEvents: {
                 click(view, event) {
-                    const target = event.target as HTMLElement;
+                    // const target = event.target as HTMLElement;
 
-                    // 1. 识别点击目标（列手柄或行手柄）
-                    const isColHandle = target.closest('.table-col-handle-btn');
-                    const isRowHandle = target.closest('.table-row-handle-btn');
+                    // // 1. 识别点击目标（列手柄或行手柄）
+                    // const isColHandle = target.closest('.table-col-handle-btn');
+                    // const isRowHandle = target.closest('.table-row-handle-btn');
 
-                    if (!isColHandle && !isRowHandle) return false;
+                    // if (!isColHandle && !isRowHandle) return false;
 
-                    event.preventDefault();
+                    // event.preventDefault();
 
-                    // 2. 核心：动态定位表格在文档中的最新位置
-                    // 即使有协同操作导致偏移，posAtDOM 也能找到正确的内存节点位置
-                    const tableDOM = target.closest("table");
-                    if (!tableDOM) return false;
+                    // // 2. 核心：动态定位表格在文档中的最新位置
+                    // // 即使有协同操作导致偏移，posAtDOM 也能找到正确的内存节点位置
+                    // const tableDOM = target.closest("table");
+                    // if (!tableDOM) return false;
 
-                    const tablePos = view.posAtDOM(tableDOM, 0) - 1; // -1 是为了移动到 table 节点开始处
-                    const $pos = view.state.doc.resolve(tablePos);
-                    const table = $pos.nodeAfter;
+                    // const tablePos = view.posAtDOM(tableDOM, 0) - 1; // -1 是为了移动到 table 节点开始处
+                    // const $pos = view.state.doc.resolve(tablePos);
+                    // const table = $pos.nodeAfter;
 
-                    if (!table || table.type.name !== "table") return false;
+                    // if (!table || table.type.name !== "table") return false;
 
-                    const map = TableMap.get(table);
-                    const { state, dispatch } = view;
+                    // const map = TableMap.get(table);
+                    // const { state, dispatch } = view;
 
-                    // 3. 处理列操作
-                    if (isColHandle) {
-                        const colIndex = parseInt((isColHandle as HTMLElement).dataset.col!);
+                    // // 3. 处理列操作
+                    // if (isColHandle) {
+                    //     const colIndex = parseInt((isColHandle as HTMLElement).dataset.col!);
 
-                        // 找到第一行和最后一行在该列的单元格位置
-                        const anchor = map.positionAt(0, colIndex, table);
-                        const head = map.positionAt(map.height - 1, colIndex, table);
+                    //     // 找到第一行和最后一行在该列的单元格位置
+                    //     const anchor = map.positionAt(0, colIndex, table);
+                    //     const head = map.positionAt(map.height - 1, colIndex, table);
 
-                        // 使用 CellSelection 创建选区
-                        // 注意：tablePos + anchor + 1 指向的是单元格节点开始的位置
-                        const sel = new CellSelection(
-                            state.doc.resolve(tablePos + anchor + 1),
-                            state.doc.resolve(tablePos + head + 1)
-                        );
+                    //     // 使用 CellSelection 创建选区
+                    //     // 注意：tablePos + anchor + 1 指向的是单元格节点开始的位置
+                    //     const sel = new CellSelection(
+                    //         state.doc.resolve(tablePos + anchor + 1),
+                    //         state.doc.resolve(tablePos + head + 1)
+                    //     );
 
-                        dispatch(state.tr.setSelection(sel));
-                        return true;
-                    }
+                    //     dispatch(state.tr.setSelection(sel));
+                    //     return true;
+                    // }
 
-                    // 4. 处理行操作
-                    if (isRowHandle) {
-                        const rowIndex = parseInt((isRowHandle as HTMLElement).dataset.row!);
+                    // // 4. 处理行操作
+                    // if (isRowHandle) {
+                    //     const rowIndex = parseInt((isRowHandle as HTMLElement).dataset.row!);
 
-                        const anchor = map.positionAt(rowIndex, 0, table);
-                        const head = map.positionAt(rowIndex, map.width - 1, table);
+                    //     const anchor = map.positionAt(rowIndex, 0, table);
+                    //     const head = map.positionAt(rowIndex, map.width - 1, table);
 
-                        const sel = new CellSelection(
-                            state.doc.resolve(tablePos + anchor + 1),
-                            state.doc.resolve(tablePos + head + 1)
-                        );
+                    //     const sel = new CellSelection(
+                    //         state.doc.resolve(tablePos + anchor + 1),
+                    //         state.doc.resolve(tablePos + head + 1)
+                    //     );
 
-                        dispatch(state.tr.setSelection(sel));
-                        return true;
-                    }
+                    //     dispatch(state.tr.setSelection(sel));
+                    //     return true;
+                    // }
 
-                    return false;
+                    // return false;
                 },
                 mousemove: (view: EditorView, event: any) => {
                     const columnResizingPlugState = columnResizingPluginKey.getState(view.state);
@@ -250,52 +253,40 @@ export const table = ({
                     //     if (tableInfo) {
                     //         showSelectRect(tableInfo.tableWrapper, tableInfo.rect);
                     //     }
-                        if (colpanel && !colpanel.contains(event.target)) {
-                            colpanel.style.opacity = 0;
-                            colpanel.style.pointerEvents = 'none';
-                        }
-                        if (rowpanel && !rowpanel.contains(event.target)) {
-                            rowpanel.style.opacity = 0;
-                            rowpanel.style.pointerEvents = 'none';
+                        if (ctrolPanel) {
+                            ctrolPanel.hideColPanel();
+                            ctrolPanel.hideRowPanel();
                         }
                         return;
                     }
                     const tableInfo = getTableInfo(event.target);
                     if (tableInfo) {
-                        // console.log('tableInfo', tableInfo.cell);
-                        const { cell, tableView } = tableInfo;
-                        const ctrolpanel = tableView.querySelector(`.${CLASSNAME}-table-view-ctrolpanel`);
-                        colpanel = tableView.querySelector(`.${CLASSNAME}-table-view-colpanel`);
-                        rowpanel = tableView.querySelector(`.${CLASSNAME}-table-view-rowpanel`);
-                        
-                        colpanel.style.opacity = 1;
-                        colpanel.style.pointerEvents = 'auto';
-                        colpanel.style.width = `${cell.offsetWidth}px`;
-                        setAlignPos(colpanel, cell, {
-                            placement: 'bl-tl',
-                            container: ctrolpanel
-                        });
-
-                        rowpanel.style.opacity = 1;
-                        rowpanel.style.pointerEvents = 'auto';
-                        rowpanel.style.height = `${cell.offsetHeight}px`;
-                        setAlignPos(rowpanel, cell, {
-                            placement: 'tr-tl',
-                            container: ctrolpanel
-                        });
-
-                    } else {
-
-                        if (colpanel && !colpanel.contains(event.target)) {
-                            colpanel.style.opacity = 0;
-                            colpanel.style.pointerEvents = 'none';
+                        if (ctrolPanel) {
+                            ctrolPanel.hideColPanel();
+                            ctrolPanel.hideRowPanel();
                         }
-                        if (rowpanel && !rowpanel.contains(event.target)) {
-                            rowpanel.style.opacity = 0;
-                            rowpanel.style.pointerEvents = 'none';
+                        const { cell, tableView } = tableInfo;
+                        if (!ctrolPanelMap.has(tableView)) {
+                            ctrolPanelMap.set(tableView, new CtrolPanel({
+                                container: tableView.childNodes[1]
+                            }));
+                            // ctrolPanelMap.set(tableView, new CtrolPanel({
+                            //     tableView
+                            // }));
+                        }
+                        ctrolPanel = ctrolPanelMap.get(tableView);
+                        ctrolPanel.showColPanel(cell);
+                        ctrolPanel.showRowPanel(cell);
+                    } else {
+                        if (ctrolPanel) {
+                            if (ctrolPanel.colPanel && !ctrolPanel.colPanel.contains(event.target)) {
+                                ctrolPanel.hideColPanel();
+                            }
+                            if (ctrolPanel.rowPanel && !ctrolPanel.rowPanel.contains(event.target)) {
+                                ctrolPanel.hideRowPanel();
+                            }
                         }
                     }
-
                 },
                 // mouseup: (view: EditorView, event: Event) => {
                 //     const columnResizingPlugState = columnResizingPluginKey.getState(view.state);
@@ -305,19 +296,20 @@ export const table = ({
                 //     }
                 // },
                 // mouseleave: (view: EditorView, event: any) => {
-                //     console.log(closestTableView(event.target));
-                //     if (event.target && !closestTableView(event.target)) {
-                //         if (colpanel) {
-                //             colpanel.style.opacity = 0;
-                //         }
-                //         if (rowpanel) {
-                //             rowpanel.style.opacity = 0;
-                //         }
-                //     }
+                //     // console.log('mouseleave>>>', ctrolPanel.tableView.contains(event.target));
+                //     // if (ctrolPanel && !ctrolPanel.tableView.contains(event.target)) {
+                //     //     ctrolPanel.hideColPanel();
+                //     // }
+                //     // if (ctrolPanel.colPanel && !ctrolPanel.colPanel.contains(event.target)) {
+                //     //     ctrolPanel.hideColPanel();
+                //     // }
+                //     // if (ctrolPanel.rowPanel && !ctrolPanel.rowPanel.contains(event.target)) {
+                //     //     ctrolPanel.hideRowPanel();
+                //     // }
                 // },
-                mousedown: (view, event) => {
+                // mousedown: (view, event) => {
 
-                }
+                // }
             }
             // decorations: (state: EditorState) => {
             //     return pluginKey.getState(state).decoration;

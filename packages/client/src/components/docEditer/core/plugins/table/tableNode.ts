@@ -15,10 +15,10 @@ export class TableNode {
     dom: HTMLDivElement;
     contentDOM: HTMLDivElement;
     inner: HTMLDivElement;
-    ctrolpanel: HTMLDivElement;
-    colpanel: HTMLDivElement;
-    rowpanel: HTMLDivElement;
-    cellSelection: HTMLDivElement;
+    ctrolPanel: HTMLDivElement;
+    // colpanel: HTMLDivElement;
+    // rowpanel: HTMLDivElement;
+    // cellSelection: HTMLDivElement;
     table: any;
     colgroup: HTMLTableColElement;
     defaultCellMinWidth: number = 100;
@@ -48,7 +48,7 @@ export class TableNode {
         this.contentDOM = this.table.appendChild(document.createElement('tbody'));
 
         this.createCtrolpanel();
-        this.createCellSelection();
+        // this.createCellSelection();
         // this.syncHandleCol(node, this.colpanel, this.colpanel, this.defaultCellMinWidth);
 
         // this.dom.appendChild(ctrolpanel);
@@ -85,7 +85,7 @@ export class TableNode {
     }
     // 必须处理 ignoreMutation，否则点击面板按钮会导致编辑器重绘
     ignoreMutation(record: ViewMutationRecord): boolean {
-        if (this.cellSelection.contains(record.target) || this.ctrolpanel.contains(record.target)) {
+        if (this.ctrolPanel.contains(record.target)) {
             return true;
         }
         return record.type == 'attributes' && (record.target == this.table || this.colgroup.contains(record.target));
@@ -114,28 +114,28 @@ export class TableNode {
     //     return false;
     // }
     createCtrolpanel() {
-        this.ctrolpanel = document.createElement('div');
-        this.ctrolpanel.className = `${CLASSNAME}-table-view-ctrolpanel`;
-        this.ctrolpanel.contentEditable = 'false';
+        this.ctrolPanel = document.createElement('div');
+        this.ctrolPanel.className = `${CLASSNAME}-table-view-ctrol-panel`;
+        this.ctrolPanel.contentEditable = 'false';
 
-        this.colpanel = document.createElement('div');
-        this.colpanel.className = `${CLASSNAME}-table-view-colpanel`;
-        this.colpanel.innerHTML = `<div class="${CLASSNAME}-table-view-colpanel-inner"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12C14 13.1046 13.1046 14 12 14C10.8954 14 10 13.1046 10 12Z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M10 5C10 3.89543 10.8954 3 12 3C13.1046 3 14 3.89543 14 5C14 6.10457 13.1046 7 12 7C10.8954 7 10 6.10457 10 5Z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M10 19C10 17.8954 10.8954 17 12 17C13.1046 17 14 17.8954 14 19C14 20.1046 13.1046 21 12 21C10.8954 21 10 20.1046 10 19Z" fill="currentColor"></path></svg></div>`;
-        this.ctrolpanel.appendChild(this.colpanel);
+        // this.colpanel = document.createElement('div');
+        // this.colpanel.className = `${CLASSNAME}-table-view-colpanel`;
+        // this.colpanel.innerHTML = `<div class="${CLASSNAME}-table-view-colpanel-inner"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12C14 13.1046 13.1046 14 12 14C10.8954 14 10 13.1046 10 12Z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M10 5C10 3.89543 10.8954 3 12 3C13.1046 3 14 3.89543 14 5C14 6.10457 13.1046 7 12 7C10.8954 7 10 6.10457 10 5Z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M10 19C10 17.8954 10.8954 17 12 17C13.1046 17 14 17.8954 14 19C14 20.1046 13.1046 21 12 21C10.8954 21 10 20.1046 10 19Z" fill="currentColor"></path></svg></div>`;
+        // this.ctrolPanel.appendChild(this.colpanel);
 
-        this.rowpanel = document.createElement('div');
-        this.rowpanel.className = `${CLASSNAME}-table-view-rowpanel`;
-        this.rowpanel.innerHTML = `<div class="${CLASSNAME}-table-view-rowpanel-inner"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12C14 13.1046 13.1046 14 12 14C10.8954 14 10 13.1046 10 12Z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M10 5C10 3.89543 10.8954 3 12 3C13.1046 3 14 3.89543 14 5C14 6.10457 13.1046 7 12 7C10.8954 7 10 6.10457 10 5Z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M10 19C10 17.8954 10.8954 17 12 17C13.1046 17 14 17.8954 14 19C14 20.1046 13.1046 21 12 21C10.8954 21 10 20.1046 10 19Z" fill="currentColor"></path></svg></div>`;
-        this.ctrolpanel.appendChild(this.rowpanel);
+        // this.rowpanel = document.createElement('div');
+        // this.rowpanel.className = `${CLASSNAME}-table-view-rowpanel`;
+        // this.rowpanel.innerHTML = `<div class="${CLASSNAME}-table-view-rowpanel-inner"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12C14 13.1046 13.1046 14 12 14C10.8954 14 10 13.1046 10 12Z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M10 5C10 3.89543 10.8954 3 12 3C13.1046 3 14 3.89543 14 5C14 6.10457 13.1046 7 12 7C10.8954 7 10 6.10457 10 5Z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M10 19C10 17.8954 10.8954 17 12 17C13.1046 17 14 17.8954 14 19C14 20.1046 13.1046 21 12 21C10.8954 21 10 20.1046 10 19Z" fill="currentColor"></path></svg></div>`;
+        // this.ctrolPanel.appendChild(this.rowpanel);
 
-        this.dom.appendChild(this.ctrolpanel);
+        this.dom.appendChild(this.ctrolPanel);
     }
-    createCellSelection() {
-        this.cellSelection = document.createElement('div');
-        this.cellSelection.className = `${CLASSNAME}-table-view-cell-selection`;
-        this.cellSelection.contentEditable = 'false';
-        this.dom.appendChild(this.cellSelection);
-    }
+    // createCellSelection() {
+    //     this.cellSelection = document.createElement('div');
+    //     this.cellSelection.className = `${CLASSNAME}-table-view-cell-selection`;
+    //     this.cellSelection.contentEditable = 'false';
+    //     this.dom.appendChild(this.cellSelection);
+    // }
     // syncHandleCol(
     //     node: Node,
     //     colgroup: HTMLDivElement,
