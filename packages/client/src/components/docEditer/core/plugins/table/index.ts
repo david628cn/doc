@@ -17,8 +17,7 @@ import {
 import { TableNode } from './tableNode';
 // import { TableCell } from './tableCell';
 import {
-    closest,
-    closestTableView,
+    selectDimensionByCell,
     getTableInfo,
     // findParentNodeClosestToPos, 
     getTableInfoByAnySelection
@@ -249,10 +248,10 @@ export const table = ({
                 mousemove: (view: EditorView, event: any) => {
                     const columnResizingPlugState = columnResizingPluginKey.getState(view.state);
                     if (columnResizingPlugState.dragging) {
-                    //     const tableInfo = getTableInfoByAnySelection(editor.view);
-                    //     if (tableInfo) {
-                    //         showSelectRect(tableInfo.tableWrapper, tableInfo.rect);
-                    //     }
+                        //     const tableInfo = getTableInfoByAnySelection(editor.view);
+                        //     if (tableInfo) {
+                        //         showSelectRect(tableInfo.tableWrapper, tableInfo.rect);
+                        //     }
                         if (ctrolPanel) {
                             ctrolPanel.hideColPanel();
                             ctrolPanel.hideRowPanel();
@@ -261,30 +260,36 @@ export const table = ({
                     }
                     const tableInfo = getTableInfo(event.target);
                     if (tableInfo) {
+                        const { cell, tableView } = tableInfo;
+                        if (!cell) {
+                            return;
+                        }
                         if (ctrolPanel) {
                             ctrolPanel.hideColPanel();
                             ctrolPanel.hideRowPanel();
                         }
-                        const { cell, tableView } = tableInfo;
                         if (!ctrolPanelMap.has(tableView)) {
                             ctrolPanelMap.set(tableView, new CtrolPanel({
-                                container: tableView.childNodes[1]
+                                container: tableView.childNodes[1],
+                                onClickColPanel(e: MouseEvent) {
+                                    e.preventDefault();
+                                    // e.stopPropagation();
+                                    selectDimensionByCell(view, ctrolPanel.cell, 'col');
+                                },
+                                onClickRowPanel(e: MouseEvent) {
+                                    e.preventDefault();
+                                    // e.stopPropagation();
+                                    selectDimensionByCell(view, ctrolPanel.cell, 'row');
+                                }
                             }));
-                            // ctrolPanelMap.set(tableView, new CtrolPanel({
-                            //     tableView
-                            // }));
                         }
                         ctrolPanel = ctrolPanelMap.get(tableView);
                         ctrolPanel.showColPanel(cell);
                         ctrolPanel.showRowPanel(cell);
                     } else {
                         if (ctrolPanel) {
-                            if (ctrolPanel.colPanel && !ctrolPanel.colPanel.contains(event.target)) {
-                                ctrolPanel.hideColPanel();
-                            }
-                            if (ctrolPanel.rowPanel && !ctrolPanel.rowPanel.contains(event.target)) {
-                                ctrolPanel.hideRowPanel();
-                            }
+                            ctrolPanel.hideColPanel();
+                            ctrolPanel.hideRowPanel();
                         }
                     }
                 },

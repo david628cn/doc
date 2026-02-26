@@ -4,15 +4,18 @@ import './index.less';
 
 export type CtrolPanelProps = {
     // tableView: HTMLElement | null | undefined;
-    container: HTMLElement | null | undefined;
+    container?: HTMLElement | null | undefined;
+    onClickColPanel?: Function;
+    onClickRowPanel?: Function;
     [key: string]: unknown;
 };
 
 export class CtrolPanel {
-    tableView
+    // tableView
     container: HTMLElement | null | undefined;
     colPanel: HTMLElement | null | undefined;
     rowPanel: HTMLElement | null | undefined;
+    cell: HTMLElement | null | undefined;
     constructor(props: CtrolPanelProps) {
         Object.assign(this, props);
         // this.container = this.tableView.childNodes[1];
@@ -23,14 +26,22 @@ export class CtrolPanel {
         this.rowPanel.className = `${CLASSNAME}-table-view-row-panel`;
         this.rowPanel.innerHTML = `<div class="${CLASSNAME}-table-view-row-panel-inner"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12C14 13.1046 13.1046 14 12 14C10.8954 14 10 13.1046 10 12Z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M10 5C10 3.89543 10.8954 3 12 3C13.1046 3 14 3.89543 14 5C14 6.10457 13.1046 7 12 7C10.8954 7 10 6.10457 10 5Z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M10 19C10 17.8954 10.8954 17 12 17C13.1046 17 14 17.8954 14 19C14 20.1046 13.1046 21 12 21C10.8954 21 10 20.1046 10 19Z" fill="currentColor"></path></svg></div>`;
 
+    
         this.container.appendChild(this.colPanel);
         this.container.appendChild(this.rowPanel);
 
+        this.colPanel.firstChild.addEventListener('click', this.onClickColPanel, false);
+        this.rowPanel.firstChild.addEventListener('click', this.onClickRowPanel, false);
+    }
+    onClickColPanel = (e: MouseEvent) => {
+    }
+    onClickRowPanel = (e: MouseEvent) => {
     }
     showColPanel(cell?: HTMLElement) {
         if (this.colPanel) {
             this.colPanel.classList.add(`${CLASSNAME}-table-view-col-panel-show`);
             if (cell) {
+                this.cell = cell;
                 this.colPanel.style.width = `${cell.offsetWidth}px`;
                 const pos = getAlignPos(this.colPanel, cell, {
                     placement: 'bl-tl',
@@ -52,6 +63,7 @@ export class CtrolPanel {
         if (this.rowPanel) {
             this.rowPanel.classList.add(`${CLASSNAME}-table-view-row-panel-show`);
             if (cell) {
+                this.cell = cell;
                 this.rowPanel.style.height = `${cell.offsetHeight}px`;
                 const pos = getAlignPos(this.rowPanel, cell, {
                     placement: 'tr-tl',

@@ -3,7 +3,8 @@ import { type EditorView } from 'prosemirror-view';
 import type { Node } from 'prosemirror-model';
 import {
     CellSelection,
-    cellAround
+    cellAround,
+    TableMap
 } from 'prosemirror-tables';
 import { CLASSNAME } from '@/global';
 
@@ -385,13 +386,19 @@ export const getTableMap = (table: HTMLTableElement) => {
 }
 
 export const getTableInfo = (dom: any) => {
-    const cell = closestCell(dom);
-    if (!cell) {
+    let cell = closestCell(dom);
+    // if (!cell) {
+    //     return null;
+    // }
+    const table = closestTable(dom);
+    const tableView = closestTableView(dom);
+    const tableInfo = getTableMap(table);
+    if (!tableView) {
         return null;
     }
-    const table = closestTable(cell);
-    const tableView = closestTableView(table);
-    const tableInfo = getTableMap(table);
+    if (!tableView.contains(cell)) {
+        cell = null;
+    }
     return {
         cell,
         table,
@@ -637,4 +644,78 @@ export const getTableInfoByAnySelection = (view: EditorView) => {
         $cellPos, // 保留此引用以便后续操作单元格
         rect
     };
+}
+
+// export const getTableNodeByCell = (view: EditorView, cell: any) => {
+//     if (!cell) {
+//         return null;
+//     }
+//     const pos = view.posAtDOM(cell, 0);
+//     const $pos = view.state.doc.resolve(pos);
+
+//     let tableNode = null;
+//     let tablePos = -1;
+
+//     // 向上遍历文档树层级
+//     for (let d = $pos.depth; d >= 0; d--) {
+//         const node = $pos.node(d);
+//         if (node.type.spec.tableRole === 'table') {
+//             tableNode = node;
+//             tablePos = $pos.before(d); // 获取 table 节点在文档中的绝对起点
+//             break;
+//         }
+//     }
+//     if (!tableNode) {
+//         return null;
+//     }
+//     return {
+//         tableNode,
+//         tablePos
+//     };
+// }
+
+export const selectDimensionByCell = (view: EditorView, cell: any, axis = 'row') => {
+    const { state, dispatch } = view;
+
+    const cellPos = view.posAtDOM(cell, 0);
+    const $cellPos = state.doc.resolve(cellPos);
+
+    // 2. 找到该单元格所属的 Table 节点
+    // 使用 prosemirror-utils 快速定位
+    const table = findParentNodeClosestToPos($cellPos, n => n.type.spec.tableRole === 'table');
+    if (!table) {
+        return;
+    }
+
+    const tableNode = table.node;
+    const tableStart = table.pos + 1; // 表格内容的起始偏移量
+    const map = TableMap.get(tableNode);
+
+    // 3. 计算当前单元格在 TableMap 中的矩形坐标 (rect)
+    // 注意：减去 tableStart 得到相对于表格内部的偏移
+    const rect = map.findCell(cellPos - (tableStart + 1));
+
+    let anchorOffset: number;
+    let headOffset: number;
+
+    // 4. 【关键修正】通过 map.map 扁平数组计算偏移量
+    // 索引公式：row * map.width + col
+    if (axis === 'row') {
+        // 选中整行：从当前行的第 0 列到最后一列
+        anchorOffset = map.map[rect.top * map.width + 0];
+        headOffset = map.map[rect.top * map.width + (map.width - 1)];
+    } else {
+        // 选中整列：从第 0 行到最后一行
+        anchorOffset = map.map[0 * map.width + rect.left];
+        headOffset = map.map[(map.height - 1) * map.width + rect.left];
+    }
+
+    // 5. 创建并分发 CellSelection
+    const selection = new CellSelection(
+        state.doc.resolve(tableStart + anchorOffset),
+        state.doc.resolve(tableStart + headOffset)
+    );
+
+    dispatch(state.tr.setSelection(selection));
+    // view.focus();
 }
