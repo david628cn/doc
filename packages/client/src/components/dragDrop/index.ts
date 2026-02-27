@@ -1,4 +1,5 @@
-import { getRect } from "@/components/utils/align";
+// import { AutoScroller } from '@/components/utils/autoScroller';
+import { getRect, getMargin } from "@/components/utils/align";
 
 
 export type DragDropProps = {
@@ -8,15 +9,20 @@ export type DragDropProps = {
     axis?: 'x' | 'y';
     scale?: number;
     space?: number;
+    onAutoScroll?: (offset: any) => void;
+    onStart?: (e: any) => void;
+    onMove?: (e: any) => void;
+    onEnd?: (e: any) => void;
     [key: string]: unknown;
 }
 
 export class DragDrop {
     container: HTMLElement | null | undefined;
     handle: any;
+    autoScroller: any;
     axis: string;
     current: any;
-    locked: boolean = false;
+    moving: boolean = false;
     // distance: number = 0;
     translate: boolean = false;
     scale: number = 1;
@@ -41,6 +47,18 @@ export class DragDrop {
         left: 0,
         top: 0
     };
+    constructor(props: DragDropProps) {
+        Object.assign(this, props);
+        if (!this.container || !(this.container instanceof HTMLElement)) {
+            this.container = document.body;
+        }
+        // this.autoScroller = new AutoScroller(
+        //     this.container,
+        //     this.onAutoScroll,
+        // );
+        this.handle.addEventListener('mousedown', this.handleStart, false);
+        this.handle.addEventListener('touchstart', this.handleStart, { passive: false });
+    }
     isTouchEvent(event: any) {
         return (
             (event.touches && event.touches.length) ||
@@ -115,14 +133,6 @@ export class DragDrop {
             node.style.top = `${pos.top}px`;
         }
     }
-    constructor(props: DragDropProps) {
-        Object.assign(this, props);
-        if (!this.container || !(this.container instanceof HTMLElement)) {
-            this.container = document.body;
-        }
-        this.handle.addEventListener('mousedown', this.handleStart, false);
-        this.handle.addEventListener('touchstart', this.handleStart, { passive: false });
-    }
     // createHelper() {
     //     if (this.container && !this.proxyNode) {
     //         const proxyNode = document.createElement('div');
@@ -139,15 +149,15 @@ export class DragDrop {
     //         top: parseFloat(pos.top)
     //     };
     // }
-    lock() {
-        this.locked = true;
-    }
-    unlock() {
-        this.locked = false;
-    }
-    isLocked() {
-        return this.locked;
-    }
+    // lock() {
+    //     this.locked = true;
+    // }
+    // unlock() {
+    //     this.locked = false;
+    // }
+    // isLocked() {
+    //     return this.locked;
+    // }
     // getRect(dom: any) {
     //     let { left, top } = this.getPosByDom(dom);
     //     return {
@@ -157,11 +167,11 @@ export class DragDrop {
     //         height: dom.offsetHeight
     //     };
     // }
-    onStart(e: any) {}
-    onMove(e: any) {}
-    onEnd(e: any) {}
+    onStart(e: any) { }
+    onMove(e: any) { }
+    onEnd(e: any) { }
     handleStart = (e: any) => {
-         // if (!isTouchEvent(e)) {
+        // if (!isTouchEvent(e)) {
         // }
         if (e.preventDefault) {
             e.preventDefault();
@@ -176,7 +186,9 @@ export class DragDrop {
         if (e.button !== 0 && e.button !== 1) {
             return;
         }
-
+        if (this.autoScroller) {
+            this.autoScroller.clear();
+        }
         this.current = e.target;
         const rect = getRect(this.handle);
         const containerRect = getRect(this.container);
@@ -196,9 +208,9 @@ export class DragDrop {
             top: pos.top
         };
 
-        this.unlock();
+        this.moving = true;
         // this.createHelper();
-        
+
         // this.setRect(this.proxyNode, relativeRect);
         // this.proxyNode.style.display = 'block';
 
@@ -212,7 +224,7 @@ export class DragDrop {
         this.onStart(e);
     }
     handleMove = (e: any) => {
-         // if (!isTouchEvent(e)) {
+        // if (!isTouchEvent(e)) {
         // }
         if (e.preventDefault) {
             e.preventDefault();
@@ -224,10 +236,10 @@ export class DragDrop {
         } else {
             e.cancelBubble = true;
         }
-        if (this.isLocked()) {
+        if (!this.moving) {
             return;
         }
-       
+
         const pos = this.getPosition(e);
         this.endPos = {
             left: pos.left,
@@ -240,17 +252,29 @@ export class DragDrop {
         const scale = this.scale;
         const space = this.space;
         this.increase = {
-            left: Math.round((this.endPos.left - this.startPos.left) / space / scale) * space, 
+            left: Math.round((this.endPos.left - this.startPos.left) / space / scale) * space,
             top: Math.round((this.endPos.top - this.startPos.top) / space / scale) * space
         }
 
+        let left = this.startXY.left + this.increase.left;
+        let top = this.startXY.top + this.increase.top;
+
+        if (left < 0) {
+            left = 0;
+        }
+        if (top < 0) {
+            top = 0;
+        }
+
         this.endXY = {
-            left: this.startXY.left + this.increase.left,
-            top: this.startXY.top + this.increase.top
+            left,
+            top
         };
 
-        this.setPos(this.handle, this.endXY);
 
+
+        this.setPos(this.handle, this.endXY);
+        // this.autoScroll();
         this.onMove(e);
     }
     handleEnd = (e: any) => {
@@ -264,9 +288,11 @@ export class DragDrop {
         } else {
             e.cancelBubble = true;
         }
-        this.lock();
+        this.moving = false;
         // this.proxyNode.style.display = 'none';
-
+        if (this.autoScroller) {
+            this.autoScroller.clear();
+        }
         document.removeEventListener('mousemove', this.handleMove);
         document.removeEventListener('touchmove', this.handleMove);
 
@@ -275,6 +301,38 @@ export class DragDrop {
         document.removeEventListener('touchcancel', this.handleEnd);
         this.onEnd(e);
     }
+    // autoScroll() {
+    //     const containerRect = getRect(this.container);
+    //     const minLeft = containerRect.left;
+    //     const minTop = containerRect.top;
+    //     const maxLeft = containerRect.right;
+    //     const maxTop = containerRect.bottom;
+
+    //     // const helperRect = getRect(this.helper);
+
+    //     this.autoScroller.update({
+    //         width: this.handle.offsetWidth,
+    //         height: this.handle.offsetHeight,
+    //         minTranslate: {
+    //             x: minLeft,
+    //             y: minTop
+    //         },
+    //         maxTranslate: {
+    //             x: maxLeft,
+    //             y: maxTop
+    //         },
+    //         translate: {
+    //             x: this.endPos.x + getMargin(this.handle, 'l'),
+    //             y: this.endPos.y + getMargin(this.handle, 't')
+    //         }
+    //         // translate: {
+    //         //     x: helperRect.left,
+    //         //     y: helperRect.top
+    //         // }
+
+    //     });
+    // }
+    onAutoScroll(offset: any) { }
     destroy() {
         if (this.container) {
             this.container.removeEventListener('mousedown', this.handleStart);

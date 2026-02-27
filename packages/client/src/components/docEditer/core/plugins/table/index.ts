@@ -258,6 +258,11 @@ export const table = ({
                         }
                         return;
                     }
+                    if (ctrolPanel) {
+                        if (ctrolPanel.moving) {
+                            return;
+                        }
+                    }
                     const tableInfo = getTableInfo(event.target);
                     if (tableInfo) {
                         const { cell, tableView } = tableInfo;
@@ -271,15 +276,10 @@ export const table = ({
                         if (!ctrolPanelMap.has(tableView)) {
                             ctrolPanelMap.set(tableView, new CtrolPanel({
                                 container: tableView.childNodes[1],
-                                onClickColPanel(e: MouseEvent) {
+                                onClickPanel(e: MouseEvent, type: 'col' | 'row') {
                                     e.preventDefault();
                                     // e.stopPropagation();
-                                    selectDimensionByCell(view, ctrolPanel.cell, 'col');
-                                },
-                                onClickRowPanel(e: MouseEvent) {
-                                    e.preventDefault();
-                                    // e.stopPropagation();
-                                    selectDimensionByCell(view, ctrolPanel.cell, 'row');
+                                    selectDimensionByCell(view, ctrolPanel.cell, type);
                                 }
                             }));
                         }
