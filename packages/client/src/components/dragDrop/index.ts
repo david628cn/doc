@@ -3,29 +3,36 @@ import { getRect } from "@/components/utils/align";
 
 export type DragDropProps = {
     container?: HTMLElement | null | undefined;
+    handle?: any;
+    translate?: boolean;
+    axis?: 'x' | 'y';
+    scale?: number;
+    space?: number;
     [key: string]: unknown;
 }
 
 export class DragDrop {
     container: HTMLElement | null | undefined;
-    // proxyNode: any;
+    handle: any;
+    axis: string;
     current: any;
     locked: boolean = false;
     // distance: number = 0;
+    translate: boolean = false;
     scale: number = 1;
     space: number = 1;
     increase: any = {
         left: 0,
         top: 0
     };
-    // startPagePos = {
-    //     left: 0,
-    //     top: 0
-    // };
-    // endPagePos = {
-    //     left: 0,
-    //     top: 0
-    // };
+    startXY = {
+        left: 0,
+        top: 0
+    };
+    endXY = {
+        left: 0,
+        top: 0
+    };
     startPos: any = {
         left: 0,
         top: 0
@@ -34,13 +41,13 @@ export class DragDrop {
         left: 0,
         top: 0
     };
-    static isTouchEvent(event: any) {
+    isTouchEvent(event: any) {
         return (
             (event.touches && event.touches.length) ||
             (event.changedTouches && event.changedTouches.length)
         );
     }
-    static getPosition(event: any) {
+    getPosition(event: any) {
         if (event.touches && event.touches.length) {
             return {
                 left: event.touches[0].pageX,
@@ -76,26 +83,32 @@ export class DragDrop {
     //         parent.insertBefore(newNode, referenceNode.nextSibling); // 插入到下一个节点之前
     //     }
     // }
-    static setRect(node: HTMLElement | null | undefined, rect: any, is: boolean = false) {
+    setRect(node: HTMLElement | null | undefined, rect: any) {
         if (node instanceof HTMLElement) {
             node.style.width = `${rect.width}px`;
             node.style.height = `${rect.height}px`;
             // node.style.left = `${rect.left}px`;
             // node.style.top = `${rect.top}px`;
-            DragDrop.setPos(node, {
+            this.setPos(node, {
                 left: rect.left,
                 top: rect.top
-            }, is);
+            });
         }
     }
-    static getRect(dom: any) {
+    getRect(dom: any) {
         return getRect(dom);
     }
-    static setPos(node: HTMLElement | null | undefined, pos: any, is: boolean = false) {
+    setPos(node: HTMLElement | null | undefined, offsetPos: any) {
+        const pos = offsetPos;
+        if (this.axis === 'x') {
+            pos.top = 0;
+        } else if (this.axis === 'y') {
+            pos.left = 0;
+        }
         if (!(node instanceof HTMLElement)) {
             return;
         }
-        if (is) {
+        if (this.translate) {
             node.style.transform = `translate(${pos.left}px, ${pos.top}px)`;
         } else {
             node.style.left = `${pos.left}px`;
@@ -107,8 +120,8 @@ export class DragDrop {
         if (!this.container || !(this.container instanceof HTMLElement)) {
             this.container = document.body;
         }
-        this.container.addEventListener('mousedown', this.handleStart, false);
-        this.container.addEventListener('touchstart', this.handleStart, { passive: false });
+        this.handle.addEventListener('mousedown', this.handleStart, false);
+        this.handle.addEventListener('touchstart', this.handleStart, { passive: false });
     }
     // createHelper() {
     //     if (this.container && !this.proxyNode) {
@@ -165,19 +178,19 @@ export class DragDrop {
         }
 
         this.current = e.target;
-        // const rect = getRect(node);
-        // const containerRect = getRect(this.container);
-        // const relativeRect = {
-        //     width: rect.width,
-        //     height: rect.height,
-        //     left: rect.left - containerRect.left,
-        //     top: rect.top - containerRect.top
-        // };
-        // this.startPagePos = this.endPagePos = {
-        //     left: relativeRect.left,
-        //     top: relativeRect.top
-        // };
-        const pos = DragDrop.getPosition(e);
+        const rect = getRect(this.handle);
+        const containerRect = getRect(this.container);
+        const relativeRect = {
+            width: rect.width,
+            height: rect.height,
+            left: rect.left - containerRect.left,
+            top: rect.top - containerRect.top
+        };
+        this.startXY = this.endXY = {
+            left: relativeRect.left,
+            top: relativeRect.top
+        };
+        const pos = this.getPosition(e);
         this.endPos = this.startPos = {
             left: pos.left,
             top: pos.top
@@ -215,7 +228,7 @@ export class DragDrop {
             return;
         }
        
-        const pos = DragDrop.getPosition(e);
+        const pos = this.getPosition(e);
         this.endPos = {
             left: pos.left,
             top: pos.top
@@ -231,17 +244,17 @@ export class DragDrop {
             top: Math.round((this.endPos.top - this.startPos.top) / space / scale) * space
         }
 
-        // this.endPagePos = {
-        //     left: this.startPagePos.left + this.increase.left,
-        //     top: this.startPagePos.top + this.increase.top
-        // };
+        this.endXY = {
+            left: this.startXY.left + this.increase.left,
+            top: this.startXY.top + this.increase.top
+        };
 
-        // this.setPos(this.proxyNode, this.endPagePos);
+        this.setPos(this.handle, this.endXY);
 
         this.onMove(e);
     }
     handleEnd = (e: any) => {
-        if (!DragDrop.isTouchEvent(e)) {
+        if (!this.isTouchEvent(e)) {
             e.preventDefault();
         } else {
             e.returnValue = false;

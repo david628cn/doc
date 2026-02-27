@@ -1,3 +1,4 @@
+import { DragDrop } from '@/components/dragDrop';
 import { getAlignPos, setPos } from '@/components/utils/align';
 import { CLASSNAME } from '@/global';
 import './index.less';
@@ -16,6 +17,8 @@ export class CtrolPanel {
     colPanel: HTMLElement | null | undefined;
     rowPanel: HTMLElement | null | undefined;
     cell: HTMLElement | null | undefined;
+    rowDragDrop: any;
+    colDragDrop: any;
     constructor(props: CtrolPanelProps) {
         Object.assign(this, props);
         // this.container = this.tableView.childNodes[1];
@@ -32,6 +35,56 @@ export class CtrolPanel {
 
         this.colPanel.firstChild.addEventListener('click', this.onClickColPanel, false);
         this.rowPanel.firstChild.addEventListener('click', this.onClickRowPanel, false);
+
+        this.rowDragDrop = new DragDrop({
+            container: this.container,
+            translate: true,
+            handle: this.rowPanel,
+            axis: 'y',
+            onStart: this.onRowDragStart,
+            onMove: this.onRowDragMove,
+            onEnd: this.onRowDragEnd
+        });
+
+        this.colDragDrop = new DragDrop({
+            container: this.container,
+            translate: true,
+            handle: this.colPanel,
+            axis: 'x',
+            onStart: this.onColDragStart,
+            onMove: this.onColDragMove,
+            onEnd: this.onColDragEnd
+        });
+    }
+    // getPosByDom(dom: any) {
+    //     let xy = dom.style.transform.split(/[(|,|)]/g);
+    //     return {
+    //         x: parseFloat(xy[1]),
+    //         y: parseFloat(xy[2])
+    //     };
+    // }
+    // setPos(dom: any, pos: number[]) {
+    //     dom.style.transform = `translate(${pos[0]}px, ${pos[1]}px)`;
+    //     //dom.style.left = pos[0] + 'px';
+    //     //dom.style.top = pos[1] + 'px';
+    // }
+    onRowDragStart = (e: MouseEvent) => {
+        
+    }
+    onRowDragMove = (e: MouseEvent) => {
+        console.log('onRowDragMove>>>', e);
+    }
+    onRowDragEnd = (e: MouseEvent) => {
+
+    }
+    onColDragStart = (e: MouseEvent) => {
+
+    }
+    onColDragMove = (e: MouseEvent) => {
+        console.log('onColDragMove>>>', e);
+    }
+    onColDragEnd = (e: MouseEvent) => {
+
     }
     onClickColPanel = (e: MouseEvent) => {
     }
