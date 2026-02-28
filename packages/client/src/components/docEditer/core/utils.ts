@@ -199,8 +199,9 @@ export const closest = (dom: any, fn: Function) => {
 //     return (node && node.nodeName === 'TABLE') ? node : null;
 // }
 
+
 /**
- * 查找最近的父节点
+ * 寻找距离指定位置最近的符合条件的父节点
  * @param {ResolvedPos} $pos - ProseMirror 的 ResolvedPos
  * @param {Function} predicate - 条件函数 (node) => boolean
  */
@@ -209,15 +210,45 @@ export const findParentNodeClosestToPos = ($pos, predicate) => {
         const node = $pos.node(d);
         if (predicate(node)) {
             return {
-                pos: $pos.before(d),
-                start: $pos.start(d),
+                pos: $pos.before(d), // 节点在文档中的绝对起点
+                start: $pos.start(d), // 节点内容（子节点）的绝对起点
                 depth: d,
                 node,
             };
         }
     }
-    return undefined;
+    return null;
 };
+
+/**
+ * 获取指定位置所属单元格在表格中的矩形坐标 (top, left, bottom, right)
+ * @param $pos ResolvedPos 对象
+ */
+export const findCellRectClosestToPos = ($pos: any) => {
+    // 1. 寻找最近的单元格 (td 或 th)
+    const cell = findParentNodeClosestToPos($pos, node =>
+        node.type.spec.tableRole === 'cell' || node.type.spec.tableRole === 'header_cell'
+    );
+    if (!cell) {
+        return null;
+    }
+
+    // 2. 寻找所属的表格 (table)
+    const table = findParentNodeClosestToPos($pos, node =>
+        node.type.spec.tableRole === 'table'
+    );
+    if (!table) {
+        return null;
+    }
+
+    const map = TableMap.get(table.node);
+    // 3. 计算相对于表格内容的偏移量
+    // cell.pos 是 <td> 的起点，table.start 是第一个 <tr> 的起点
+    const relativeOffset = cell.pos - table.start;
+
+    // 4. 返回 Rect 坐标
+    return map.findCell(relativeOffset);
+}
 
 export const getOuterNode = (doc: Node, pos: number): Node | null => {
     const node = doc.nodeAt(pos);
@@ -280,6 +311,10 @@ export const closestTable = (dom: any) => {
 
 export const closestCell = (dom: any) => {
     return closest(dom, node => node.tagName === 'TH' || node.tagName === 'TD');
+}
+
+export const closestTr = (dom: any) => {
+    return closest(dom, node => node.tagName === 'TR');
 }
 
 export const getTableMap = (table: HTMLTableElement) => {
@@ -391,18 +426,18 @@ export const getTableInfo = (dom: any) => {
     //     return null;
     // }
     const table = closestTable(dom);
-    const tableView = closestTableView(dom);
+    const tableContainer = closestTableView(dom);
     const tableInfo = getTableMap(table);
-    if (!tableView) {
+    if (!tableContainer) {
         return null;
     }
-    if (!tableView.contains(cell)) {
+    if (!tableContainer.contains(cell)) {
         cell = null;
     }
     return {
         cell,
         table,
-        tableView,
+        tableContainer,
         tableInfo
     }
 }
@@ -674,48 +709,104 @@ export const getTableInfoByAnySelection = (view: EditorView) => {
 //     };
 // }
 
-export const selectDimensionByCell = (view: EditorView, cell: any, axis = 'row') => {
-    const { state, dispatch } = view;
+export const getDimensionByCell = (view: EditorView, cell: any) => {
+    if (!cell) {
+        return null;
+    }
 
+    try {
+        const { state } = view;
+
+        // 2. 将 DOM 转换为文档位置
+        const cellPos = view.posAtDOM(cell, 0);
+        const $cellPos = state.doc.resolve(cellPos);
+
+        // 3. 找到所属的 Table 节点
+        const tableData = findParentNodeClosestToPos($cellPos, n => n.type.spec.tableRole === 'table');
+        // 4. 【核心修复】使用 utils 直接获取单元格的矩形信息
+        // 这个方法比手动 map.findCell(pos - start) 稳健得多，它会自动对齐偏移量
+        const rect = findCellRectClosestToPos($cellPos);
+
+        if (!tableData || !rect) {
+            return null;
+        }
+        // 3. 定義 tableStart
+        // table.pos 是 <table> 標籤之前
+        // table.start 通常是 table.pos + 1，即內容開始處
+        const tableStart = tableData.start;
+
+        return {
+            tableNode: tableData.node,
+            tablePos: tableData.pos, // <table> 節點的起始絕對位置
+            tableStart, // 表格內容（第一個 tr）的起始絕對位置
+            map: TableMap.get(tableData.node),
+            rowIndex: rect.top,    // 这就是 fromIndex (行)
+            colIndex: rect.left,   // 这就是 fromIndex (列)
+            rect             // 包含 top, left, bottom, right
+        };
+    } catch (e) {
+        console.error("Failed to get table context:", e);
+        return null;
+    }
+}
+
+export const selectDimensionByCell = (view: EditorView, cell: any, axis = 'row') => {
+    // 1. 确保拿到 td/th 元素，防止传入内部文本节点导致 posAtDOM 偏移
+    if (!cell) {
+        return null;
+    }
+
+    const { state, dispatch } = view;
     const cellPos = view.posAtDOM(cell, 0);
     const $cellPos = state.doc.resolve(cellPos);
 
-    // 2. 找到该单元格所属的 Table 节点
-    // 使用 prosemirror-utils 快速定位
-    const table = findParentNodeClosestToPos($cellPos, n => n.type.spec.tableRole === 'table');
-    if (!table) {
-        return;
+    // 2. 使用你封装的工具函数
+    const tableData = findParentNodeClosestToPos($cellPos, n => n.type.spec.tableRole === 'table');
+    if (!tableData) {
+        return null;
     }
 
-    const tableNode = table.node;
-    const tableStart = table.pos + 1; // 表格内容的起始偏移量
-    const map = TableMap.get(tableNode);
+    const tableStart = tableData.start; // 使用封装好的 start (即 table.pos + 1)
+    const map = TableMap.get(tableData.node);
 
-    // 3. 计算当前单元格在 TableMap 中的矩形坐标 (rect)
-    // 注意：减去 tableStart 得到相对于表格内部的偏移
-    const rect = map.findCell(cellPos - (tableStart + 1));
+    // 3. 获取当前单元格的逻辑坐标
+    const rect = findCellRectClosestToPos($cellPos);
+    if (!rect) {
+        return null;
+    }
 
     let anchorOffset: number;
     let headOffset: number;
 
-    // 4. 【关键修正】通过 map.map 扁平数组计算偏移量
-    // 索引公式：row * map.width + col
+    // 4. 计算逻辑首尾
     if (axis === 'row') {
-        // 选中整行：从当前行的第 0 列到最后一列
+        // 选中整行：从该行逻辑第 0 列到最后一列
         anchorOffset = map.map[rect.top * map.width + 0];
         headOffset = map.map[rect.top * map.width + (map.width - 1)];
     } else {
-        // 选中整列：从第 0 行到最后一行
+        // 选中整列：从逻辑第 0 行到最后一行
         anchorOffset = map.map[0 * map.width + rect.left];
         headOffset = map.map[(map.height - 1) * map.width + rect.left];
     }
 
-    // 5. 创建并分发 CellSelection
-    const selection = new CellSelection(
-        state.doc.resolve(tableStart + anchorOffset),
-        state.doc.resolve(tableStart + headOffset)
-    );
+    try {
+        // 5. 构造 CellSelection
+        // 注意：CellSelection 的构造函数会自动处理 anchor 和 head 属于同一个表格的校验
+        const selection = new CellSelection(
+            state.doc.resolve(tableStart + anchorOffset),
+            state.doc.resolve(tableStart + headOffset)
+        );
 
-    dispatch(state.tr.setSelection(selection));
-    // view.focus();
+        const tr = state.tr.setSelection(selection);
+
+        // 如果是 Notion 风格，通常点击按钮选中后不希望干扰历史记录
+        tr.setMeta("addToHistory", false);
+
+        dispatch(tr);
+
+        // 只有在非拖拽开始的情况下才 focus，防止干扰 HTML5 DragEvents
+        // view.focus(); 
+    } catch (e) {
+        console.error('CellSelection creation failed. Table structure might be corrupted.', e);
+    }
 }

@@ -2,25 +2,26 @@ import { type EditorState, type Transaction, Plugin, PluginKey, EditorStateConfi
 import { EditorView } from 'prosemirror-view';
 // import { type Node } from 'prosemirror-model';
 import {
-    TableMap,
+    // TableMap,
     columnResizingPluginKey,
     columnResizing,
     tableEditing,
     // RowSelection, 
     // ColumnSelection, 
-    CellSelection,
-    addColumnAfter,
-    deleteColumn,
-    addRowAfter,
-    deleteRow
+    // CellSelection,
+    // addColumnAfter,
+    // deleteColumn,
+    // addRowAfter,
+    // deleteRow
 } from 'prosemirror-tables';
 import { TableNode } from './tableNode';
 // import { TableCell } from './tableCell';
 import {
-    selectDimensionByCell,
+    // selectDimensionByCell,
     getTableInfo,
-    // findParentNodeClosestToPos, 
-    getTableInfoByAnySelection
+    // findParentNodeClosestToPos,
+    // closestTr,
+    // getTableInfoByAnySelection
     // getMaxCellRect,
     // getCellRect
 } from '@/components/docEditer/core/utils';
@@ -183,68 +184,68 @@ export const table = ({
             //     }
             // } as any,
             handleDOMEvents: {
-                click(view, event) {
-                    // const target = event.target as HTMLElement;
+                // click(view, event) {
+                //     // const target = event.target as HTMLElement;
 
-                    // // 1. 识别点击目标（列手柄或行手柄）
-                    // const isColHandle = target.closest('.table-col-handle-btn');
-                    // const isRowHandle = target.closest('.table-row-handle-btn');
+                //     // // 1. 识别点击目标（列手柄或行手柄）
+                //     // const isColHandle = target.closest('.table-col-handle-btn');
+                //     // const isRowHandle = target.closest('.table-row-handle-btn');
 
-                    // if (!isColHandle && !isRowHandle) return false;
+                //     // if (!isColHandle && !isRowHandle) return false;
 
-                    // event.preventDefault();
+                //     // event.preventDefault();
 
-                    // // 2. 核心：动态定位表格在文档中的最新位置
-                    // // 即使有协同操作导致偏移，posAtDOM 也能找到正确的内存节点位置
-                    // const tableDOM = target.closest("table");
-                    // if (!tableDOM) return false;
+                //     // // 2. 核心：动态定位表格在文档中的最新位置
+                //     // // 即使有协同操作导致偏移，posAtDOM 也能找到正确的内存节点位置
+                //     // const tableDOM = target.closest("table");
+                //     // if (!tableDOM) return false;
 
-                    // const tablePos = view.posAtDOM(tableDOM, 0) - 1; // -1 是为了移动到 table 节点开始处
-                    // const $pos = view.state.doc.resolve(tablePos);
-                    // const table = $pos.nodeAfter;
+                //     // const tablePos = view.posAtDOM(tableDOM, 0) - 1; // -1 是为了移动到 table 节点开始处
+                //     // const $pos = view.state.doc.resolve(tablePos);
+                //     // const table = $pos.nodeAfter;
 
-                    // if (!table || table.type.name !== "table") return false;
+                //     // if (!table || table.type.name !== "table") return false;
 
-                    // const map = TableMap.get(table);
-                    // const { state, dispatch } = view;
+                //     // const map = TableMap.get(table);
+                //     // const { state, dispatch } = view;
 
-                    // // 3. 处理列操作
-                    // if (isColHandle) {
-                    //     const colIndex = parseInt((isColHandle as HTMLElement).dataset.col!);
+                //     // // 3. 处理列操作
+                //     // if (isColHandle) {
+                //     //     const colIndex = parseInt((isColHandle as HTMLElement).dataset.col!);
 
-                    //     // 找到第一行和最后一行在该列的单元格位置
-                    //     const anchor = map.positionAt(0, colIndex, table);
-                    //     const head = map.positionAt(map.height - 1, colIndex, table);
+                //     //     // 找到第一行和最后一行在该列的单元格位置
+                //     //     const anchor = map.positionAt(0, colIndex, table);
+                //     //     const head = map.positionAt(map.height - 1, colIndex, table);
 
-                    //     // 使用 CellSelection 创建选区
-                    //     // 注意：tablePos + anchor + 1 指向的是单元格节点开始的位置
-                    //     const sel = new CellSelection(
-                    //         state.doc.resolve(tablePos + anchor + 1),
-                    //         state.doc.resolve(tablePos + head + 1)
-                    //     );
+                //     //     // 使用 CellSelection 创建选区
+                //     //     // 注意：tablePos + anchor + 1 指向的是单元格节点开始的位置
+                //     //     const sel = new CellSelection(
+                //     //         state.doc.resolve(tablePos + anchor + 1),
+                //     //         state.doc.resolve(tablePos + head + 1)
+                //     //     );
 
-                    //     dispatch(state.tr.setSelection(sel));
-                    //     return true;
-                    // }
+                //     //     dispatch(state.tr.setSelection(sel));
+                //     //     return true;
+                //     // }
 
-                    // // 4. 处理行操作
-                    // if (isRowHandle) {
-                    //     const rowIndex = parseInt((isRowHandle as HTMLElement).dataset.row!);
+                //     // // 4. 处理行操作
+                //     // if (isRowHandle) {
+                //     //     const rowIndex = parseInt((isRowHandle as HTMLElement).dataset.row!);
 
-                    //     const anchor = map.positionAt(rowIndex, 0, table);
-                    //     const head = map.positionAt(rowIndex, map.width - 1, table);
+                //     //     const anchor = map.positionAt(rowIndex, 0, table);
+                //     //     const head = map.positionAt(rowIndex, map.width - 1, table);
 
-                    //     const sel = new CellSelection(
-                    //         state.doc.resolve(tablePos + anchor + 1),
-                    //         state.doc.resolve(tablePos + head + 1)
-                    //     );
+                //     //     const sel = new CellSelection(
+                //     //         state.doc.resolve(tablePos + anchor + 1),
+                //     //         state.doc.resolve(tablePos + head + 1)
+                //     //     );
 
-                    //     dispatch(state.tr.setSelection(sel));
-                    //     return true;
-                    // }
+                //     //     dispatch(state.tr.setSelection(sel));
+                //     //     return true;
+                //     // }
 
-                    // return false;
-                },
+                //     // return false;
+                // },
                 mousemove: (view: EditorView, event: any) => {
                     const columnResizingPlugState = columnResizingPluginKey.getState(view.state);
                     if (columnResizingPlugState.dragging) {
@@ -265,7 +266,7 @@ export const table = ({
                     }
                     const tableInfo = getTableInfo(event.target);
                     if (tableInfo) {
-                        const { cell, tableView } = tableInfo;
+                        const { cell, tableContainer, table } = tableInfo;
                         if (!cell) {
                             return;
                         }
@@ -273,19 +274,87 @@ export const table = ({
                             ctrolPanel.hideColPanel();
                             ctrolPanel.hideRowPanel();
                         }
-                        if (!ctrolPanelMap.has(tableView)) {
-                            ctrolPanelMap.set(tableView, new CtrolPanel({
-                                container: tableView.childNodes[1],
-                                onClickPanel(e: MouseEvent, type: 'col' | 'row') {
-                                    e.preventDefault();
-                                    // e.stopPropagation();
-                                    selectDimensionByCell(view, ctrolPanel.cell, type);
-                                }
+                        if (!ctrolPanelMap.has(tableContainer)) {
+                            ctrolPanelMap.set(tableContainer, new CtrolPanel({
+                                view,
+                                container: tableContainer.childNodes[1]
                             }));
+                            // ctrolPanelMap.set(tableContainer, new CtrolPanel({
+                            //     container: tableContainer.childNodes[1],
+                            //     onClickPanel(e: MouseEvent, type: 'col' | 'row') {
+                            //         e.preventDefault();
+                            //         // e.stopPropagation();
+                            //         selectDimensionByCell(view, ctrolPanel.cell, type);
+                            //     },
+                            //     onStart(e: MouseEvent, type: 'col' | 'row') {
+                            //         e.preventDefault();
+
+                            //         // 1. 将 DOM 转换为文档位置
+                            //         const cellPos = view.posAtDOM(ctrolPanel.cell, 0);
+                            //         const $cellPos = view.state.doc.resolve(cellPos);
+
+                            //         // 2. 找到所属的 Table 节点
+                            //         const tableData = findParentNodeClosestToPos($cellPos, n => n.type.spec.tableRole === "table");
+                            //         if (!tableData) return null;
+
+                            //         // 3. 利用 TableMap 计算坐标
+                            //         const tableStart = tableData.pos + 1;
+                            //         const map = TableMap.get(tableData.node);
+
+                            //         // findCell 返回 {top, left, bottom, right}
+                            //         // top 就是行索引 (rowIndex)，left 就是列索引 (colIndex)
+                            //         const rect = map.findCell(cellPos - (tableStart + 1));
+                            //         const rowIndex = rect.top;
+                            //         const colIndex = rect.left;
+                            //         const tablePos = tableData.pos;
+
+                            //         // console.log({
+                            //         //     rowIndex: rect.top,
+                            //         //     colIndex: rect.left,
+                            //         //     tablePos: tableData.pos
+                            //         // });
+
+                            //         // const previewTable = document.createElement('table');
+                            //         // previewTable.style.width = '100px'; // 给个固定宽度
+                            //         // previewTable.style.borderCollapse = 'collapse';
+                            //         // previewTable.style.position = 'absolute';
+                            //         // previewTable.style.top = '-1000px'; // 隐藏在屏幕外
+
+                            //         // // 2. 提取该列每一行的单元格 DOM
+                            //         // for (let row = 0; row < map.height; row++) {
+                            //         //     const cellOffset = map.map[row * map.width + colIndex];
+                            //         //     // 通过 view.nodeDOM 找到实际的单元格 DOM 节点
+                            //         //     const cellDom = view.nodeDOM(tableStart + cellOffset);
+
+                            //         //     if (cellDom) {
+                            //         //         const tr = document.createElement('tr');
+                            //         //         const clonedCell: any = cellDom.cloneNode(true);
+                            //         //         // 保持原始单元格的样式（高度等）
+                            //         //         clonedCell.style.border = '1px solid #ddd';
+                            //         //         tr.appendChild(clonedCell);
+                            //         //         previewTable.appendChild(tr);
+                            //         //     }
+                            //         // }
+                            //         // previewTable.style.borderSpacing = '0';
+                            //         // previewTable.style.borderCollapse = 'collapse';
+                            //         // previewTable.style.tableLayout = 'fixed';
+                            //         // previewTable.style.width = `${ctrolPanel.cell.offsetWidth}px`;
+                            //         // previewTable.style.height = `${table.offsetHeight}px`;
+                            //         // setAlignPos(previewTable, ctrolPanel.cell, {
+                            //         //     placement: 'tl-tl'
+                            //         // });
+                            //         // document.body.appendChild(previewTable);
+                            //     },
+                            //     onMove(e: MouseEvent, type: 'col' | 'row') {
+                            //         e.preventDefault();
+
+                            //     }
+                            // }));
                         }
-                        ctrolPanel = ctrolPanelMap.get(tableView);
-                        ctrolPanel.showColPanel(cell);
-                        ctrolPanel.showRowPanel(cell);
+                        ctrolPanel = ctrolPanelMap.get(tableContainer);
+                        ctrolPanel.cell = cell;
+                        ctrolPanel.showColPanel();
+                        ctrolPanel.showRowPanel();
                     } else {
                         if (ctrolPanel) {
                             ctrolPanel.hideColPanel();
@@ -301,8 +370,8 @@ export const table = ({
                 //     }
                 // },
                 // mouseleave: (view: EditorView, event: any) => {
-                //     // console.log('mouseleave>>>', ctrolPanel.tableView.contains(event.target));
-                //     // if (ctrolPanel && !ctrolPanel.tableView.contains(event.target)) {
+                //     // console.log('mouseleave>>>', ctrolPanel.tableContainer.contains(event.target));
+                //     // if (ctrolPanel && !ctrolPanel.tableContainer.contains(event.target)) {
                 //     //     ctrolPanel.hideColPanel();
                 //     // }
                 //     // if (ctrolPanel.colPanel && !ctrolPanel.colPanel.contains(event.target)) {

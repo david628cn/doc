@@ -1,11 +1,23 @@
+import { EditorView } from 'prosemirror-view';
+import {
+    TableMap
+} from 'prosemirror-tables';
 // import { DragDrop } from '@/components/dragDrop';
+import {
+    closestTable,
+    selectDimensionByCell,
+    getDimensionByCell
+} from '@/components/docEditer/core/utils';
 import { getRect, getAlignPos, setPos } from '@/components/utils/align';
 import { CLASSNAME } from '@/global';
 import './index.less';
 
+
 export type CtrolPanelProps = {
+    view: EditorView;
     // tableView: HTMLElement | null | undefined;
     container?: HTMLElement | null | undefined;
+    cell?: HTMLElement | null | undefined;
     onClickPanel?: Function;
     onStart?: Function;
     onMove?: Function;
@@ -14,13 +26,15 @@ export type CtrolPanelProps = {
 };
 
 export class CtrolPanel {
-    // tableView
+    view: EditorView;
     container: HTMLElement | null | undefined;
+    table: HTMLElement | null | undefined;
     colPanel: HTMLElement | null | undefined;
     rowPanel: HTMLElement | null | undefined;
     cell: HTMLElement | null | undefined;
+    preview: HTMLElement | null | undefined;
     moving: 'col' | 'row' | null = null;
-    active: 'col' | 'row' | null = null;
+    // active: 'col' | 'row' | null = null;
     current: any;
     startXY = {
         left: 0,
@@ -42,6 +56,18 @@ export class CtrolPanel {
         left: 0,
         top: 0
     };
+    startPreviewRect = {
+        width: 0,
+        height: 0,
+        left: 0,
+        top: 0
+    };
+    endPreviewRect = {
+        width: 0,
+        height: 0,
+        left: 0,
+        top: 0
+    };
     constructor(props: CtrolPanelProps) {
         Object.assign(this, props);
         // this.container = this.tableView.childNodes[1];
@@ -56,29 +82,8 @@ export class CtrolPanel {
         this.container.appendChild(this.colPanel);
         this.container.appendChild(this.rowPanel);
 
+        this.container.addEventListener('click', this.handleClickPanel, false);
         this.container.addEventListener('mousedown', this.handleStart, false);
-        // this.colPanel.firstChild.addEventListener('click', this.onClickColPanel, false);
-        // this.rowPanel.firstChild.addEventListener('click', this.onClickRowPanel, false);
-
-        // this.rowDragDrop = new DragDrop({
-        //     container: this.container,
-        //     translate: true,
-        //     handle: this.rowPanel,
-        //     axis: 'y',
-        //     onStart: this.onRowDragStart,
-        //     onMove: this.onRowDragMove,
-        //     onEnd: this.onRowDragEnd
-        // });
-
-        // this.colDragDrop = new DragDrop({
-        //     container: this.container,
-        //     translate: true,
-        //     handle: this.colPanel,
-        //     axis: 'x',
-        //     onStart: this.onColDragStart,
-        //     onMove: this.onColDragMove,
-        //     onEnd: this.onColDragEnd
-        // });
     }
     // getPosByDom(dom: any) {
     //     let xy = dom.style.transform.split(/[(|,|)]/g);
@@ -120,6 +125,70 @@ export class CtrolPanel {
             };
         }
     }
+    handleClickPanel = (e: any) => {
+        // if (!isTouchEvent(e)) {
+        // }
+        if (e.preventDefault) {
+            e.preventDefault();
+        } else {
+            e.returnValue = false;
+        }
+        if (e.stopPropagation) {
+            e.stopPropagation();
+        } else {
+            e.cancelBubble = true;
+        }
+        const col = this.colPanel?.contains(e.target as Node);
+        const row = this.rowPanel?.contains(e.target as Node);
+        if (col || row) {
+            let type: 'col' | 'row';
+            if (col) {
+                type = 'col';
+            } else if (row) {
+                type = 'row';
+            }
+            selectDimensionByCell(this.view, this.cell, type);
+            this.onClickPanel?.(e, type);
+        }
+    }
+    createColPreview(dimension: any): HTMLElement {
+        const wrap = document.createElement('table');
+        wrap.style.borderCollapse = 'collapse'; // 確保樣式整齊
+        const { map, tableStart, colIndex } = dimension;
+
+        // 用於記錄已處理過的單元格偏移量，防止 Rowspan 重複添加
+        const processedOffsets = new Set<number>();
+
+        for (let r = 0; r < map.height; r++) {
+            // 獲取該行第 colIndex 列的邏輯偏移量
+            const cellOffset = map.map[r * map.width + colIndex];
+
+            // 如果這個偏移量已經添加過（說明是同一個跨行單元格），則跳過
+            if (processedOffsets.has(cellOffset)) {
+                continue;
+            }
+
+            // 找到真實的單元格 DOM
+            const cellNodeDom = this.view.nodeDOM(tableStart + cellOffset) as HTMLElement;
+
+            if (cellNodeDom) {
+                const tr = document.createElement('tr');
+                const clonedCell = cellNodeDom.cloneNode(true) as HTMLElement;
+
+                // 重要：清除 Rowspan 屬性，使鏡像中的單元格高度回歸正常，避免樣式撐破
+                clonedCell.removeAttribute('rowspan');
+                clonedCell.style.height = 'auto';
+
+                tr.appendChild(clonedCell);
+                wrap.appendChild(tr);
+
+                // 記錄已處理
+                processedOffsets.add(cellOffset);
+            }
+        }
+        // this.applyPreviewStyle(wrap, 120); // 列预览通常给固定宽度
+        return wrap;
+    }
     handleStart = (e: any) => {
         // if (!isTouchEvent(e)) {
         // }
@@ -147,8 +216,7 @@ export class CtrolPanel {
                 type = 'row';
                 this.current = this.rowPanel;
             }
-            this.onClickPanel(e, type);
-            
+
             const rect = getRect(this.current);
             const containerRect = getRect(this.container);
             const relativeRect = {
@@ -167,14 +235,29 @@ export class CtrolPanel {
                 top: pos.top
             };
             this.moving = type;
-            this.active = type;
+
+            // const dimension = getDimensionByCell(this.view, this.cell);
+            // const tableDom = this.createColPreview(dimension);
+            this.table = closestTable(this.cell);
+            const tableRect = getRect(this.table);
+            const cellRect = getRect(this.cell);
+            this.startPreviewRect = {
+                width: type === 'row' ? tableRect.width : cellRect.width,
+                height: type === 'col' ? tableRect.height : cellRect.height,
+                left: cellRect.left,
+                top: cellRect.top
+            };
+
+            this.createPreview(this.startPreviewRect);
+
             document.addEventListener('mousemove', this.handleMove, false);
             document.addEventListener('touchmove', this.handleMove, { passive: false });
 
             document.addEventListener('mouseup', this.handleEnd, false);
             document.addEventListener('touchend', this.handleEnd, { passive: false });
             document.addEventListener('touchcancel', this.handleEnd, { passive: false });
-            this.onStart(e, this.active);
+
+            this.onStart(e, this.moving);
         }
     }
     handleMove = (e: any) => {
@@ -201,9 +284,13 @@ export class CtrolPanel {
             top: pos.top
         };
 
-        // if (this.endPos.left - this.startPos.left === 0 && this.endPos.top - this.startPos.top === 0) {
-        //     return;
-        // }
+        if (this.endPos.left - this.startPos.left === 0 && this.endPos.top - this.startPos.top === 0) {
+            // this.preview.style.opacity = '0';
+            return;
+        }
+
+        // this.setPreview();
+
         // const scale = this.scale;
         // const space = this.space;
         this.increase = {
@@ -213,15 +300,27 @@ export class CtrolPanel {
         let left = this.startXY.left + this.increase.left;
         let top = this.startXY.top + this.increase.top;
 
+        // if (this.moving === 'col') {
+        //     top = 0;
+        // } else if (this.moving === 'row') {
+        //     left = 0;
+        // }
+
         this.endXY = {
             left,
             top
         };
-        console.log('handleMove>>>', this.endXY);
 
-        setPos(this.current, this.endXY, true);
+        // console.log('handleMove>>>', this.endXY);
+
+        // setPos(this.current, this.endXY, true);
         // // this.autoScroll();
-        this.onMove(e, this.active);
+        this.preview.style.opacity = '1';
+        setPos(this.preview, {
+            left: this.moving === 'row' ? this.startPreviewRect.left : this.startPreviewRect.left + this.increase.left,
+            top: this.moving === 'col' ? this.startPreviewRect.top : this.startPreviewRect.top + this.increase.top
+        }, true);
+        this.onMove(e, this.moving);
     }
     handleEnd = (e: any) => {
         if (!this.isTouchEvent(e)) {
@@ -234,28 +333,47 @@ export class CtrolPanel {
         } else {
             e.cancelBubble = true;
         }
-        this.moving = null;
         this.current = null;
-        // // this.proxyNode.style.display = 'none';
-        // if (this.autoScroller) {
-        //     this.autoScroller.clear();
-        // }
+        this.removePreview();
         document.removeEventListener('mousemove', this.handleMove);
         document.removeEventListener('touchmove', this.handleMove);
 
         document.removeEventListener('mouseup', this.handleEnd);
         document.removeEventListener('touchend', this.handleEnd);
         document.removeEventListener('touchcancel', this.handleEnd);
-        this.onEnd(e, this.active);
-        this.active = null;
+        this.onEnd(e, this.moving);
+        this.moving = null;
     }
-    showColPanel(cell?: HTMLElement) {
+    createPreview(rect?: any) {
+        if (this.preview && this.preview.parentNode) {
+            this.preview.parentNode.removeChild(this.preview);
+        }
+        if (!this.preview) {
+            this.preview = document.createElement('div');
+            this.preview.className = `${CLASSNAME}-table-view-ctrol-panel-preview`;
+        }
+        // this.preview.appendChild(content);
+        if (rect) {
+            this.preview.style.width = `${rect.width}px`;
+            this.preview.style.height = `${rect.height}px`;
+            setPos(this.preview, {
+                left: rect.left,
+                top: rect.top
+            }, true);
+        }
+        document.body.appendChild(this.preview);
+    }
+    removePreview() {
+        if (this.preview && this.preview.parentNode) {
+            this.preview.parentNode.removeChild(this.preview);
+        }
+    }
+    showColPanel() {
         if (this.colPanel) {
             this.colPanel.classList.add(`${CLASSNAME}-table-view-col-panel-show`);
-            if (cell) {
-                this.cell = cell;
-                this.colPanel.style.width = `${cell.offsetWidth}px`;
-                const pos = getAlignPos(this.colPanel, cell, {
+            if (this.cell) {
+                this.colPanel.style.width = `${this.cell.offsetWidth}px`;
+                const pos = getAlignPos(this.colPanel, this.cell, {
                     placement: 'bl-tl',
                     container: this.container
                 });
@@ -271,13 +389,12 @@ export class CtrolPanel {
             this.colPanel.classList.remove(`${CLASSNAME}-table-view-col-panel-show`);
         }
     }
-    showRowPanel(cell?: HTMLElement) {
+    showRowPanel() {
         if (this.rowPanel) {
             this.rowPanel.classList.add(`${CLASSNAME}-table-view-row-panel-show`);
-            if (cell) {
-                this.cell = cell;
-                this.rowPanel.style.height = `${cell.offsetHeight}px`;
-                const pos = getAlignPos(this.rowPanel, cell, {
+            if (this.cell) {
+                this.rowPanel.style.height = `${this.cell.offsetHeight}px`;
+                const pos = getAlignPos(this.rowPanel, this.cell, {
                     placement: 'tr-tl',
                     container: this.container
                 });
