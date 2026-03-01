@@ -163,14 +163,14 @@ export const DocEditor: React.FC<DocEditorProps> = props => {
         // <ParentContext.Provider value={editorRef}>
         <div className={`${CLASSNAME}-container`}>
             <div className={`${CLASSNAME}-editor-inner`}>
-                <div className={`${CLASSNAME}-editor-header`} style={{
+                {/* <div className={`${CLASSNAME}-editor-header`} style={{
                     padding: '20px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
                 }}>
                     <Button onClick={handleClick}>添加</Button>
-                </div>
+                </div> */}
                 <div className={`${CLASSNAME}-editor-content`}>
                     <div
                         className={className}
