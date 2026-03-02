@@ -224,31 +224,31 @@ export const findParentNodeClosestToPos = ($pos, predicate) => {
  * 获取指定位置所属单元格在表格中的矩形坐标 (top, left, bottom, right)
  * @param $pos ResolvedPos 对象
  */
-export const findCellRectClosestToPos = ($pos: any) => {
-    // 1. 寻找最近的单元格 (td 或 th)
-    const cell = findParentNodeClosestToPos($pos, node =>
-        node.type.spec.tableRole === 'cell' || node.type.spec.tableRole === 'header_cell'
-    );
-    if (!cell) {
-        return null;
-    }
+// export const findCellRectClosestToPos = ($pos: any) => {
+//     // 1. 寻找最近的单元格 (td 或 th)
+//     const cell = findParentNodeClosestToPos($pos, node =>
+//         node.type.spec.tableRole === 'cell' || node.type.spec.tableRole === 'header_cell'
+//     );
+//     if (!cell) {
+//         return null;
+//     }
 
-    // 2. 寻找所属的表格 (table)
-    const table = findParentNodeClosestToPos($pos, node =>
-        node.type.spec.tableRole === 'table'
-    );
-    if (!table) {
-        return null;
-    }
+//     // 2. 寻找所属的表格 (table)
+//     const table = findParentNodeClosestToPos($pos, node =>
+//         node.type.spec.tableRole === 'table'
+//     );
+//     if (!table) {
+//         return null;
+//     }
 
-    const map = TableMap.get(table.node);
-    // 3. 计算相对于表格内容的偏移量
-    // cell.pos 是 <td> 的起点，table.start 是第一个 <tr> 的起点
-    const relativeOffset = cell.pos - table.start;
+//     const map = TableMap.get(table.node);
+//     // 3. 计算相对于表格内容的偏移量
+//     // cell.pos 是 <td> 的起点，table.start 是第一个 <tr> 的起点
+//     const relativeOffset = cell.pos - table.start;
 
-    // 4. 返回 Rect 坐标
-    return map.findCell(relativeOffset);
-}
+//     // 4. 返回 Rect 坐标
+//     return map.findCell(relativeOffset);
+// }
 
 export const getOuterNode = (doc: Node, pos: number): Node | null => {
     const node = doc.nodeAt(pos);
@@ -668,7 +668,7 @@ export const getExtendedRange = (index: number, matrix: any, type: 'col' | 'row'
             }
         }
     }
-    
+
     return { start, end };
 };
 
@@ -700,7 +700,7 @@ export const getExtendedRange = (index: number, matrix: any, type: 'col' | 'row'
 //                 if (type === 'col') {
 //                     // 利用你的 cs (colSpan) 屬性計算實際結束列
 //                     const nodeEndCol = node.startCol + node.cs - 1;
-                    
+
 //                     if (node.startCol < start) {
 //                         start = node.startCol;
 //                         changed = true;
@@ -712,7 +712,7 @@ export const getExtendedRange = (index: number, matrix: any, type: 'col' | 'row'
 //                 } else {
 //                     // 利用你的 rs (rowSpan) 屬性計算實際結束行
 //                     const nodeEndRow = node.startRow + node.rs - 1;
-                    
+
 //                     if (node.startRow < start) {
 //                         start = node.startRow;
 //                         changed = true;
@@ -790,7 +790,7 @@ export const getTableMatrix = (tableElement: HTMLTableElement) => {
 
     for (let r = 0; r < rows.length; r++) {
         if (!matrix[r]) matrix[r] = [];
-        
+
         let visualCol = 0;
         const rowCells = rows[r].cells;
 
@@ -803,7 +803,7 @@ export const getTableMatrix = (tableElement: HTMLTableElement) => {
 
             const rs = cell.rowSpan || 1;
             const cs = cell.colSpan || 1;
-            
+
             // 封裝成一個對象，矩陣中所有引用都指向同一個對象（節省內存）
             const node = {
                 cell,
@@ -975,113 +975,6 @@ export const getTableInfo = (dom: any) => {
     }
 }
 
-// /**
-//  * 当只有 $anchor (普通光标选区) 时，获取表格信息
-//  * @param {EditorView} view 
-//  */
-// export const getTableInfoFromAnchor = (view: EditorView) => {
-//     const { $anchor } = view.state.selection;
-
-//     // 1. 向上遍历所有的父节点深度
-//     // 从当前深度 ($anchor.depth) 一直往上找，直到根节点 (0)
-//     for (let d = $anchor.depth; d > 0; d--) {
-//         const node = $anchor.node(d);
-
-//         // 2. 检查该节点是否定义了 tableRole 为 "table"
-//         // 这是 prosemirror-tables 插件标记表格节点的标准方式
-//         if (node.type.spec.tableRole === "table") {
-//             const tablePos = $anchor.before(d); // 获取表格在文档中的起始位置
-//             const tableDOM = view.nodeDOM(tablePos); // 映射到 <table> DOM
-
-//             return {
-//                 tableNode: node,
-//                 tablePos: tablePos,
-//                 tableDOM: tableDOM,
-//                 // 如果外层有 prosemirror-tables 自动生成的 wrapper
-//                 tableWrapper: tableDOM ? closestTableView : null,
-//                 depth: d
-//             };
-//         }
-//     }
-
-//     return null; // 光标不在表格内
-
-//     // --- 使用方法 ---
-//     // const info = getTableInfoFromAnchor(view);
-//     // if (info) {
-//     //     console.log("光标所在的表格位置:", info.tablePos);
-//     //     console.log("表格 DOM 节点:", info.tableDOM);
-//     // }
-
-//     // 1. $anchor.node(d)：
-//     // 获取在深度 d 处的节点。例如，深度 d 可能是 table_cell，d - 1 可能是 table_row，d - 2 才是 table。
-//     // 2. node.type.spec.tableRole：
-//     // 这是最稳妥的判断方式。不要直接判断 node.type.name === 'table'，因为不同 Schema 里的表格命名可能不同（如 my_table），但 prosemirror - tables 要求必须设置 tableRole 属性。
-//     // 3. $anchor.before(d)：
-//     // 获取第 d 层节点之前的位置。这正是 view.nodeDOM 所需要的准确索引。
-
-//     // 这种场景与 CellSelection 的区别
-//     // 1. CellSelection：表示用户选中了格子（通常背景变蓝）。此时 $anchor 实际上是选区的一个端点单元格位置。
-//     // 2. 普通 $anchor：表示用户只是把光标点进了格子。此时 $anchor 指向的是单元格内部的文本节点（如 paragraph）。
-
-//     // 注意事项
-//     // 如果你在 table_cell 中使用了自定义的 NodeView：
-//     // 1. 只要 NodeView 没有破坏 ProseMirror 的文档树深度（即依然保持 table > row > cell > content），上述逻辑依然 100 % 有效。
-//     // 2. view.nodeDOM(tablePos) 会返回你为表格定义的 NodeView 的根 DOM。
-
-// }
-
-
-// /**
-// * 仅在当前选区为 CellSelection 时提取表格完整信息
-// * @param {EditorView} view - ProseMirror 编辑器实例
-// */
-// export const getTableInfoFromCellSelection = (view: EditorView) => {
-//     const { selection } = view.state;
-
-//     // 1. 严格检查是否为单元格选区
-//     if (!(selection instanceof CellSelection)) {
-//         return null;
-//     }
-
-//     // 2. 通过选区内部的 $anchorCell 找到表格节点
-//     // $anchorCell 是选区开始位置的单元格，-1 代表其父级（即 table）
-//     const tableNode = selection.$anchorCell.node(-1);
-//     const tablePos = selection.$anchorCell.before(-1);
-
-//     // 3. 根据位置获取原生的 DOM 节点
-//     const tableDOM = view.nodeDOM(tablePos); // 得到 <table> 标签
-//     const tableWrapper = tableDOM ? tableDOM.parentElement : null; // 得到 .tableWrapper
-
-//     // 4. 统计选中单元格
-//     let selectedCells = [];
-//     selection.forEachCell((node, pos) => {
-//         selectedCells.push({
-//             node: node, // td 节点
-//             pos: pos,   // td 在文档中的位置
-//             dom: view.nodeDOM(pos) // td 的 DOM 元素（如果是 NodeView 则返回 NodeView 的 dom）
-//         });
-//     });
-
-//     return {
-//         tableNode,          // 表格的 Node 对象
-//         tablePos,           // 表格在文档中的起始位置 (number)
-//         tableDOM,           // <table> 原生 DOM
-//         tableWrapper,       // .tableWrapper 原生 DOM
-//         selectedCells,      // 选中单元格的数组
-//         count: selectedCells.length // 选中数量
-//     };
-//     // console.log("找到表格 Wrapper:", info.tableWrapper);
-//     // console.log("选中了几个格子:", info.count);
-//     // console.log("第一个格子的内容:", info.selectedCells[0].node.textContent);
-//     // 1. selection.$anchorCell.before(-1)：
-//     // 这是最直接获取表格位置的方法。-1 指向当前单元格的直接父级（即 Table）。这比手动 while 循环 DOM 要快且准确。
-//     // 2. view.nodeDOM(tablePos)：
-//     // 这是 ProseMirror 视图层的核心方法，它能根据文档位置直接返回编辑器中渲染的 DOM。
-//     // 3. forEachCell 的参数：
-//     // 回调函数中的 pos 是每个单元格的准确位置。如果你要在单元格上做视觉标记（比如弹出一个悬浮菜单），使用这个 pos 配合 view.coordsAtPos(pos) 是标准做法。
-// }
-
 export const getMaxCellRect = (view: EditorView, selection: any) => {
     if (selection instanceof CellSelection) {
         const cells: Element[] = []
@@ -1120,7 +1013,7 @@ export const getMaxCellRect = (view: EditorView, selection: any) => {
     return null;
 }
 
-export const getCellRect = (view: EditorView, cellPos: number) => {
+export const getNodeRect = (view: EditorView, cellPos: number) => {
     const cell: any = view.nodeDOM(cellPos);
     const rect = cell?.getBoundingClientRect();
     if (rect) {
@@ -1140,194 +1033,150 @@ export const getCellRect = (view: EditorView, cellPos: number) => {
  * 统一处理：无论是单元格选区还是普通光标，获取所属表格信息
  * @param {EditorView} view 
  */
-export const getTableInfoByAnySelection = (view: EditorView) => {
-    const { state } = view;
-    const { selection } = state;
-    let $cellPos = null;
-    let rect = null;
+// export const getTableInfoByAnySelection = (view: EditorView) => {
+//     const { state } = view;
+//     const { selection } = state;
+//     let $cellPos = null;
+//     let rect = null;
 
-    // 1. 确定单元格解析位置
-    if (selection instanceof CellSelection) {
-        $cellPos = selection.$anchorCell;
-        rect = getMaxCellRect(view, selection);
-    } else {
-        // 兼容光标在表格边缘的情况
-        $cellPos = cellAround(selection.$anchor);
-        const cell = cellAround(selection.$anchor);
-        if (cell) {
-            rect = getCellRect(view, cell.pos);
-        }
-    }
+//     // 1. 确定单元格解析位置
+//     if (selection instanceof CellSelection) {
+//         $cellPos = selection.$anchorCell;
+//         rect = getMaxCellRect(view, selection);
+//     } else {
+//         // 兼容光标在表格边缘的情况
+//         $cellPos = cellAround(selection.$anchor);
+//         const cell = cellAround(selection.$anchor);
+//         if (cell) {
+//             rect = getNodeRect(view, cell.pos);
+//         }
+//     }
 
-    // 如果依然找不到单元格位置，彻底说明不在表格内
-    if (!$cellPos) {
-        return null;
-    }
-
-    // 2. 向上寻找 Table 节点（使用 tableRole 匹配，无视 NodeView 增加的深度）
-    let tableNode = null;
-    let tablePos = -1;
-
-    // 从当前位置向上查找直到文档根部
-    for (let d = $cellPos.depth; d >= 0; d--) {
-        const node = $cellPos.node(d);
-        if (node.type.spec.tableRole === "table") {
-            tableNode = node;
-            tablePos = $cellPos.before(d);
-            break;
-        }
-    }
-
-    if (!tableNode || tablePos === -1) {
-        return null;
-    }
-
-    // 3. 安全获取 DOM
-    const tableDOM: any = view.nodeDOM(tablePos);
-    if (!tableDOM) {
-        return null;
-    }
-
-    // 4. 寻找 tableWrapper (兼容无 closest 的环境)
-    // let tableWrapper = tableDOM;
-    // while (tableWrapper && tableWrapper !== view.dom) {
-    //     if (tableWrapper.classList && tableWrapper.classList.contains('tableWrapper')) {
-    //         break;
-    //     }
-    //     tableWrapper = tableWrapper.parentNode;
-    // }
-
-    return {
-        tableNode,
-        tablePos,
-        tableDOM: tableDOM.querySelector('table'),
-        // 如果没找到 wrapper 类名，回退到 tableDOM.parentNode
-        tableWrapper: closestTableView(tableDOM),
-        $cellPos, // 保留此引用以便后续操作单元格
-        rect
-    };
-}
-
-// export const getTableNodeByCell = (view: EditorView, cell: any) => {
-//     if (!cell) {
+//     // 如果依然找不到单元格位置，彻底说明不在表格内
+//     if (!$cellPos) {
 //         return null;
 //     }
-//     const pos = view.posAtDOM(cell, 0);
-//     const $pos = view.state.doc.resolve(pos);
 
+//     // 2. 向上寻找 Table 节点（使用 tableRole 匹配，无视 NodeView 增加的深度）
 //     let tableNode = null;
 //     let tablePos = -1;
 
-//     // 向上遍历文档树层级
-//     for (let d = $pos.depth; d >= 0; d--) {
-//         const node = $pos.node(d);
-//         if (node.type.spec.tableRole === 'table') {
+//     // 从当前位置向上查找直到文档根部
+//     for (let d = $cellPos.depth; d >= 0; d--) {
+//         const node = $cellPos.node(d);
+//         if (node.type.spec.tableRole === "table") {
 //             tableNode = node;
-//             tablePos = $pos.before(d); // 获取 table 节点在文档中的绝对起点
+//             tablePos = $cellPos.before(d);
 //             break;
 //         }
 //     }
-//     if (!tableNode) {
+
+//     if (!tableNode || tablePos === -1) {
 //         return null;
 //     }
+
+//     // 3. 安全获取 DOM
+//     const tableDOM: any = view.nodeDOM(tablePos);
+//     if (!tableDOM) {
+//         return null;
+//     }
+
+//     // 4. 寻找 tableWrapper (兼容无 closest 的环境)
+//     // let tableWrapper = tableDOM;
+//     // while (tableWrapper && tableWrapper !== view.dom) {
+//     //     if (tableWrapper.classList && tableWrapper.classList.contains('tableWrapper')) {
+//     //         break;
+//     //     }
+//     //     tableWrapper = tableWrapper.parentNode;
+//     // }
+
 //     return {
 //         tableNode,
-//         tablePos
+//         tablePos,
+//         tableDOM: tableDOM.querySelector('table'),
+//         // 如果没找到 wrapper 类名，回退到 tableDOM.parentNode
+//         tableWrapper: closestTableView(tableDOM),
+//         $cellPos, // 保留此引用以便后续操作单元格
+//         rect
 //     };
 // }
 
-export const getDimensionByCell = (view: EditorView, cell: any) => {
+export const selectDimensionByCell = (view: EditorView, cell: HTMLTableCellElement, type: 'col' | 'row' = 'row') => {
     if (!cell) {
         return null;
     }
-
-    try {
-        const { state } = view;
-
-        // 2. 将 DOM 转换为文档位置
-        const cellPos = view.posAtDOM(cell, 0);
-        const $cellPos = state.doc.resolve(cellPos);
-
-        // 3. 找到所属的 Table 节点
-        const tableData = findParentNodeClosestToPos($cellPos, n => n.type.spec.tableRole === 'table');
-        // 4. 【核心修复】使用 utils 直接获取单元格的矩形信息
-        // 这个方法比手动 map.findCell(pos - start) 稳健得多，它会自动对齐偏移量
-        const rect = findCellRectClosestToPos($cellPos);
-
-        if (!tableData || !rect) {
-            return null;
-        }
-        // 3. 定義 tableStart
-        // table.pos 是 <table> 標籤之前
-        // table.start 通常是 table.pos + 1，即內容開始處
-        const tableStart = tableData.start;
-
-        return {
-            tableNode: tableData.node,
-            tablePos: tableData.pos, // <table> 節點的起始絕對位置
-            tableStart, // 表格內容（第一個 tr）的起始絕對位置
-            map: TableMap.get(tableData.node),
-            rowIndex: rect.top,    // 这就是 fromIndex (行)
-            colIndex: rect.left,   // 这就是 fromIndex (列)
-            rect             // 包含 top, left, bottom, right
-        };
-    } catch (e) {
-        console.error("Failed to get table context:", e);
-        return null;
-    }
-}
-
-export const selectDimensionByCell = (view: EditorView, cell: any, axis = 'row') => {
-    // 1. 确保拿到 td/th 元素，防止传入内部文本节点导致 posAtDOM 偏移
-    if (!cell) {
-        return null;
-    }
-
     const { state, dispatch } = view;
     const cellPos = view.posAtDOM(cell, 0);
     const $cellPos = state.doc.resolve(cellPos);
-
-    // 2. 使用你封装的工具函数
-    const tableData = findParentNodeClosestToPos($cellPos, n => n.type.spec.tableRole === 'table');
-    if (!tableData) {
-        return null;
+    const tableNodeInfo = findParentNodeClosestToPos($cellPos, n => n.type.spec.tableRole === 'table');
+    if (!tableNodeInfo) {
+        return;
     }
-
-    const tableStart = tableData.start; // 使用封装好的 start (即 table.pos + 1)
-    const map = TableMap.get(tableData.node);
-
-    // 3. 获取当前单元格的逻辑坐标
-    const rect = findCellRectClosestToPos($cellPos);
-    if (!rect) {
-        return null;
-    }
-
+    const map = TableMap.get(tableNodeInfo.node);
+    const cellNodeInfo = findParentNodeClosestToPos($cellPos, n => n.type.spec.tableRole === 'cell' || n.type.spec.tableRole === 'header_cell');
+    const matrix = getTableNodeMatrix(tableNodeInfo.node);
+    const cellSpanInfo = getCellSpanInfoByCellNode(cellNodeInfo.node, matrix);
+    const sourceRange = getExtendedRange(type === 'col' ? cellSpanInfo.startCol : cellSpanInfo.startRow, matrix, type);
+    const { start, end } = sourceRange;
     let anchorOffset: number;
     let headOffset: number;
+    const startPos = tableNodeInfo.start;
 
-    // 4. 计算逻辑首尾
-    if (axis === 'row') {
-        // 选中整行：从该行逻辑第 0 列到最后一列
-        anchorOffset = map.map[rect.top * map.width + 0];
-        headOffset = map.map[rect.top * map.width + (map.width - 1)];
+    // 1. 找到第 index 行的第一个单元格 (左上角)
+    // const anchorCell = startPos + map.map[index * map.width];
+
+    // // 2. 找到第 index + 1 行的最后一个单元格 (右下角)
+    // // 公式：(当前起始行 + 选中行数) * 总宽度 - 1
+    // const headCell = startPos + map.map[(index + 2) * map.width - 1];
+
+    // // 3. 创建选区
+    // const sel = CellSelection.create(state.doc, anchorCell, headCell);
+    // dispatch(state.tr.setSelection(sel));
+
+
+    // const map = TableMap.get(tableNode);
+    // const startPos = tableResult.start;
+
+    // // 1. 找到第 index 列的第一行单元格 (左上角)
+    // const anchorCell = startPos + map.map[index];
+
+    // // 2. 找到第 index + 1 列的最后一行单元格 (右下角)
+    // // 公式：(总高度 - 1) * 总宽度 + (起始列 + 选中列数 - 1)
+    // const lastRowIndex = (map.height - 1) * map.width;
+    // const headCell = startPos + map.map[lastRowIndex + (index + 1)];
+
+    // // 3. 创建选区
+    // const sel = CellSelection.create(state.doc, anchorCell, headCell);
+    // dispatch(state.tr.setSelection(sel));
+
+    if (type === 'row') {
+        // 逻辑：行索引 * 总宽度 = 该行第一个格子的索引
+        // const rowIndex = index * map.width;
+        // const anchorCell = startPos + map.map[rowIndex];
+
+        anchorOffset = map.map[start * map.width];
+        headOffset = map.map[(end + 1) * map.width - 1];
     } else {
-        // 选中整列：从逻辑第 0 行到最后一行
-        anchorOffset = map.map[0 * map.width + rect.left];
-        headOffset = map.map[(map.height - 1) * map.width + rect.left];
+        /// 逻辑：直接取第 index 列在第一行（row 0）的偏移量
+        // const colIndex = index; 
+        // const anchorCell = startPos + map.map[colIndex];
+
+        anchorOffset = map.map[start];
+        headOffset = map.map[(map.height - 1) * map.width + end];
     }
 
     try {
         // 5. 构造 CellSelection
         // 注意：CellSelection 的构造函数会自动处理 anchor 和 head 属于同一个表格的校验
         const selection = new CellSelection(
-            state.doc.resolve(tableStart + anchorOffset),
-            state.doc.resolve(tableStart + headOffset)
+            state.doc.resolve(startPos + anchorOffset),
+            state.doc.resolve(startPos + headOffset)
         );
 
         const tr = state.tr.setSelection(selection);
 
         // 如果是 Notion 风格，通常点击按钮选中后不希望干扰历史记录
-        tr.setMeta("addToHistory", false);
+        tr.setMeta('addToHistory', false);
 
         dispatch(tr);
 
@@ -1338,52 +1187,170 @@ export const selectDimensionByCell = (view: EditorView, cell: any, axis = 'row')
     }
 }
 
-/**
- * 根據行/列索引獲取真實的單元格 DOM 列表（非選區場景）
- * @param view 
- * @param ctx 之前 getTableCtx 返回的上下文 (包含 map, tableStart 等)
- * @param axis 'row' | 'col'
- */
-export const getDimensionDOM = (view: EditorView, dimension: any, axis: 'row' | 'col' = 'row'): HTMLElement[] => {
-    const { map, tableStart, rect } = dimension;
-    const doms: HTMLElement[] = [];
-    const seenOffsets = new Set<number>();
+export const getCellSelectionDOMRect = (view: EditorView, selection: CellSelection) => {
+    
+    let minTop = Infinity;
+    let minLeft = Infinity;
+    let maxBottom = -Infinity;
+    let maxRight = -Infinity;
 
-    if (axis === 'col') {
-        // --- 模式：獲取「列」區域 ---
-        // 遍歷當前單元格橫跨的所有邏輯列 (rect.left -> rect.right)
-        for (let col = rect.left; col < rect.right; col++) {
-            for (let row = 0; row < map.height; row++) {
-                const offset = map.map[row * map.width + col];
-                if (!seenOffsets.has(offset)) {
-                    const absPos = tableStart + offset;
-                    const dom = view.nodeDOM(absPos) as HTMLElement;
-                    if (dom) {
-                        doms.push(dom);
-                        seenOffsets.add(offset);
-                    }
+    selection.forEachCell((node, pos) => {
+        const dom = view.nodeDOM(pos) as HTMLElement;
+        if (dom) {
+            const rect = dom.getBoundingClientRect();
+            minTop = Math.min(minTop, rect.top);
+            minLeft = Math.min(minLeft, rect.left);
+            maxBottom = Math.max(maxBottom, rect.bottom);
+            maxRight = Math.max(maxRight, rect.right);
+        }
+    });
+
+    return {
+        top: minTop,
+        left: minLeft,
+        width: maxRight - minLeft,
+        height: maxBottom - minTop,
+        right: maxRight,
+        bottom: maxBottom
+    };
+}
+
+/**
+ * 将 TableNode 转换为二维矩阵结构
+ * @param tableNode 这里的 tableNode 是 ProseMirror 的 Node 对象
+ */
+export const getTableNodeMatrix = (tableNode: Node) => {
+    const map = TableMap.get(tableNode);
+    // const tableStart = 0; // 如果是相对位置设为0，如果是绝对位置需传入 tablePos + 1
+    const matrix = [];
+
+    // 初始化空的二维数组
+    for (let r = 0; r < map.height; r++) {
+        matrix[r] = new Array(map.width);
+    }
+
+    // 记录已经处理过的 pos，防止重复计算同一个单元格
+    const seen = {};
+
+    for (let r = 0; r < map.height; r++) {
+        for (let c = 0; c < map.width; c++) {
+            // 获取当前逻辑格子的相对偏移量
+            const mapIndex = r * map.width + c;
+            const pos = map.map[mapIndex];
+
+            // 如果这个单元格已经处理过（它是之前某个单元格的 span 部分）
+            if (seen[pos]) {
+                matrix[r][c] = seen[pos];
+                continue;
+            }
+
+            // 这是一个新的物理单元格起始点
+            const cellNode = tableNode.nodeAt(pos);
+            const colspan = cellNode?.attrs.colspan || 1;
+            const rowspan = cellNode?.attrs.rowspan || 1;
+
+            const cellData = {
+                cell: null,
+                node: cellNode,
+                pos: pos,
+                startRow: r,
+                startCol: c,
+                endRow: r + rowspan - 1,
+                endCol: c + colspan - 1,
+                rs: rowspan,
+                cs: colspan
+            };
+
+            // 将该单元格填充进它所占据的所有逻辑格子中
+            for (let i = r; i < r + rowspan; i++) {
+                for (let j = c; j < c + colspan; j++) {
+                    matrix[i][j] = cellData;
                 }
             }
+
+            seen[pos] = cellData;
         }
-    } else {
-        // --- 模式：獲取「行」區域 ---
-        // 遍歷當前單元格橫跨的所有邏輯行 (rect.top -> rect.bottom)
-        // 如果單元格是 rowspan="2"，則會掃描這兩行內的所有單元格
-        for (let row = rect.top; row < rect.bottom; row++) {
-            for (let col = 0; col < map.width; col++) {
-                const offset = map.map[row * map.width + col];
-                if (!seenOffsets.has(offset)) {
-                    const absPos = tableStart + offset;
-                    const dom = view.nodeDOM(absPos) as HTMLElement;
-                    if (dom) {
-                        doms.push(dom);
-                        seenOffsets.add(offset);
-                    }
-                }
+    }
+
+    return matrix;
+}
+
+export const getCellSpanInfoByCellNode = (cellNode: Node, matrix: any) => {
+    if (!matrix || !matrix.length) {
+        return null;
+    }
+
+    let minCol = Infinity;
+    let maxCol = -Infinity;
+    let minRow = Infinity;
+    let maxRow = -Infinity;
+
+    // 遍历整个矩阵寻找该 td 占据的所有坐标点
+    for (let r = 0; r < matrix.length; r++) {
+        for (let c = 0; c < matrix[r].length; c++) {
+            if (matrix[r][c].node === cellNode) {
+                minRow = Math.min(minRow, r);
+                maxRow = Math.max(maxRow, r);
+                minCol = Math.min(minCol, c);
+                maxCol = Math.max(maxCol, c);
             }
         }
     }
 
-    // console.log(`Axis: ${axis}, 區域範圍: ${axis === 'row' ? (rect.top + '-' + rect.bottom) : (rect.left + '-' + rect.right)}, 獲取到單元格數量: ${doms.length}`);
-    return doms;
+    return {
+        startRow: minRow,
+        endRow: maxRow,
+        startCol: minCol,
+        endCol: maxCol
+    };
 }
+
+/**
+ * 根據行/列索引獲取真實的單元格 DOM 列表（非選區場景）
+ * @param view
+ * @param ctx 之前 getTableCtx 返回的上下文 (包含 map, tableStart 等)
+ * @param axis 'row' | 'col'
+ */
+// export const getDimensionDOM = (view: EditorView, dimension: any, axis: 'row' | 'col' = 'row'): HTMLElement[] => {
+//     const { map, tableStart, rect } = dimension;
+//     const doms: HTMLElement[] = [];
+//     const seenOffsets = new Set<number>();
+
+//     if (axis === 'col') {
+//         // --- 模式：獲取「列」區域 ---
+//         // 遍歷當前單元格橫跨的所有邏輯列 (rect.left -> rect.right)
+//         for (let col = rect.left; col < rect.right; col++) {
+//             for (let row = 0; row < map.height; row++) {
+//                 const offset = map.map[row * map.width + col];
+//                 if (!seenOffsets.has(offset)) {
+//                     const absPos = tableStart + offset;
+//                     const dom = view.nodeDOM(absPos) as HTMLElement;
+//                     if (dom) {
+//                         doms.push(dom);
+//                         seenOffsets.add(offset);
+//                     }
+//                 }
+//             }
+//         }
+//     } else {
+//         // --- 模式：獲取「行」區域 ---
+//         // 遍歷當前單元格橫跨的所有邏輯行 (rect.top -> rect.bottom)
+//         // 如果單元格是 rowspan="2"，則會掃描這兩行內的所有單元格
+//         for (let row = rect.top; row < rect.bottom; row++) {
+//             for (let col = 0; col < map.width; col++) {
+//                 const offset = map.map[row * map.width + col];
+//                 if (!seenOffsets.has(offset)) {
+//                     const absPos = tableStart + offset;
+//                     const dom = view.nodeDOM(absPos) as HTMLElement;
+//                     if (dom) {
+//                         doms.push(dom);
+//                         seenOffsets.add(offset);
+//                     }
+//                 }
+//             }
+//         }
+//     }
+
+//     // console.log(`Axis: ${axis}, 區域範圍: ${axis === 'row' ? (rect.top + '-' + rect.bottom) : (rect.left + '-' + rect.right)}, 獲取到單元格數量: ${doms.length}`);
+//     return doms;
+// }

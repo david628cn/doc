@@ -34,7 +34,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
+            cursor: grab;
             border-radius: 10px;
             background: #e5e7eb;
 
@@ -78,7 +78,7 @@
             align-items: center;
             justify-content: center;
             border-radius: 10px;
-            cursor: pointer;
+            cursor: grab;
             background: #e5e7eb;
 
             svg {
@@ -113,10 +113,11 @@
     left: 0;
     top: 0;
     background: transparent;
-    border: 1px solid #2383e2; /* Notion 藍 */
-    border-radius: 4px;
+    // border: 1px dashed #555;
+    // border-radius: 4px;
+    // background: rgba(5, 5, 5, 0.15);
     opacity: 0;
-    box-shadow: 0 4px 12px rgba(15, 15, 15, 0.15); /* 深層陰影 */
+    // box-shadow: 0 4px 12px rgba(15, 15, 15, 0.15);
     // table {
     //     border-collapse: collapse;
     //     width: 100%;
@@ -204,21 +205,24 @@
     top: 12px;
 }
 
-// .@{className}-table-view-cell-selection {
-//     width: 100%;
-//     height: 100%;
-//     position: absolute;
-//     left: 0;
-//     top: 0;
-//     // border: 2px solid rgba(122,82,255,1);
-//     // background: rgba(200, 200, 255, 0.4);
-//     pointer-events: none;
-//     .@{className}-table-view-cell-selection-rect {
-//         position: absolute;
-//         left: 0;
-//         top: 0;
-//         border: 1px solid rgba(79, 70, 229, 1);
-//         background: rgba(200, 200, 255, 0.4);
-//         pointer-events: none;
-//     }
-// }
+.@{className}-table-view-cell-selection {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    // border: 2px solid rgba(122,82,255,1);
+    // background: rgba(200, 200, 255, 0.4);
+    pointer-events: none;
+    .@{className}-table-view-cell-selection-inner {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        border: 2px solid #2383e2;
+        background: transparent;
+        // box-shadow: 0px 0px 10px rgba(15, 15, 15, 0.15) inset;
+        // box-shadow: 0 4px 12px rgba(15, 15, 15, 0.15);
+    }
+}

@@ -1,34 +1,35 @@
 import { EditorView } from 'prosemirror-view';
 import {
-    TableMap,
+    // TableMap,
     moveTableRow,
     moveTableColumn
 } from 'prosemirror-tables';
 // import { DragDrop } from '@/components/dragDrop';
 import { AutoScroller } from '@/components/utils/autoScroller';
 import {
-    closestTable,
     getAxisMap,
-    getTableMatrix,
+    // getTableMatrix,
     getSafeIndex,
-    getCellSpanInfo,
+    // getCellSpanInfo,
+    getCellSpanInfoByCellNode,
     getExtendedRange,
     isStay,
     selectDimensionByCell,
-    closestTableView
+    findParentNodeClosestToPos,
+    getTableNodeMatrix
     // getDimensionByCell,
     // getDimensionDOM,
     // closestTr
 } from '@/components/docEditer/core/utils';
-import { getRect, getAlignPos, setPos } from '@/components/utils/align';
+import { getRect, getAlignPos, setPos, getPadding } from '@/components/utils/align';
 import { CLASSNAME } from '@/global';
 import './index.less';
 
 
 export type CtrolPanelProps = {
     view: EditorView;
-    // tableView: HTMLElement | null | undefined;
-    container?: HTMLElement | null | undefined;
+    tableContainer: HTMLElement | null | undefined;
+    // container?: HTMLElement | null | undefined;
     cell?: HTMLElement | null | undefined;
     onClickPanel?: Function;
     onStart?: Function;
@@ -39,8 +40,8 @@ export type CtrolPanelProps = {
 
 export class CtrolPanel {
     view: EditorView;
-    tableview: HTMLElement | null | undefined;
-    container: HTMLElement | null | undefined;
+    tableContainer: HTMLElement | null | undefined;
+    ctrolPanel: HTMLElement | null | undefined;
     table: HTMLTableElement | null | undefined;
     colPanel: HTMLElement | null | undefined;
     rowPanel: HTMLElement | null | undefined;
@@ -88,9 +89,13 @@ export class CtrolPanel {
         left: 0,
         top: 0
     };
+    static selectRect: any;
     constructor(props: CtrolPanelProps) {
         Object.assign(this, props);
-        // this.container = this.tableView.childNodes[1];
+        const inner = this.tableContainer.childNodes[0] as HTMLElement;
+        this.table = inner.firstChild as HTMLTableElement;
+        this.ctrolPanel = this.tableContainer.childNodes[1] as HTMLElement;
+
         this.colPanel = document.createElement('div');
         this.colPanel.className = `${CLASSNAME}-table-view-col-panel`;
         this.colPanel.innerHTML = `<div class="${CLASSNAME}-table-view-col-panel-inner"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12C14 13.1046 13.1046 14 12 14C10.8954 14 10 13.1046 10 12Z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M10 5C10 3.89543 10.8954 3 12 3C13.1046 3 14 3.89543 14 5C14 6.10457 13.1046 7 12 7C10.8954 7 10 6.10457 10 5Z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M10 19C10 17.8954 10.8954 17 12 17C13.1046 17 14 17.8954 14 19C14 20.1046 13.1046 21 12 21C10.8954 21 10 20.1046 10 19Z" fill="currentColor"></path></svg></div>`;
@@ -101,15 +106,14 @@ export class CtrolPanel {
         this.indicator = document.createElement('div');
         this.indicator.className = `${CLASSNAME}-table-view-ctrol-panel-indicator`;
 
-        this.tableview = closestTableView(this.container);
-        this.autoScroller = new AutoScroller(this.tableview);
+        this.autoScroller = new AutoScroller(this.tableContainer);
 
-        this.container.appendChild(this.colPanel);
-        this.container.appendChild(this.rowPanel);
-        this.container.appendChild(this.indicator);
+        this.ctrolPanel.appendChild(this.colPanel);
+        this.ctrolPanel.appendChild(this.rowPanel);
+        this.ctrolPanel.appendChild(this.indicator);
 
-        this.container.addEventListener('click', this.handleClickPanel, false);
-        this.container.addEventListener('mousedown', this.handleStart, false);
+        this.ctrolPanel.addEventListener('click', this.handleClickPanel, false);
+        this.ctrolPanel.addEventListener('mousedown', this.handleStart, false);
     }
     // getPosByDom(dom: any) {
     //     let xy = dom.style.transform.split(/[(|,|)]/g);
@@ -156,18 +160,18 @@ export class CtrolPanel {
             return;
         }
         this.indicator.className = `${CLASSNAME}-table-view-ctrol-panel-indicator ${CLASSNAME}-table-view-ctrol-panel-${axis}-axis`;
-        const containerRect = getRect(this.container);
-        // const scrollLeft = getScroll(this.tableview);
+        const ctrolPanelRect = getRect(this.ctrolPanel);
+        // const scrollLeft = getScroll(this.tableContainer);
         if (axis === 'row') {
             setPos(this.indicator, {
                 // width: containerRect.width,
                 left: 0,
-                top: pos - containerRect.top
+                top: pos - ctrolPanelRect.top
             }, true);
         } else {
             setPos(this.indicator, {
                 // height: containerRect.height,
-                left: pos - containerRect.left,
+                left: pos - ctrolPanelRect.left,
                 top: 0
             }, true);
         }
@@ -225,14 +229,14 @@ export class CtrolPanel {
                 type = 'row';
                 this.current = this.rowPanel;
             }
-            selectDimensionByCell(this.view, this.cell, type);
+            
             const rect = getRect(this.current);
-            const containerRect = getRect(this.container);
+            const ctrolPanelRect = getRect(this.ctrolPanel);
             const relativeRect = {
                 width: rect.width,
                 height: rect.height,
-                left: rect.left - containerRect.left,
-                top: rect.top - containerRect.top
+                left: rect.left - ctrolPanelRect.left,
+                top: rect.top - ctrolPanelRect.top
             };
             this.startXY = this.endXY = {
                 left: relativeRect.left,
@@ -244,8 +248,7 @@ export class CtrolPanel {
                 top: pos.top
             };
             this.moving = type;
-
-            this.table = closestTable(this.cell);
+            // this.table = closestTable(this.cell);
             const tableRect = getRect(this.table);
             const cellRect = getRect(this.cell);
             const parentViewRect = getRect(this.view.dom.parentNode as HTMLDivElement);
@@ -262,21 +265,39 @@ export class CtrolPanel {
                 top: relativeCellRect.top
             };
 
-            // const dimension = getDimensionByCell(this.view, this.cell);
-            this.matrix = getTableMatrix(this.table);
-            // this.axis = getAxisMap(this.table);
-            const cellSpanInfo = getCellSpanInfo(this.cell as HTMLTableCellElement, this.matrix);
-            this.sourceRange = getExtendedRange(
-                this.moving === 'col' ? cellSpanInfo.startCol : cellSpanInfo.startRow,
-                this.matrix,
-                this.moving
-            );
-
-            this.toIndex = this.sourceRange.start;
-            this.createPreview(this.startPreviewRect);
-
             this.autoScroller.clear();
             this.autoScroller.start();
+
+            // const dimension = getDimensionByCell(this.view, this.cell);
+            // this.matrix = getTableMatrix(this.table);
+            // this.axis = getAxisMap(this.table);
+            // const cellSpanInfo = getCellSpanInfo(this.cell as HTMLTableCellElement, this.matrix);
+            // this.sourceRange = getExtendedRange(
+            //     this.moving === 'col' ? cellSpanInfo.startCol : cellSpanInfo.startRow,
+            //     this.matrix,
+            //     this.moving
+            // );
+            // this.toIndex = this.sourceRange.start;
+            // this.createPreview(this.startPreviewRect);
+
+            selectDimensionByCell(this.view, this.cell as HTMLTableCellElement, type);
+
+            const cellPos = this.view.posAtDOM(this.cell, 0);
+            const $cellPos = this.view.state.doc.resolve(cellPos);
+            const tableNodeInfo =  findParentNodeClosestToPos($cellPos, n => n.type.spec.tableRole === 'table');
+            const cellNodeInfo = findParentNodeClosestToPos($cellPos, n => n.type.spec.tableRole === 'cell' || n.type.spec.tableRole === 'header_cell');
+            if (tableNodeInfo) {
+                const tableNode = tableNodeInfo.node;
+                this.matrix = getTableNodeMatrix(tableNode);
+                const cellSpanInfo = getCellSpanInfoByCellNode(cellNodeInfo.node, this.matrix);
+                this.sourceRange = getExtendedRange(
+                    this.moving === 'col' ? cellSpanInfo.startCol : cellSpanInfo.startRow,
+                    this.matrix,
+                    this.moving
+                );
+                this.toIndex = this.sourceRange.start;
+                this.createPreview(this.startPreviewRect);
+            }
 
             document.addEventListener('mousemove', this.handleMove, false);
             document.addEventListener('touchmove', this.handleMove, { passive: false });
@@ -355,7 +376,7 @@ export class CtrolPanel {
             top
         }, true);
 
-        this.autoScroller.update(getRect(this.preview), getRect(this.tableview));
+        this.autoScroller.update(getRect(this.preview), getRect(this.tableContainer));
 
         this.onMove(e, this.moving);
     }
@@ -450,7 +471,7 @@ export class CtrolPanel {
                 this.colPanel.style.width = `${this.cell.offsetWidth}px`;
                 const pos = getAlignPos(this.colPanel, this.cell, {
                     placement: 'bl-tl',
-                    container: this.container
+                    container: this.ctrolPanel
                 });
                 setPos(this.colPanel, {
                     ...pos,
@@ -471,7 +492,7 @@ export class CtrolPanel {
                 this.rowPanel.style.height = `${this.cell.offsetHeight}px`;
                 const pos = getAlignPos(this.rowPanel, this.cell, {
                     placement: 'tr-tl',
-                    container: this.container
+                    container: this.ctrolPanel
                 });
                 setPos(this.rowPanel, {
                     ...pos,
@@ -485,12 +506,26 @@ export class CtrolPanel {
             this.rowPanel.classList.remove(`${CLASSNAME}-table-view-row-panel-show`);
         }
     }
-    // show(cell?: HTMLElement) {
-    //     this.container.classList.add(`${CLASSNAME}-table-view-ctrol-panel-show`);
-    //     this.showColPanel(cell);
-    //     this.showRowPanel(cell);
-    // }
-    // hide() {
-    //     this.container.classList.remove(`${CLASSNAME}-table-view-ctrol-panel-show`);
-    // }
+    static showSelectRect(scrop: CtrolPanel, rect: any) {
+        if (!CtrolPanel.selectRect) {
+            CtrolPanel.selectRect = document.createElement('div');
+            CtrolPanel.selectRect.className = `${CLASSNAME}-table-view-cell-selection`;
+            const inner = document.createElement('div');
+            inner.className = `${CLASSNAME}-table-view-cell-selection-inner`;
+            CtrolPanel.selectRect.appendChild(inner);
+        }
+        if (CtrolPanel.selectRect.parentNode) {
+            CtrolPanel.selectRect.parentNode.removeChild(CtrolPanel.selectRect);
+        }
+        CtrolPanel.selectRect.style.width = `${rect.width}px`;
+        CtrolPanel.selectRect.style.height = `${rect.height}px`;
+        const ctrolPanelRect = getRect(scrop.ctrolPanel);
+        // const l = getPadding(scrop.ctrolPanel, 'l');
+        // const t = getPadding(scrop.ctrolPanel, 't');
+        setPos(CtrolPanel.selectRect, {
+            left: rect.left - ctrolPanelRect.left,
+            top: rect.top - ctrolPanelRect.top
+        }, true);
+        scrop.ctrolPanel.appendChild(CtrolPanel.selectRect);
+    }
 }
