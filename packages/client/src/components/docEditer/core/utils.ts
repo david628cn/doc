@@ -492,122 +492,6 @@ export const getCellSpanInfo = (cell: HTMLTableCellElement, matrix: any) => {
 }
 
 /**
- * 獲取點擊單元格（或柄所在的單元格）所屬的完整合併塊範圍
- */
-// export const getSourceRange = (cell: HTMLTableCellElement, matrix: any, type: 'col' | 'row' = 'row') => {
-//     let min = Infinity;
-//     let max = -Infinity;
-
-//     // 遍歷矩陣尋找該 cell 佔據的所有邏輯位置
-//     for (let r = 0; r < matrix.length; r++) {
-//         for (let c = 0; c < matrix[r].length; c++) {
-//             // 檢查當前格子的 cell 引用是否一致
-//             if (matrix[r][c]?.cell === cell) {
-//                 const index = type === 'col' ? c : r;
-//                 if (index < min) {
-//                     min = index;
-//                 }
-//                 if (index > max) {
-//                     max = index;
-//                 }
-//             }
-//         }
-//     }
-
-//     // 如果沒找到（理論上不會），返回 0,0
-//     if (min === Infinity) {
-//         return { start: 0, end: 0 };
-//     }
-
-//     return { start: min, end: max };
-// }
-
-/**
- * 获取包含合并单元格的完整列范围
- * @param {Array} matrix 逻辑矩阵（由第一步 getTableMatrix 生成）
- * @param {number} colIndex 用户点击/拖拽的起始列索引
- * @returns {Object} { start, end } 完整的列区间
- */
-// export const getExtendedColRange = (colIndex: number, matrix: any) => {
-//     if (!matrix || !matrix.length) {
-//         return null;
-//     }
-//     let start = colIndex;
-//     let end = colIndex;
-//     let changed = true;
-
-//     // 只要范围还在扩大，就继续扫描，确保不会切断任何合并单元格
-//     while (changed) {
-//         changed = false;
-
-//         // 遍历当前确定的 [start, end] 范围内每一行的单元格
-//         for (let r = 0; r < matrix.length; r++) {
-//             for (let c = start; c <= end; c++) {
-//                 const cell = matrix[r][c].cell;
-//                 if (!cell) {
-//                     continue;
-//                 }
-
-//                 // 【核心调用点】：获取该单元格在矩阵中的真实占据位置
-//                 const info = getCellSpanInfo(cell, matrix);
-//                 if (!info) {
-//                     continue;
-//                 }
-
-//                 // 如果该单元格的左边界比当前 start 还小，向左扩充
-//                 if (info.startCol < start) {
-//                     start = info.startCol;
-//                     changed = true; // 标记已改变，需要重新完整扫描新范围
-//                 }
-//                 // 如果该单元格的右边界比当前 end 还大，向右扩充
-//                 if (info.endCol > end) {
-//                     end = info.endCol;
-//                     changed = true;
-//                 }
-//             }
-//         }
-//     }
-//     return { start, end };
-// }
-
-// export const getExtendedRowRange = (rowIndex: number, matrix: any) => {
-//     let start = rowIndex;
-//     let end = rowIndex;
-//     let changed = true;
-
-//     while (changed) {
-//         changed = false;
-//         // 扫描当前确定的 [start, end] 范围内所有列
-//         for (let r = start; r <= end; r++) {
-//             for (let c = 0; c < matrix[r].length; c++) {
-//                 const cell = matrix[r][c].cell;
-//                 if (!cell) {
-//                     continue;
-//                 }
-
-//                 // 获取该单元格在矩阵中的真实占据位置
-//                 const info = getCellSpanInfo(cell, matrix);
-//                 if (!info) {
-//                     continue;
-//                 }
-
-//                 // 如果单元格的顶端超出了当前 start，向上扩充
-//                 if (info.startRow < start) {
-//                     start = info.startRow;
-//                     changed = true; // 范围变大，需要重新扫描整个新范围
-//                 }
-//                 // 如果单元格的底端超出了当前 end，向下扩充
-//                 if (info.endRow > end) {
-//                     end = info.endRow;
-//                     changed = true;
-//                 }
-//             }
-//         }
-//     }
-//     return { start, end };
-// }
-
-/**
  * 获取包含合并单元格的完整行或列范围
  */
 export const getExtendedRange = (index: number, matrix: any, type: 'col' | 'row' = 'row') => {
@@ -670,115 +554,6 @@ export const getExtendedRange = (index: number, matrix: any, type: 'col' | 'row'
 
     return { start, end };
 };
-
-/**
- * 获取包含合并单元格的完整行或列范围
- */
-// export const getExtendedRange = (index: number, matrix: any, type: 'col' | 'row' = 'row') => {
-//     let start = index;
-//     let end = index;
-//     let changed = true;
-
-//     while (changed) {
-//         changed = false;
-
-//         // 根據類型決定掃描範圍
-//         const rowStart = type === 'col' ? 0 : start;
-//         const rowLimit = type === 'col' ? matrix.length : end + 1;
-
-//         for (let r = rowStart; r < rowLimit; r++) {
-//             if (!matrix[r]) continue;
-
-//             const colStart = type === 'col' ? start : 0;
-//             const colLimit = type === 'col' ? end + 1 : matrix[r].length;
-
-//             for (let c = colStart; c < colLimit; c++) {
-//                 const node = matrix[r][c];
-//                 if (!node) continue;
-
-//                 if (type === 'col') {
-//                     // 利用你的 cs (colSpan) 屬性計算實際結束列
-//                     const nodeEndCol = node.startCol + node.cs - 1;
-
-//                     if (node.startCol < start) {
-//                         start = node.startCol;
-//                         changed = true;
-//                     }
-//                     if (nodeEndCol > end) {
-//                         end = nodeEndCol;
-//                         changed = true;
-//                     }
-//                 } else {
-//                     // 利用你的 rs (rowSpan) 屬性計算實際結束行
-//                     const nodeEndRow = node.startRow + node.rs - 1;
-
-//                     if (node.startRow < start) {
-//                         start = node.startRow;
-//                         changed = true;
-//                     }
-//                     if (nodeEndRow > end) {
-//                         end = nodeEndRow;
-//                         changed = true;
-//                     }
-//                 }
-//             }
-//         }
-//     }
-//     return { start, end };
-// };
-
-// export const getTableCellSizes = (tableElement: HTMLTableElement) => {
-//     if (!tableElement || tableElement.nodeName !== 'TABLE') {
-//         return null;
-//     }
-
-//     const rows = tableElement.rows;
-//     const matrix: any[][] = [];
-
-//     // 1. 建立物理矩阵
-//     for (let r = 0; r < rows.length; r++) {
-//         if (!matrix[r]) matrix[r] = [];
-//         const cells = rows[r].cells;
-//         let visualCol = 0;
-
-//         for (let c = 0; c < cells.length; c++) {
-//             const cell = cells[c];
-//             const rowSpan = cell.rowSpan || 1;
-//             const colSpan = cell.colSpan || 1;
-
-//             // 获取物理尺寸（包含 padding 和 border）
-//             const rect = cell.getBoundingClientRect();
-//             // const text = cell.textContent || "0";
-//             // const val = parseFloat(text.replace(/,/g, '')) || 0;
-
-//             while (matrix[r][visualCol] !== undefined) {
-//                 visualCol++;
-//             }
-
-//             for (let rs = 0; rs < rowSpan; rs++) {
-//                 const targetRow = r + rs;
-//                 if (!matrix[targetRow]) matrix[targetRow] = [];
-//                 for (let cs = 0; cs < colSpan; cs++) {
-//                     matrix[targetRow][visualCol + cs] = {
-//                         // value: val,
-//                         cell: cell,
-//                         // 如果是合并单元格，我们将单个逻辑格子的平均宽度/高度存入，
-//                         // 或者存储物理尺寸。这里建议存储物理尺寸，但在计算行列宽时去重。
-//                         width: rect.width,
-//                         height: rect.height,
-//                         left: rect.left,
-//                         top: rect.top,
-//                         right: rect.right,
-//                         bottom: rect.bottom
-//                     };
-//                 }
-//             }
-//             visualCol += colSpan;
-//         }
-//     }
-
-//     return matrix;
-// }
 
 export const getTableMatrix = (tableElement: HTMLTableElement) => {
     if (!tableElement || tableElement.nodeName !== 'TABLE') {
@@ -862,60 +637,76 @@ export const getAxisMap = (tableElement: HTMLTableElement) => {
  * @param {number} rawIndex 初始判定的索引
  * @param {string} type 'col' | 'row'
  */
-export const getSafeIndex = (rawIndex: number, lines: number[], matrix: any, type: 'col' | 'row' = 'row') => {
-    // 1. 寻找最近的线索引 (二分查找会更快，但遍历也行)
+export const getSafeInfo = (mousePos: any, axis: any, matrix: any, type: 'col' | 'row' = 'row') => {
+    const curPos = type === 'row' ? mousePos.top : mousePos.left;
+    const lines = type === 'row' ? axis.yLines : axis.xLines;
+    
+    // 1. 寻找初步最近的线索引
     let closestIndex = 0;
     let minDiff = Infinity;
     for (let i = 0; i < lines.length; i++) {
-        const diff = Math.abs(rawIndex - lines[i]);
+        const diff = Math.abs(curPos - lines[i]);
         if (diff < minDiff) {
             minDiff = diff;
             closestIndex = i;
         }
     }
 
-    // 2. 边界保护
+    // 2. 边界保护（表格最外围的线永远不被阻塞）
     if (closestIndex <= 0 || closestIndex >= lines.length - 1) {
-        return closestIndex;
+        return {
+            index: closestIndex,
+            pos: lines[closestIndex],
+            isBlock: false 
+        };
     }
 
     const rowCount = matrix.length;
     const colCount = matrix[0] ? matrix[0].length : 0;
-
-    // 3. 扫描该“线”切过的所有位置
     const checkLimit = type === 'col' ? rowCount : colCount;
 
+    // 3. 扫描该“线”是否切开了任何合并单元格
+    let isBlock = false;
+    let blockedCellRange = null;
+
     for (let i = 0; i < checkLimit; i++) {
-        // 这里的索引访问需要非常小心
         const cellBefore = type === 'col' ? matrix[i][closestIndex - 1] : matrix[closestIndex - 1][i];
         const cellAfter = type === 'col' ? matrix[i][closestIndex] : matrix[closestIndex][i];
 
-        // 如果前后两个逻辑格子指向同一个物理 cell，说明线切在了 cell 中间
+        // 核心判断：前后两个逻辑格子物理位置相同，说明线在单元格内部
         if (cellBefore && cellAfter && cellBefore.pos === cellAfter.pos) {
-            // 获取该 cell 在该维度上的逻辑范围
-            const start = type === 'col' ? cellBefore.startCol : cellBefore.startRow;
-            const end = type === 'col' ? cellBefore.endCol + 1 : cellBefore.endRow + 1;
-
-            // 吸附逻辑：判断 rawIndex 离哪根线更近
-            const distToStart = Math.abs(rawIndex - lines[start]);
-            const distToEnd = Math.abs(rawIndex - lines[end]);
-
-            // 关键：一旦找到切断点，计算完吸附就立即返回，避免多余循环
-            return distToStart < distToEnd ? start : end;
+            isBlock = true;
+            // 记录这个导致阻塞的单元格范围
+            blockedCellRange = {
+                start: type === 'col' ? cellBefore.startCol : cellBefore.startRow,
+                end: type === 'col' ? cellBefore.endCol + 1 : cellBefore.endRow + 1
+            };
+            break; // 只要有一处切断，整根线就是 Block 状态
         }
     }
 
-    return closestIndex;
+    // 4. 处理阻塞：执行吸附逻辑
+    if (isBlock && blockedCellRange) {
+        const distToStart = Math.abs(curPos - lines[blockedCellRange.start]);
+        const distToEnd = Math.abs(curPos - lines[blockedCellRange.end]);
 
-}
+        // 选择离鼠标最近的合法边界
+        const snappedIndex = distToStart < distToEnd ? blockedCellRange.start : blockedCellRange.end;
+        
+        return {
+            index: snappedIndex,
+            pos: lines[snappedIndex],
+            isBlock: true // 告诉外部，原始位置是非法的，已自动修正
+        };
+    }
 
-/**
-  * 4. 判定是否為原地 (無效移動)
-  */
-export const isStay = (toIndex: number, sourceRange: any): boolean => {
-    // const sourceRange = getExtendedRange(fromIndex, matrix, type);
-    // 技巧：落在源塊的起始索引或結束索引(start+1...end)都算原地
-    return toIndex >= sourceRange.start && toIndex <= sourceRange.end + 1;
+    // 5. 正常返回
+    return {
+        index: closestIndex,
+        pos: lines[closestIndex],
+        isBlock: false
+    };
+
 }
 
 export const getTableInfo = (dom: any) => {
@@ -959,78 +750,6 @@ export const getNodeRect = (view: EditorView, cellPos: number) => {
     }
     return null;
 }
-
-/**
- * 统一处理：无论是单元格选区还是普通光标，获取所属表格信息
- * @param {EditorView} view 
- */
-// export const getTableInfoByAnySelection = (view: EditorView) => {
-//     const { state } = view;
-//     const { selection } = state;
-//     let $cellPos = null;
-//     let rect = null;
-
-//     // 1. 确定单元格解析位置
-//     if (selection instanceof CellSelection) {
-//         $cellPos = selection.$anchorCell;
-//         rect = getMaxCellRect(view, selection);
-//     } else {
-//         // 兼容光标在表格边缘的情况
-//         $cellPos = cellAround(selection.$anchor);
-//         const cell = cellAround(selection.$anchor);
-//         if (cell) {
-//             rect = getNodeRect(view, cell.pos);
-//         }
-//     }
-
-//     // 如果依然找不到单元格位置，彻底说明不在表格内
-//     if (!$cellPos) {
-//         return null;
-//     }
-
-//     // 2. 向上寻找 Table 节点（使用 tableRole 匹配，无视 NodeView 增加的深度）
-//     let tableNode = null;
-//     let tablePos = -1;
-
-//     // 从当前位置向上查找直到文档根部
-//     for (let d = $cellPos.depth; d >= 0; d--) {
-//         const node = $cellPos.node(d);
-//         if (node.type.spec.tableRole === "table") {
-//             tableNode = node;
-//             tablePos = $cellPos.before(d);
-//             break;
-//         }
-//     }
-
-//     if (!tableNode || tablePos === -1) {
-//         return null;
-//     }
-
-//     // 3. 安全获取 DOM
-//     const tableDOM: any = view.nodeDOM(tablePos);
-//     if (!tableDOM) {
-//         return null;
-//     }
-
-//     // 4. 寻找 tableWrapper (兼容无 closest 的环境)
-//     // let tableWrapper = tableDOM;
-//     // while (tableWrapper && tableWrapper !== view.dom) {
-//     //     if (tableWrapper.classList && tableWrapper.classList.contains('tableWrapper')) {
-//     //         break;
-//     //     }
-//     //     tableWrapper = tableWrapper.parentNode;
-//     // }
-
-//     return {
-//         tableNode,
-//         tablePos,
-//         tableDOM: tableDOM.querySelector('table'),
-//         // 如果没找到 wrapper 类名，回退到 tableDOM.parentNode
-//         tableWrapper: closestTableView(tableDOM),
-//         $cellPos, // 保留此引用以便后续操作单元格
-//         rect
-//     };
-// }
 
 export const selectCellDimension = (view: EditorView, cell: HTMLTableCellElement, type: 'col' | 'row' = 'row') => {
     if (!cell) {

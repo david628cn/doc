@@ -11,7 +11,7 @@ import { AutoScroller } from '@/components/utils/autoScroller';
 import {
     getAxisMap,
     // getTableMatrix,
-    getSafeIndex,
+    getSafeInfo,
     // getCellSpanInfo,
     getCellSpanInfoByCellNode,
     getExtendedRange,
@@ -153,27 +153,6 @@ export class CtrolPanel {
             };
         }
     }
-    showIndicator(pos: number, axis: 'row' | 'col') {
-        if (!this.indicator) {
-            return;
-        }
-        this.indicator.className = `${CLASSNAME}-table-view-ctrol-panel-indicator ${CLASSNAME}-table-view-ctrol-panel-${axis}-axis`;
-        const ctrolPanelRect = getRect(this.ctrolPanel);
-        // const scrollLeft = getScroll(this.tableContainer);
-        if (axis === 'row') {
-            setPos(this.indicator, {
-                // width: containerRect.width,
-                left: 0,
-                top: pos - ctrolPanelRect.top
-            }, true);
-        } else {
-            setPos(this.indicator, {
-                // height: containerRect.height,
-                left: pos - ctrolPanelRect.left,
-                top: 0
-            }, true);
-        }
-    }
     handleClickPanel = (e: any) => {
         // if (!isTouchEvent(e)) {
         // }
@@ -247,21 +226,8 @@ export class CtrolPanel {
             };
             this.moving = type;
 
-
             this.autoScroller.clear();
             this.autoScroller.start();
-
-            // const dimension = getDimensionByCell(this.view, this.cell);
-            // this.matrix = getTableMatrix(this.table);
-            // this.axis = getAxisMap(this.table);
-            // const cellSpanInfo = getCellSpanInfo(this.cell as HTMLTableCellElement, this.matrix);
-            // this.sourceRange = getExtendedRange(
-            //     this.moving === 'col' ? cellSpanInfo.startCol : cellSpanInfo.startRow,
-            //     this.matrix,
-            //     this.moving
-            // );
-            // this.toIndex = this.sourceRange.start;
-            // this.createPreview(this.previewRect);
 
             selectCellDimension(this.view, this.cell as HTMLTableCellElement, type);
 
@@ -279,23 +245,6 @@ export class CtrolPanel {
                 this.moving
             );
             this.toIndex = this.sourceRange.start;
-
-            // const tableRect = getRect(this.table);
-            // const cellRect = getRect(this.cell);
-            // const parentViewRect = getRect(this.view.dom.parentNode as HTMLDivElement);
-            // const relativeCellRect = {
-            //     width: cellRect.width,
-            //     height: cellRect.height,
-            //     left: cellRect.left - parentViewRect.left,
-            //     top: cellRect.top - parentViewRect.top
-            // };
-
-            // this.previewRect = {
-            //     width: type === 'row' ? tableRect.width : relativeCellRect.width,
-            //     height: type === 'col' ? tableRect.height : relativeCellRect.height,
-            //     left: relativeCellRect.left,
-            //     top: relativeCellRect.top
-            // };
 
             this.previewRect = getCellDimensionRect(this.view, this.cell as HTMLTableCellElement, type, this.view.dom.parentNode as HTMLDivElement);
             this.createPreview(this.previewRect);
@@ -357,28 +306,14 @@ export class CtrolPanel {
             top
         };
 
-        const axis = getAxisMap(this.table);
-
-        const curPos = this.moving === 'row' ? this.endPos.top : this.endPos.left;
-        const lines = this.moving === 'row' ? axis.yLines : axis.xLines;
-
-        this.toIndex = getSafeIndex(curPos, lines, this.matrix, this.moving);
-
-        const indicatorPos = lines[this.toIndex];
-        this.indicator.style.opacity = '1';
-        this.showIndicator(indicatorPos, this.moving);
-
-        this.preview.style.opacity = '1';
-
-        // 如果處於被切斷區域，可以改變導引線顏色
-        // this.indicator.style.backgroundColor = moveContext.isBlocked ? 'red' : '#0052cc';
-
-        left = this.moving === 'row' ? this.previewRect.left : this.previewRect.left + this.increase.left;
-        top = this.moving === 'col' ? this.previewRect.top : this.previewRect.top + this.increase.top;
+        const safeInfo = getSafeInfo(this.endPos, getAxisMap(this.table), this.matrix, this.moving);
+        
+        this.toIndex = safeInfo.index;
+        this.showIndicator(safeInfo.pos, this.moving);
 
         setPos(this.preview, {
-            left,
-            top
+            left: this.moving === 'row' ? this.previewRect.left : this.previewRect.left + this.increase.left,
+            top: this.moving === 'col' ? this.previewRect.top : this.previewRect.top + this.increase.top
         }, true);
 
         this.autoScroller.update(getRect(this.preview), getRect(this.tableContainer));
@@ -397,25 +332,26 @@ export class CtrolPanel {
             e.cancelBubble = true;
         }
         this.current = null;
-        this.removePreview();
-        this.indicator.style.opacity = '0';
-        setPos(this.indicator, {
-            left: 0,
-            top: 0
-        }, true);
-
+        this.hidePreview();
+        this.hideIndicator();
+        
         const { start, end } = this.sourceRange;
         let finalTo = this.toIndex;
 
-        // 1. 拦截原地移动：目标线在源块的范围内（start 到 end+1）
+        // if (finalTo >= start && finalTo <= end + 1) {
+        //     console.log('原地移动');
+        // } else {
+            
+        // }
         if (finalTo < start || finalTo > end + 1) {
-            const { state, dispatch } = this.view;
-
-            if (finalTo > start) {
+            // 2. 核心换算逻辑
+            if (finalTo > end) {
+                // 向后移：目标索引减去移动块的大小
                 // finalTo = finalTo - (end - start + 1);
                 finalTo = finalTo - 1;
             }
-
+            console.log('移动', this.sourceRange, finalTo);
+            const { state, dispatch } = this.view;
             try {
                 const command = this.moving === 'col'
                     ? moveTableColumn({ from: start, to: finalTo })
@@ -429,6 +365,30 @@ export class CtrolPanel {
                 console.warn("Caught Prosemirror Table Map Error:", err);
             }
         }
+
+        
+        // 1. 拦截原地移动：目标线在源块的范围内（start 到 end+1）
+        // if (finalTo < start || finalTo > end + 1) {
+        //     const { state, dispatch } = this.view;
+
+        //     if (finalTo > start) {
+        //         // finalTo = finalTo - (end - start + 1);
+        //         finalTo = finalTo - 1;
+        //     }
+
+        //     try {
+        //         const command = this.moving === 'col'
+        //             ? moveTableColumn({ from: start, to: finalTo })
+        //             : moveTableRow({ from: start, to: finalTo });
+        //         command(state, dispatch);
+        //         // const success = command(state, dispatch);
+        //         // if (success) {
+        //         //     setTimeout(() => this.view.focus(), 10);
+        //         // }
+        //     } catch (err: any) {
+        //         console.warn("Caught Prosemirror Table Map Error:", err);
+        //     }
+        // }
 
 
         document.removeEventListener('mousemove', this.handleMove);
@@ -454,6 +414,7 @@ export class CtrolPanel {
         // if (content) {
         //     this.preview.appendChild(content);
         // }
+        this.preview.style.opacity = '1';
         if (rect) {
             this.preview.style.width = `${rect.width}px`;
             this.preview.style.height = `${rect.height}px`;
@@ -464,11 +425,41 @@ export class CtrolPanel {
         }
         this.view.dom.parentNode.appendChild(this.preview);
     }
-    removePreview() {
+    hidePreview() {
         if (this.preview && this.preview.parentNode) {
             this.preview.parentNode.removeChild(this.preview);
         }
+        this.preview.style.opacity = '0';
         this.preview.innerHTML = '';
+    }
+    showIndicator(pos: number, axis: 'row' | 'col') {
+        if (!this.indicator) {
+            return;
+        }
+        this.indicator.className = `${CLASSNAME}-table-view-ctrol-panel-indicator ${CLASSNAME}-table-view-ctrol-panel-${axis}-axis`;
+        this.indicator.style.opacity = '1';
+        const ctrolPanelRect = getRect(this.ctrolPanel);
+        // const scrollLeft = getScroll(this.tableContainer);
+        if (axis === 'row') {
+            setPos(this.indicator, {
+                // width: containerRect.width,
+                left: 0,
+                top: pos - ctrolPanelRect.top
+            }, true);
+        } else {
+            setPos(this.indicator, {
+                // height: containerRect.height,
+                left: pos - ctrolPanelRect.left,
+                top: 0
+            }, true);
+        }
+    }
+    hideIndicator() {
+        this.indicator.style.opacity = '0';
+        setPos(this.indicator, {
+            left: 0,
+            top: 0
+        }, true);
     }
     showColPanel() {
         if (this.colPanel) {
