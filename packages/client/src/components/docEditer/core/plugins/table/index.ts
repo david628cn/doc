@@ -49,7 +49,9 @@ export const table = ({
                     }
                 },
                 destroy() {
-
+                    if (ctrolPanel) {
+                        ctrolPanel.destroy();
+                    }
                 }
             };
         },

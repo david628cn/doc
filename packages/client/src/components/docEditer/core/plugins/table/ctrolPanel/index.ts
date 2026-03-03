@@ -1,13 +1,12 @@
 import { EditorView } from 'prosemirror-view';
 import {
-    TableMap,
-    moveTableRow,
-    moveTableColumn,
+    // TableMap,
+    // moveTableRow,
+    // moveTableColumn,
     CellSelection,
     cellAround
 } from 'prosemirror-tables';
-// import { DragDrop } from '@/components/dragDrop';
-import { AutoScroller } from '@/components/utils/autoScroller';
+import { DragDrop } from '@/components/dragDrop';
 import {
     getAxisMap,
     // getTableMatrix,
@@ -25,7 +24,8 @@ import {
     // getDimensionDOM,
     // closestTr
 } from '@/components/docEditer/core/utils';
-import { getRect, getAlignPos, setPos, getPadding } from '@/components/utils/align';
+import { getRect, getAlignPos, setPos } from '@/components/utils/align';
+import { moveTableRowEx as moveTableRow, moveTableColumnEx as moveTableColumn } from './utils';
 import { CLASSNAME } from '@/global';
 import './index.less';
 
@@ -35,10 +35,10 @@ export type CtrolPanelProps = {
     tableContainer: HTMLElement | null | undefined;
     // container?: HTMLElement | null | undefined;
     cell?: HTMLElement | null | undefined;
-    onClickPanel?: Function;
-    onStart?: Function;
-    onMove?: Function;
-    onEnd?: Function;
+    // onClickPanel?: Function;
+    // onStart?: Function;
+    // onMove?: Function;
+    // onEnd?: Function;
     [key: string]: unknown;
 };
 
@@ -51,35 +51,14 @@ export class CtrolPanel {
     rowPanel: HTMLElement | null | undefined;
     indicator: HTMLElement | null | undefined;
     cell: HTMLElement | null | undefined;
-    preview: HTMLElement | null | undefined;
     moving: 'col' | 'row' | null = null;
-    // active: 'col' | 'row' | null = null;
+    colDrag: DragDrop;
+    rowDrag: DragDrop;
     current: any;
     matrix: any;
-    autoScroller: AutoScroller;
     sourceRange: any;
-    // fromIndex: number | null | undefined;
     toIndex: number | null | undefined;
-    startXY = {
-        left: 0,
-        top: 0
-    };
-    endXY = {
-        left: 0,
-        top: 0
-    };
-    startPos: any = {
-        left: 0,
-        top: 0
-    };
-    endPos: any = {
-        left: 0,
-        top: 0
-    };
-    increase: any = {
-        left: 0,
-        top: 0
-    };
+    preview: HTMLElement | null | undefined;
     previewRect = {
         width: 0,
         height: 0,
@@ -103,14 +82,42 @@ export class CtrolPanel {
         this.indicator = document.createElement('div');
         this.indicator.className = `${CLASSNAME}-table-view-ctrol-panel-indicator`;
 
-        this.autoScroller = new AutoScroller(this.tableContainer);
-
         this.ctrolPanel.appendChild(this.colPanel);
         this.ctrolPanel.appendChild(this.rowPanel);
         this.ctrolPanel.appendChild(this.indicator);
 
-        this.ctrolPanel.addEventListener('click', this.handleClickPanel, false);
-        this.ctrolPanel.addEventListener('mousedown', this.handleStart, false);
+        this.colDrag = new DragDrop({
+            handle: this.colPanel,
+            container: this.tableContainer,
+            // preview: this.preview,
+            translate: true,
+            onStart: (e: any, drag: DragDrop) => {
+                this.handleStart('col', drag);
+            },
+            onMove: (e: any, drag: DragDrop) => {
+                this.handleMove('col', drag);
+            },
+            onEnd: (e: any, drag: DragDrop) => {
+                this.handleEnd('col', drag);
+            }
+        });
+        this.rowDrag = new DragDrop({
+            handle: this.rowPanel,
+            container: this.tableContainer,
+            // preview: this.preview,
+            translate: true,
+            onStart: (e: any, drag: DragDrop) => {
+                this.handleStart('row', drag);
+            },
+            onMove: (e: any, drag: DragDrop) => {
+                this.handleMove('row', drag);
+            },
+            onEnd: (e: any, drag: DragDrop) => {
+                this.handleEnd('row', drag);
+            }
+        });
+
+        // this.ctrolPanel.addEventListener('click', this.handleClickPanel, false);
     }
     // getPosByDom(dom: any) {
     //     let xy = dom.style.transform.split(/[(|,|)]/g);
@@ -124,223 +131,82 @@ export class CtrolPanel {
     //     //dom.style.left = pos[0] + 'px';
     //     //dom.style.top = pos[1] + 'px';
     // }
-    onClickPanel = (e: MouseEvent, type: 'col' | 'row') => { }
-    onStart(e: any, type: 'col' | 'row') { }
-    onMove(e: any, type: 'col' | 'row') { }
-    onEnd(e: any, type: 'col' | 'row') { }
-    isTouchEvent(event: any) {
-        return (
-            (event.touches && event.touches.length) ||
-            (event.changedTouches && event.changedTouches.length)
+
+    // onClickPanel = (e: MouseEvent, type: 'col' | 'row') => { }
+    // onStart(e: any, type: 'col' | 'row') { }
+    // onMove(e: any, type: 'col' | 'row') { }
+    // onEnd(e: any, type: 'col' | 'row') { }
+
+    // handleClickPanel = (e: any) => {
+    //     // if (!isTouchEvent(e)) {
+    //     // }
+    //     if (e.preventDefault) {
+    //         e.preventDefault();
+    //     } else {
+    //         e.returnValue = false;
+    //     }
+    //     if (e.stopPropagation) {
+    //         e.stopPropagation();
+    //     } else {
+    //         e.cancelBubble = true;
+    //     }
+    //     const col = this.colPanel?.contains(e.target as Node);
+    //     const row = this.rowPanel?.contains(e.target as Node);
+    //     if (col || row) {
+    //         let type: 'col' | 'row';
+    //         if (col) {
+    //             type = 'col';
+    //         } else if (row) {
+    //             type = 'row';
+    //         }
+    //         // selectDimensionByCell(this.view, this.cell, type);
+    //         this.onClickPanel?.(e, type);
+    //     }
+    // }
+    handleStart(type: 'col' | 'row' = 'row', drag: DragDrop) {
+        selectCellDimension(this.view, this.cell as HTMLTableCellElement, type);
+        const cellPos = this.view.posAtDOM(this.cell, 0);
+        const $cellPos = this.view.state.doc.resolve(cellPos);
+        const tableNodeInfo = findParentNodeClosestToPos($cellPos, n => n.type.spec.tableRole === 'table');
+        const cellNodeInfo = findParentNodeClosestToPos($cellPos, n => n.type.spec.tableRole === 'cell' || n.type.spec.tableRole === 'header_cell');
+        // if (tableNodeInfo) {
+        const tableNode = tableNodeInfo.node;
+        this.matrix = getTableNodeMatrix(tableNode);
+        const cellSpanInfo = getCellSpanInfoByCellNode(cellNodeInfo.node, this.matrix);
+        this.sourceRange = getExtendedRange(
+            type === 'col' ? cellSpanInfo.startCol : cellSpanInfo.startRow,
+            this.matrix,
+            type
         );
+        this.toIndex = this.sourceRange.start;
+        this.previewRect = getCellDimensionRect(this.view, this.cell as HTMLTableCellElement, type, this.view.dom.parentNode as HTMLDivElement);
+        this.createPreview(this.previewRect);
+        drag.preview = this.preview;
     }
-    getPosition(event: any) {
-        if (event.touches && event.touches.length) {
-            return {
-                left: event.touches[0].pageX,
-                top: event.touches[0].pageY
-            };
-        } else if (event.changedTouches && event.changedTouches.length) {
-            return {
-                left: event.changedTouches[0].pageX,
-                top: event.changedTouches[0].pageY
-            };
-        } else {
-            return {
-                left: event.pageX,
-                top: event.pageY
-            };
-        }
-    }
-    handleClickPanel = (e: any) => {
-        // if (!isTouchEvent(e)) {
-        // }
-        if (e.preventDefault) {
-            e.preventDefault();
-        } else {
-            e.returnValue = false;
-        }
-        if (e.stopPropagation) {
-            e.stopPropagation();
-        } else {
-            e.cancelBubble = true;
-        }
-        const col = this.colPanel?.contains(e.target as Node);
-        const row = this.rowPanel?.contains(e.target as Node);
-        if (col || row) {
-            let type: 'col' | 'row';
-            if (col) {
-                type = 'col';
-            } else if (row) {
-                type = 'row';
-            }
-            // selectDimensionByCell(this.view, this.cell, type);
-            this.onClickPanel?.(e, type);
-        }
-    }
-    handleStart = (e: any) => {
-        // if (!isTouchEvent(e)) {
-        // }
-        if (e.preventDefault) {
-            e.preventDefault();
-        } else {
-            e.returnValue = false;
-        }
-        if (e.stopPropagation) {
-            e.stopPropagation();
-        } else {
-            e.cancelBubble = true;
-        }
-        if (e.button !== 0 && e.button !== 1) {
-            return;
-        }
-        const col = this.colPanel?.contains(e.target as Node);
-        const row = this.rowPanel?.contains(e.target as Node);
-        if (col || row) {
-            let type: 'col' | 'row';
-            if (col) {
-                type = 'col';
-                this.current = this.colPanel;
-            } else if (row) {
-                type = 'row';
-                this.current = this.rowPanel;
-            }
-
-            const rect = getRect(this.current);
-            const ctrolPanelRect = getRect(this.ctrolPanel);
-            const relativeRect = {
-                width: rect.width,
-                height: rect.height,
-                left: rect.left - ctrolPanelRect.left,
-                top: rect.top - ctrolPanelRect.top
-            };
-            this.startXY = this.endXY = {
-                left: relativeRect.left,
-                top: relativeRect.top
-            };
-            const pos = this.getPosition(e);
-            this.endPos = this.startPos = {
-                left: pos.left,
-                top: pos.top
-            };
-            this.moving = type;
-
-            this.autoScroller.clear();
-            this.autoScroller.start();
-
-            selectCellDimension(this.view, this.cell as HTMLTableCellElement, type);
-
-            const cellPos = this.view.posAtDOM(this.cell, 0);
-            const $cellPos = this.view.state.doc.resolve(cellPos);
-            const tableNodeInfo = findParentNodeClosestToPos($cellPos, n => n.type.spec.tableRole === 'table');
-            const cellNodeInfo = findParentNodeClosestToPos($cellPos, n => n.type.spec.tableRole === 'cell' || n.type.spec.tableRole === 'header_cell');
-            // if (tableNodeInfo) {
-            const tableNode = tableNodeInfo.node;
-            this.matrix = getTableNodeMatrix(tableNode);
-            const cellSpanInfo = getCellSpanInfoByCellNode(cellNodeInfo.node, this.matrix);
-            this.sourceRange = getExtendedRange(
-                this.moving === 'col' ? cellSpanInfo.startCol : cellSpanInfo.startRow,
-                this.matrix,
-                this.moving
-            );
-            this.toIndex = this.sourceRange.start;
-
-            this.previewRect = getCellDimensionRect(this.view, this.cell as HTMLTableCellElement, type, this.view.dom.parentNode as HTMLDivElement);
-            this.createPreview(this.previewRect);
-            // }
-
-            document.addEventListener('mousemove', this.handleMove, false);
-            document.addEventListener('touchmove', this.handleMove, { passive: false });
-
-            document.addEventListener('mouseup', this.handleEnd, false);
-            document.addEventListener('touchend', this.handleEnd, { passive: false });
-            document.addEventListener('touchcancel', this.handleEnd, { passive: false });
-
-            this.onStart(e, this.moving);
-        }
-    }
-    handleMove = (e: any) => {
-        // if (!isTouchEvent(e)) {
-        // }
-        if (e.preventDefault) {
-            e.preventDefault();
-        } else {
-            e.returnValue = false;
-        }
-        if (e.stopPropagation) {
-            e.stopPropagation();
-        } else {
-            e.cancelBubble = true;
-        }
-
-        if (!this.moving) {
-            return;
-        }
-
-        const pos = this.getPosition(e);
-        this.endPos = {
-            left: pos.left,
-            top: pos.top
-        };
-
-        // if (this.endPos.left - this.startPos.left === 0 && this.endPos.top - this.startPos.top === 0) {
-        //     return;
-        // }
-
-        this.increase = {
-            left: this.endPos.left - this.startPos.left,
-            top: this.endPos.top - this.startPos.top
-        };
-        let left = this.startXY.left + this.increase.left;
-        let top = this.startXY.top + this.increase.top;
-
-        // if (this.moving === 'col') {
-        //     top = 0;
-        // } else if (this.moving === 'row') {
-        //     left = 0;
-        // }
-
-        this.endXY = {
-            left,
-            top
-        };
-
-        const safeInfo = getSafeInfo(this.endPos, getAxisMap(this.table), this.matrix, this.moving);
-        
+    handleMove(type: 'col' | 'row' = 'row', drag: DragDrop) {
+        this.moving = type;
+        const safeInfo = getSafeInfo(drag.endPos, getAxisMap(this.table), this.matrix, type);
         this.toIndex = safeInfo.index;
-        this.showIndicator(safeInfo.pos, this.moving);
-
+        this.showIndicator(safeInfo.pos, type);
         setPos(this.preview, {
-            left: this.moving === 'row' ? this.previewRect.left : this.previewRect.left + this.increase.left,
-            top: this.moving === 'col' ? this.previewRect.top : this.previewRect.top + this.increase.top
+            left: type === 'row' ? this.previewRect.left : this.previewRect.left + drag.increase.left,
+            top: type === 'col' ? this.previewRect.top : this.previewRect.top + drag.increase.top
         }, true);
-
-        this.autoScroller.update(getRect(this.preview), getRect(this.tableContainer));
-
-        this.onMove(e, this.moving);
     }
-    handleEnd = (e: any) => {
-        if (!this.isTouchEvent(e)) {
-            e.preventDefault();
-        } else {
-            e.returnValue = false;
-        }
-        if (e.stopPropagation) {
-            e.stopPropagation();
-        } else {
-            e.cancelBubble = true;
-        }
+    handleEnd(type: 'col' | 'row' = 'row', drag: DragDrop) {
+        drag.preview = null;
+        this.moving = null;
         this.current = null;
         this.hidePreview();
         this.hideIndicator();
-        
+
         const { start, end } = this.sourceRange;
         let finalTo = this.toIndex;
 
         // if (finalTo >= start && finalTo <= end + 1) {
         //     console.log('原地移动');
         // } else {
-            
+
         // }
         if (finalTo < start || finalTo > end + 1) {
             // 2. 核心换算逻辑
@@ -351,22 +217,22 @@ export class CtrolPanel {
             }
             const { state, dispatch } = this.view;
             try {
-                const command = this.moving === 'col'
+                const command = type === 'col'
                     ? moveTableColumn({ from: start, to: finalTo, select: true })
-                    : moveTableRow({ from: start, to: finalTo, select: true });                
+                    : moveTableRow({ from: start, to: finalTo, select: true });
                 const success = command(state, dispatch);
                 // if (success) {
                 //     setTimeout(() => {
-                //         selectCellDimension(this.view, this.cell as HTMLTableCellElement, this.moving);
+                //         selectCellDimension(this.view, this.cell as HTMLTableCellElement, type);
                 //     }, 1000);
-                    
+
                 // }
             } catch (err: any) {
                 console.warn("Caught Prosemirror Table Map Error:", err);
             }
         }
 
-        
+
         // 1. 拦截原地移动：目标线在源块的范围内（start 到 end+1）
         // if (finalTo < start || finalTo > end + 1) {
         //     const { state, dispatch } = this.view;
@@ -377,7 +243,7 @@ export class CtrolPanel {
         //     }
 
         //     try {
-        //         const command = this.moving === 'col'
+        //         const command = type === 'col'
         //             ? moveTableColumn({ from: start, to: finalTo })
         //             : moveTableRow({ from: start, to: finalTo });
         //         command(state, dispatch);
@@ -389,19 +255,6 @@ export class CtrolPanel {
         //         console.warn("Caught Prosemirror Table Map Error:", err);
         //     }
         // }
-
-
-        document.removeEventListener('mousemove', this.handleMove);
-        document.removeEventListener('touchmove', this.handleMove);
-
-        document.removeEventListener('mouseup', this.handleEnd);
-        document.removeEventListener('touchend', this.handleEnd);
-        document.removeEventListener('touchcancel', this.handleEnd);
-
-        this.autoScroller.clear();
-
-        this.onEnd(e, this.moving);
-        this.moving = null;
     }
     createPreview(rect?: any) {
         if (this.preview && this.preview.parentNode) {
@@ -544,5 +397,9 @@ export class CtrolPanel {
             top: rect.top - ctrolPanelRect.top
         }, true);
         this.ctrolPanel.appendChild(CtrolPanel.selectRect);
+    }
+    destroy() {
+        this.colDrag.destroy();
+        this.rowDrag.destroy();
     }
 }

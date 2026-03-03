@@ -6,7 +6,7 @@ import {
 import type { EditorState, Transaction } from 'prosemirror-state';
 import type { EditorView } from 'prosemirror-view';
 import { getPosition, getRect, setAlignPos } from '@/components/utils/align';
-import { AutoScroller } from '@/components/utils/autoScroller';
+import { AutoScroller } from '@/components/dragDrop';
 import type { Node } from 'prosemirror-model';
 // import {
 //     // newlineInCode,
