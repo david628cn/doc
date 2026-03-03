@@ -1,6 +1,6 @@
 import { EditorView } from 'prosemirror-view';
 import {
-    // TableMap,
+    TableMap,
     moveTableRow,
     moveTableColumn,
     CellSelection,
@@ -56,7 +56,6 @@ export class CtrolPanel {
     // active: 'col' | 'row' | null = null;
     current: any;
     matrix: any;
-    axis: any;
     autoScroller: AutoScroller;
     sourceRange: any;
     // fromIndex: number | null | undefined;
@@ -350,16 +349,17 @@ export class CtrolPanel {
                 // finalTo = finalTo - (end - start + 1);
                 finalTo = finalTo - 1;
             }
-            console.log('移动', this.sourceRange, finalTo);
             const { state, dispatch } = this.view;
             try {
                 const command = this.moving === 'col'
-                    ? moveTableColumn({ from: start, to: finalTo })
-                    : moveTableRow({ from: start, to: finalTo });
-                command(state, dispatch);
-                // const success = command(state, dispatch);
+                    ? moveTableColumn({ from: start, to: finalTo, select: true })
+                    : moveTableRow({ from: start, to: finalTo, select: true });                
+                const success = command(state, dispatch);
                 // if (success) {
-                //     setTimeout(() => this.view.focus(), 10);
+                //     setTimeout(() => {
+                //         selectCellDimension(this.view, this.cell as HTMLTableCellElement, this.moving);
+                //     }, 1000);
+                    
                 // }
             } catch (err: any) {
                 console.warn("Caught Prosemirror Table Map Error:", err);
