@@ -2,7 +2,9 @@ import { EditorView } from 'prosemirror-view';
 import {
     // TableMap,
     moveTableRow,
-    moveTableColumn
+    moveTableColumn,
+    CellSelection,
+    cellAround
 } from 'prosemirror-tables';
 // import { DragDrop } from '@/components/dragDrop';
 import { AutoScroller } from '@/components/utils/autoScroller';
@@ -13,10 +15,12 @@ import {
     // getCellSpanInfo,
     getCellSpanInfoByCellNode,
     getExtendedRange,
-    isStay,
-    selectDimensionByCell,
+    selectCellDimension,
     findParentNodeClosestToPos,
-    getTableNodeMatrix
+    getTableNodeMatrix,
+    getCellSelectionDOMRect,
+    getNodeRect,
+    getCellDimensionRect
     // getDimensionByCell,
     // getDimensionDOM,
     // closestTr
@@ -77,13 +81,7 @@ export class CtrolPanel {
         left: 0,
         top: 0
     };
-    startPreviewRect = {
-        width: 0,
-        height: 0,
-        left: 0,
-        top: 0
-    };
-    endPreviewRect = {
+    previewRect = {
         width: 0,
         height: 0,
         left: 0,
@@ -229,7 +227,7 @@ export class CtrolPanel {
                 type = 'row';
                 this.current = this.rowPanel;
             }
-            
+
             const rect = getRect(this.current);
             const ctrolPanelRect = getRect(this.ctrolPanel);
             const relativeRect = {
@@ -248,22 +246,7 @@ export class CtrolPanel {
                 top: pos.top
             };
             this.moving = type;
-            // this.table = closestTable(this.cell);
-            const tableRect = getRect(this.table);
-            const cellRect = getRect(this.cell);
-            const parentViewRect = getRect(this.view.dom.parentNode as HTMLDivElement);
-            const relativeCellRect = {
-                width: cellRect.width,
-                height: cellRect.height,
-                left: cellRect.left - parentViewRect.left,
-                top: cellRect.top - parentViewRect.top
-            };
-            this.startPreviewRect = {
-                width: type === 'row' ? tableRect.width : relativeCellRect.width,
-                height: type === 'col' ? tableRect.height : relativeCellRect.height,
-                left: relativeCellRect.left,
-                top: relativeCellRect.top
-            };
+
 
             this.autoScroller.clear();
             this.autoScroller.start();
@@ -278,26 +261,45 @@ export class CtrolPanel {
             //     this.moving
             // );
             // this.toIndex = this.sourceRange.start;
-            // this.createPreview(this.startPreviewRect);
+            // this.createPreview(this.previewRect);
 
-            selectDimensionByCell(this.view, this.cell as HTMLTableCellElement, type);
+            selectCellDimension(this.view, this.cell as HTMLTableCellElement, type);
 
             const cellPos = this.view.posAtDOM(this.cell, 0);
             const $cellPos = this.view.state.doc.resolve(cellPos);
-            const tableNodeInfo =  findParentNodeClosestToPos($cellPos, n => n.type.spec.tableRole === 'table');
+            const tableNodeInfo = findParentNodeClosestToPos($cellPos, n => n.type.spec.tableRole === 'table');
             const cellNodeInfo = findParentNodeClosestToPos($cellPos, n => n.type.spec.tableRole === 'cell' || n.type.spec.tableRole === 'header_cell');
-            if (tableNodeInfo) {
-                const tableNode = tableNodeInfo.node;
-                this.matrix = getTableNodeMatrix(tableNode);
-                const cellSpanInfo = getCellSpanInfoByCellNode(cellNodeInfo.node, this.matrix);
-                this.sourceRange = getExtendedRange(
-                    this.moving === 'col' ? cellSpanInfo.startCol : cellSpanInfo.startRow,
-                    this.matrix,
-                    this.moving
-                );
-                this.toIndex = this.sourceRange.start;
-                this.createPreview(this.startPreviewRect);
-            }
+            // if (tableNodeInfo) {
+            const tableNode = tableNodeInfo.node;
+            this.matrix = getTableNodeMatrix(tableNode);
+            const cellSpanInfo = getCellSpanInfoByCellNode(cellNodeInfo.node, this.matrix);
+            this.sourceRange = getExtendedRange(
+                this.moving === 'col' ? cellSpanInfo.startCol : cellSpanInfo.startRow,
+                this.matrix,
+                this.moving
+            );
+            this.toIndex = this.sourceRange.start;
+
+            // const tableRect = getRect(this.table);
+            // const cellRect = getRect(this.cell);
+            // const parentViewRect = getRect(this.view.dom.parentNode as HTMLDivElement);
+            // const relativeCellRect = {
+            //     width: cellRect.width,
+            //     height: cellRect.height,
+            //     left: cellRect.left - parentViewRect.left,
+            //     top: cellRect.top - parentViewRect.top
+            // };
+
+            // this.previewRect = {
+            //     width: type === 'row' ? tableRect.width : relativeCellRect.width,
+            //     height: type === 'col' ? tableRect.height : relativeCellRect.height,
+            //     left: relativeCellRect.left,
+            //     top: relativeCellRect.top
+            // };
+
+            this.previewRect = getCellDimensionRect(this.view, this.cell as HTMLTableCellElement, type, this.view.dom.parentNode as HTMLDivElement);
+            this.createPreview(this.previewRect);
+            // }
 
             document.addEventListener('mousemove', this.handleMove, false);
             document.addEventListener('touchmove', this.handleMove, { passive: false });
@@ -333,9 +335,9 @@ export class CtrolPanel {
             top: pos.top
         };
 
-        if (this.endPos.left - this.startPos.left === 0 && this.endPos.top - this.startPos.top === 0) {
-            return;
-        }
+        // if (this.endPos.left - this.startPos.left === 0 && this.endPos.top - this.startPos.top === 0) {
+        //     return;
+        // }
 
         this.increase = {
             left: this.endPos.left - this.startPos.left,
@@ -361,15 +363,18 @@ export class CtrolPanel {
         const lines = this.moving === 'row' ? axis.yLines : axis.xLines;
 
         this.toIndex = getSafeIndex(curPos, lines, this.matrix, this.moving);
-        const finalPos = lines[this.toIndex];
 
+        const indicatorPos = lines[this.toIndex];
         this.indicator.style.opacity = '1';
-        this.showIndicator(finalPos, this.moving);
+        this.showIndicator(indicatorPos, this.moving);
 
         this.preview.style.opacity = '1';
 
-        left = this.moving === 'row' ? this.startPreviewRect.left : this.startPreviewRect.left + this.increase.left;
-        top = this.moving === 'col' ? this.startPreviewRect.top : this.startPreviewRect.top + this.increase.top;
+        // 如果處於被切斷區域，可以改變導引線顏色
+        // this.indicator.style.backgroundColor = moveContext.isBlocked ? 'red' : '#0052cc';
+
+        left = this.moving === 'row' ? this.previewRect.left : this.previewRect.left + this.increase.left;
+        top = this.moving === 'col' ? this.previewRect.top : this.previewRect.top + this.increase.top;
 
         setPos(this.preview, {
             left,
@@ -400,30 +405,31 @@ export class CtrolPanel {
         }, true);
 
         const { start, end } = this.sourceRange;
-    
-        if (!isStay(this.toIndex, this.sourceRange)) {
+        let finalTo = this.toIndex;
+
+        // 1. 拦截原地移动：目标线在源块的范围内（start 到 end+1）
+        if (finalTo < start || finalTo > end + 1) {
             const { state, dispatch } = this.view;
 
-            let finalTo = this.toIndex;
-            // const rangeSize = end - start + 1;
             if (finalTo > start) {
-                finalTo -= 1;
+                // finalTo = finalTo - (end - start + 1);
+                finalTo = finalTo - 1;
             }
+
             try {
-                const pos = this.view.posAtDOM(this.cell, 0);
                 const command = this.moving === 'col'
                     ? moveTableColumn({ from: start, to: finalTo })
                     : moveTableRow({ from: start, to: finalTo });
-
-                const success = command(state, dispatch);
-                if (success) {
-                    setTimeout(() => this.view.focus(), 10);
-                }
+                command(state, dispatch);
+                // const success = command(state, dispatch);
+                // if (success) {
+                //     setTimeout(() => this.view.focus(), 10);
+                // }
             } catch (err: any) {
                 console.warn("Caught Prosemirror Table Map Error:", err);
             }
-            
         }
+
 
         document.removeEventListener('mousemove', this.handleMove);
         document.removeEventListener('touchmove', this.handleMove);
@@ -506,7 +512,26 @@ export class CtrolPanel {
             this.rowPanel.classList.remove(`${CLASSNAME}-table-view-row-panel-show`);
         }
     }
-    static showSelectRect(scrop: CtrolPanel, rect: any) {
+    getSelectionCellsRect() {
+        const { selection } = this.view.state;
+        let rect = null;
+        if (selection instanceof CellSelection) {
+            rect = getCellSelectionDOMRect(this.view, selection);
+        } else {
+            const { $anchor } = selection;
+            const cell = cellAround($anchor);
+            if (cell) {
+                rect = getNodeRect(this.view, cell.pos)
+            }
+        }
+        // const tableNodeInfo = findParentNodeClosestToPos(selection.$from, n => n.type.spec.tableRole === 'cell' || n.type.spec.tableRole === 'header_cell');
+        // const dom = view.nodeDOM(tableNodeInfo.pos); 
+        // const tableContainer = closestTableView(dom);
+        // const curCtolPanel = ctrolPanelMap.get(tableContainer);
+        return rect;
+
+    }
+    showSelectionCells() {
         if (!CtrolPanel.selectRect) {
             CtrolPanel.selectRect = document.createElement('div');
             CtrolPanel.selectRect.className = `${CLASSNAME}-table-view-cell-selection`;
@@ -517,15 +542,16 @@ export class CtrolPanel {
         if (CtrolPanel.selectRect.parentNode) {
             CtrolPanel.selectRect.parentNode.removeChild(CtrolPanel.selectRect);
         }
+        const rect = this.getSelectionCellsRect();
         CtrolPanel.selectRect.style.width = `${rect.width}px`;
         CtrolPanel.selectRect.style.height = `${rect.height}px`;
-        const ctrolPanelRect = getRect(scrop.ctrolPanel);
+        const ctrolPanelRect = getRect(this.ctrolPanel);
         // const l = getPadding(scrop.ctrolPanel, 'l');
         // const t = getPadding(scrop.ctrolPanel, 't');
         setPos(CtrolPanel.selectRect, {
             left: rect.left - ctrolPanelRect.left,
             top: rect.top - ctrolPanelRect.top
         }, true);
-        scrop.ctrolPanel.appendChild(CtrolPanel.selectRect);
+        this.ctrolPanel.appendChild(CtrolPanel.selectRect);
     }
 }

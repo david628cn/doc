@@ -3,7 +3,6 @@ import { type EditorView } from 'prosemirror-view';
 import type { Node } from 'prosemirror-model';
 import {
     CellSelection,
-    cellAround,
     TableMap
 } from 'prosemirror-tables';
 import { CLASSNAME } from '@/global';
@@ -859,41 +858,12 @@ export const getAxisMap = (tableElement: HTMLTableElement) => {
 }
 
 /**
- * 核心判定：输入鼠标坐标，输出逻辑索引
- */
-// export const getLogicIndex = (pos: number, lines: number[]) => {
-//     // 寻找鼠标落在哪个区间
-//     // 例如：pos = 150, lines = [100, 200, 300] -> 返回索引 1 (代表在第0和第1列之间)
-//     for (let i = 0; i < lines.length - 1; i++) {
-//         const midPoint = (lines[i] + lines[i + 1]) / 2;
-//         if (pos < midPoint) {
-//             return i;
-//         }
-//     }
-//     return lines.length - 1;
-//     // 示例：在 mousemove 中调用
-//     // let targetCol = getLogicIndex(e.clientX, xLines);
-//     // let targetRow = getLogicIndex(e.clientY, yLines);
-
-//     // 1. Mousedown (拖动柄):
-//     // 调用 getAxisMap(table) 缓存刻度。
-//     // 调用 getTableCellSizes(table) 拿到 tableMatrix。
-//     // 确定源范围 sourceRange（比如你拖动的是第 2 行到第 3 行的合并块）。
-//     // 2. Mousemove:
-//     // rawCol = getLogicIndex(e.clientX, xLines)。
-//     // safeCol = getSafeIndex(rawCol, 'col')。
-//     // UI 反馈：在 xLines[safeCol] 位置显示一根垂直线。这根线会随着鼠标移动，但在遇到合并单元格时会“跳过去”。
-//     // 3. Mouseup:
-//     // 根据 safeCol 执行最终的 DOM 移动逻辑。
-// }
-
-/**
  * 修正索引：防止切断合并块
  * @param {number} rawIndex 初始判定的索引
  * @param {string} type 'col' | 'row'
  */
 export const getSafeIndex = (rawIndex: number, lines: number[], matrix: any, type: 'col' | 'row' = 'row') => {
-    // 1. 寻找最近的线索引
+    // 1. 寻找最近的线索引 (二分查找会更快，但遍历也行)
     let closestIndex = 0;
     let minDiff = Infinity;
     for (let i = 0; i < lines.length; i++) {
@@ -904,34 +874,33 @@ export const getSafeIndex = (rawIndex: number, lines: number[], matrix: any, typ
         }
     }
 
-    // 2. 边界保护：如果是第一根线(0)或最后一根线，不需要检查“切断”，直接返回
+    // 2. 边界保护
     if (closestIndex <= 0 || closestIndex >= lines.length - 1) {
         return closestIndex;
     }
 
-    // 3. 核心判定：检查这一线是否切断了合并单元格
     const rowCount = matrix.length;
     const colCount = matrix[0] ? matrix[0].length : 0;
 
-    // 根据是行拖拽还是列拖拽，决定扫描方向
+    // 3. 扫描该“线”切过的所有位置
     const checkLimit = type === 'col' ? rowCount : colCount;
 
     for (let i = 0; i < checkLimit; i++) {
-        // 关键修正：增加对 matrix[i] 和 matrix[i][index] 的存在性检查
-        const lineBefore = type === 'col' ? matrix[i][closestIndex - 1] : matrix[closestIndex - 1][i];
-        const lineAfter = type === 'col' ? matrix[i][closestIndex] : matrix[closestIndex][i];
+        // 这里的索引访问需要非常小心
+        const cellBefore = type === 'col' ? matrix[i][closestIndex - 1] : matrix[closestIndex - 1][i];
+        const cellAfter = type === 'col' ? matrix[i][closestIndex] : matrix[closestIndex][i];
 
-        // 只有当线的前后都有单元格数据时，才进行比对
-        if (lineBefore && lineAfter && lineBefore.cell === lineAfter.cell) {
-            // 命中合并块内部，计算该合并块的起止逻辑位置
-            const start = type === 'col' ? lineBefore.startCol : lineBefore.startRow;
-            const span = type === 'col' ? lineBefore.cs : lineBefore.rs;
-            const end = start + span;
+        // 如果前后两个逻辑格子指向同一个物理 cell，说明线切在了 cell 中间
+        if (cellBefore && cellAfter && cellBefore.pos === cellAfter.pos) {
+            // 获取该 cell 在该维度上的逻辑范围
+            const start = type === 'col' ? cellBefore.startCol : cellBefore.startRow;
+            const end = type === 'col' ? cellBefore.endCol + 1 : cellBefore.endRow + 1;
 
-            // 自动吸附：判断鼠标离合并块的哪一端更近
+            // 吸附逻辑：判断 rawIndex 离哪根线更近
             const distToStart = Math.abs(rawIndex - lines[start]);
             const distToEnd = Math.abs(rawIndex - lines[end]);
 
+            // 关键：一旦找到切断点，计算完吸附就立即返回，避免多余循环
             return distToStart < distToEnd ? start : end;
         }
     }
@@ -946,7 +915,7 @@ export const getSafeIndex = (rawIndex: number, lines: number[], matrix: any, typ
 export const isStay = (toIndex: number, sourceRange: any): boolean => {
     // const sourceRange = getExtendedRange(fromIndex, matrix, type);
     // 技巧：落在源塊的起始索引或結束索引(start+1...end)都算原地
-    return toIndex > sourceRange.start && toIndex <= sourceRange.end + 1;
+    return toIndex >= sourceRange.start && toIndex <= sourceRange.end + 1;
 }
 
 export const getTableInfo = (dom: any) => {
@@ -973,44 +942,6 @@ export const getTableInfo = (dom: any) => {
         tableContainer
         // tableInfo
     }
-}
-
-export const getMaxCellRect = (view: EditorView, selection: any) => {
-    if (selection instanceof CellSelection) {
-        const cells: Element[] = []
-        selection.forEachCell((node: Node, pos: number) => {
-            const dom: any = view.nodeDOM(pos);
-            if (dom) {
-                cells.push(dom);
-            }
-        });
-        if (cells.length > 0) {
-            const maxRect = {
-                left: Infinity,
-                top: Infinity,
-                right: -Infinity,
-                bottom: -Infinity,
-            }
-
-            cells.forEach((cell) => {
-                const rect: any = cell.getBoundingClientRect();
-                maxRect.left = Math.min(maxRect.left, rect.left);
-                maxRect.top = Math.min(maxRect.top, rect.top);
-                maxRect.right = Math.max(maxRect.right, rect.right);
-                maxRect.bottom = Math.max(maxRect.bottom, rect.bottom);
-            });
-
-            return {
-                width: maxRect.right - maxRect.left,
-                height: maxRect.bottom - maxRect.top,
-                left: maxRect.left,
-                top: maxRect.top,
-                right: maxRect.right,
-                bottom: maxRect.bottom
-            };
-        }
-    }
-    return null;
 }
 
 export const getNodeRect = (view: EditorView, cellPos: number) => {
@@ -1101,7 +1032,7 @@ export const getNodeRect = (view: EditorView, cellPos: number) => {
 //     };
 // }
 
-export const selectDimensionByCell = (view: EditorView, cell: HTMLTableCellElement, type: 'col' | 'row' = 'row') => {
+export const selectCellDimension = (view: EditorView, cell: HTMLTableCellElement, type: 'col' | 'row' = 'row') => {
     if (!cell) {
         return null;
     }
@@ -1187,8 +1118,175 @@ export const selectDimensionByCell = (view: EditorView, cell: HTMLTableCellEleme
     }
 }
 
-export const getCellSelectionDOMRect = (view: EditorView, selection: CellSelection) => {
+export const getCellDimensionDoms = (view: EditorView, cell: HTMLTableCellElement, type: 'col' | 'row' = 'row') => {
+    if (!cell) {
+        return null;
+    }
+
+    const { state } = view;
+    // 1. 获取单元格在文档中的绝对位置
+    const cellPos = view.posAtDOM(cell, 0);
+    const $cellPos = state.doc.resolve(cellPos);
+
+    // 2. 找到所属的 Table 节点及其起始位置
+    const tableNodeInfo = findParentNodeClosestToPos($cellPos, n => n.type.spec.tableRole === 'table');
+    if (!tableNodeInfo) return null;
+
+    // 3. 获取 Table 内部内容的起始偏移量 (tableStart)
+    // 这是将 matrix 中的相对 pos 转换为绝对 pos 的关键
+    const tableStart = tableNodeInfo.start;
+
+    // 4. 获取矩阵和当前单元格的 Span 信息
+    const matrix = getTableNodeMatrix(tableNodeInfo.node);
+    const cellNodeInfo = findParentNodeClosestToPos($cellPos, n => n.type.spec.tableRole === 'cell' || n.type.spec.tableRole === 'header_cell');
+    if (!cellNodeInfo) {
+        return null;
+    }
+
+    const cellSpanInfo = getCellSpanInfoByCellNode(cellNodeInfo.node, matrix);
+
+    // 5. 获取需要选中的行/列索引范围 (考虑了合并单元格的扩展)
+    const sourceRange = getExtendedRange(
+        type === 'col' ? cellSpanInfo.startCol : cellSpanInfo.startRow,
+        matrix,
+        type
+    );
+    const { start, end } = sourceRange;
+
+    // 6. 遍历矩阵获取对应的 DOM 节点
+    // 使用 Set 存储 pos，防止同一个合并单元格被重复添加
+    const seenPos = new Set<number>();
+    const doms: HTMLTableCellElement[] = [];
+
+    if (type === 'row') {
+        // 遍历 start 到 end 之间的所有行
+        for (let r = start; r <= end; r++) {
+            for (let c = 0; c < matrix[0].length; c++) {
+                const cellData = matrix[r][c];
+                if (cellData && !seenPos.has(cellData.pos)) {
+                    seenPos.add(cellData.pos);
+                    // 将相对位置转为绝对位置获取 DOM
+                    const dom = view.nodeDOM(tableStart + cellData.pos) as HTMLTableCellElement;
+                    if (dom) {
+                        doms.push(dom);
+                    }
+                }
+            }
+        }
+    } else {
+        // 遍历 start 到 end 之间的所有列
+        for (let c = start; c <= end; c++) {
+            for (let r = 0; r < matrix.length; r++) {
+                const cellData = matrix[r][c];
+                if (cellData && !seenPos.has(cellData.pos)) {
+                    seenPos.add(cellData.pos);
+                    const dom = view.nodeDOM(tableStart + cellData.pos) as HTMLTableCellElement;
+                    if (dom) {
+                        doms.push(dom);
+                    }
+                }
+            }
+        }
+    }
+    return doms;
+}
+
+export const getCellDimensionRect = (view: EditorView, cell: HTMLTableCellElement, type: 'col' | 'row' = 'row', container?: HTMLDivElement) => {
+    if (!cell) {
+        return null;
+    }
+
+    const { state } = view;
+    // 1. 將 DOM 座標轉為 ProseMirror 絕對位置
+    const cellPos = view.posAtDOM(cell, 0);
+    const $cellPos = state.doc.resolve(cellPos);
     
+    // 2. 獲取表格節點及內容起始點 (tableStart)
+    const tableNodeInfo = findParentNodeClosestToPos($cellPos, n => n.type.spec.tableRole === 'table');
+    if (!tableNodeInfo) {
+        return null;
+    }
+
+    const tableStart = tableNodeInfo.start; 
+    const matrix = getTableNodeMatrix(tableNodeInfo.node);
+    
+    // 3. 獲取單元格在矩陣中的 Span 信息
+    const cellNodeInfo = findParentNodeClosestToPos($cellPos, n => n.type.spec.tableRole === 'cell' || n.type.spec.tableRole === 'header_cell');
+    if (!cellNodeInfo) {
+        return null;
+    }
+
+    const cellSpanInfo = getCellSpanInfoByCellNode(cellNodeInfo.node, matrix);
+    
+    // 4. 根據合併單元格擴展範圍 (防止切斷合併單元格)
+    const sourceRange = getExtendedRange(
+        type === 'col' ? cellSpanInfo.startCol : cellSpanInfo.startRow, 
+        matrix, 
+        type
+    );
+    const { start, end } = sourceRange;
+
+    // 5. 初始化邊界變量
+    let minTop = Infinity, minLeft = Infinity;
+    let maxBottom = -Infinity, maxRight = -Infinity;
+    const seenPos = new Set<number>();
+
+    // 獲取容器的矩形和滾動量
+    const containerRect = container ? container.getBoundingClientRect() : { left: 0, top: 0 };
+    const scrollLeft = container ? container.scrollLeft : 0;
+    const scrollTop = container ? container.scrollTop : 0;
+
+    // 內部更新函數：獲取單元格 DOM 並計算 Viewport 邊界
+    const updateRect = (relativePos: number) => {
+        if (seenPos.has(relativePos)) {
+            return;
+        }
+        seenPos.add(relativePos);
+        
+        // 絕對位置 = tableStart + 矩陣中的相對偏移
+        const dom = view.nodeDOM(tableStart + relativePos) as HTMLElement;
+        if (dom) {
+            const rect = dom.getBoundingClientRect();
+            minTop = Math.min(minTop, rect.top);
+            minLeft = Math.min(minLeft, rect.left);
+            maxBottom = Math.max(maxBottom, rect.bottom);
+            maxRight = Math.max(maxRight, rect.right);
+        }
+    };
+
+    // 6. 遍歷選定維度的所有邏輯格子
+    if (type === 'row') {
+        for (let r = start; r <= end; r++) {
+            for (let c = 0; c < matrix[r].length; c++) {
+                updateRect(matrix[r][c].pos);
+            }
+        }
+    } else {
+        for (let c = start; c <= end; c++) {
+            for (let r = 0; r < matrix.length; r++) {
+                updateRect(matrix[r][c].pos);
+            }
+        }
+    }
+
+    if (minTop === Infinity) {
+        return null;
+    }
+
+    // 7. 返回相對於容器內容頂部的座標 (考慮滾動補償)
+    // 公式：(單元格視窗座標 - 容器視窗座標) + 容器滾動偏移
+    return {
+        top: (minTop - containerRect.top) + scrollTop,
+        left: (minLeft - containerRect.left) + scrollLeft,
+        bottom: (maxBottom - containerRect.top) + scrollTop,
+        right: (maxRight - containerRect.left) + scrollLeft,
+        width: maxRight - minLeft,
+        height: maxBottom - minTop
+    };
+};
+
+export const getCellSelectionDOMRect = (view: EditorView, selection: CellSelection) => {
+
     let minTop = Infinity;
     let minLeft = Infinity;
     let maxBottom = -Infinity;

@@ -34,31 +34,6 @@ export const table = ({
 }: any) => {
     const ctrolPanelMap: WeakMap<HTMLElement, any> = new WeakMap();
     let ctrolPanel: any;
-    
-    const selectCells = (view: EditorView) => {
-        const { selection } = view.state;
-        let rect;
-        if (selection instanceof CellSelection) {
-            rect = getCellSelectionDOMRect(editor.view, selection);
-        } else {
-            const { $anchor } = selection;
-            const cell = cellAround($anchor);
-            if (cell) {
-                console.log('cell', cell);
-                rect = getNodeRect(editor.view, cell.pos)
-            }
-        }
-        // const tableNodeInfo = findParentNodeClosestToPos(selection.$from, n => n.type.spec.tableRole === 'cell' || n.type.spec.tableRole === 'header_cell');
-        // const dom = view.nodeDOM(tableNodeInfo.pos); 
-        // const tableContainer = closestTableView(dom);
-        // const curCtolPanel = ctrolPanelMap.get(tableContainer);
-        // if (curCtolPanel) {
-        //     curCtolPanel.showSelectRect(rect);
-        // }
-        if (ctrolPanel) {
-            CtrolPanel.showSelectRect(ctrolPanel, rect);
-        }
-    }
 
     const plugin: Plugin = new Plugin({
         key: pluginKey,
@@ -69,7 +44,9 @@ export const table = ({
                     if (prevState && prevState.selection.eq(view.state.selection)) {
                         return;
                     }
-                    selectCells(view);
+                    if (ctrolPanel) {
+                        ctrolPanel.showSelectionCells();
+                    }
                 },
                 destroy() {
 
@@ -81,8 +58,8 @@ export const table = ({
                 mousemove: (view: EditorView, event: any) => {
                     const columnResizingPlugState = columnResizingPluginKey.getState(view.state);
                     if (columnResizingPlugState.dragging) {
-                        selectCells(view);
                         if (ctrolPanel) {
+                            ctrolPanel.showSelectionCells();
                             ctrolPanel.hideColPanel();
                             ctrolPanel.hideRowPanel();
                         }
