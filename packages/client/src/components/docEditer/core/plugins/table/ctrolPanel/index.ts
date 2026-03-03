@@ -86,51 +86,27 @@ export class CtrolPanel {
         this.ctrolPanel.appendChild(this.rowPanel);
         this.ctrolPanel.appendChild(this.indicator);
 
-        this.colDrag = new DragDrop({
-            handle: this.colPanel,
-            container: this.tableContainer,
-            // preview: this.preview,
-            translate: true,
-            onStart: (e: any, drag: DragDrop) => {
-                this.handleStart('col', drag);
-            },
-            onMove: (e: any, drag: DragDrop) => {
-                this.handleMove('col', drag);
-            },
-            onEnd: (e: any, drag: DragDrop) => {
-                this.handleEnd('col', drag);
-            }
-        });
-        this.rowDrag = new DragDrop({
-            handle: this.rowPanel,
-            container: this.tableContainer,
-            // preview: this.preview,
-            translate: true,
-            onStart: (e: any, drag: DragDrop) => {
-                this.handleStart('row', drag);
-            },
-            onMove: (e: any, drag: DragDrop) => {
-                this.handleMove('row', drag);
-            },
-            onEnd: (e: any, drag: DragDrop) => {
-                this.handleEnd('row', drag);
-            }
+        [this.colPanel, this.rowPanel].forEach((handle: any, index: number) => {
+            const type = index === 0 ? 'col' : 'row';
+            this.colDrag = new DragDrop({
+                handle,
+                container: this.tableContainer,
+                // preview: this.preview,
+                translate: true,
+                onStart: (e: any, drag: DragDrop) => {
+                    this.handleStart(type, drag);
+                },
+                onMove: (e: any, drag: DragDrop) => {
+                    this.handleMove(type, drag);
+                },
+                onEnd: (e: any, drag: DragDrop) => {
+                    this.handleEnd(type, drag);
+                }
+            });
         });
 
         // this.ctrolPanel.addEventListener('click', this.handleClickPanel, false);
     }
-    // getPosByDom(dom: any) {
-    //     let xy = dom.style.transform.split(/[(|,|)]/g);
-    //     return {
-    //         x: parseFloat(xy[1]),
-    //         y: parseFloat(xy[2])
-    //     };
-    // }
-    // setPos(dom: any, pos: number[]) {
-    //     dom.style.transform = `translate(${pos[0]}px, ${pos[1]}px)`;
-    //     //dom.style.left = pos[0] + 'px';
-    //     //dom.style.top = pos[1] + 'px';
-    // }
 
     // onClickPanel = (e: MouseEvent, type: 'col' | 'row') => { }
     // onStart(e: any, type: 'col' | 'row') { }
