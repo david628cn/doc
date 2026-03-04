@@ -8,6 +8,10 @@ import {
     findTable,
     CellSelection
 } from 'prosemirror-tables';
+import {
+    getTableNodeMatrix,
+    getExtendedRange
+} from './table';
 
 export const getCellsInColumn = (
     columnIndex: number,
@@ -305,16 +309,31 @@ export const moveColumn = (moveColParams: any): boolean => {
 
     if (!select) return true;
 
+    const matrix = getTableNodeMatrix(newTable);
+    const { start, end } = getExtendedRange(targetIndex, matrix, 'col');
     const map = TableMap.get(newTable);
-    const start = table.start;
-    const index = targetIndex;
-    const lastCell = map.positionAt(map.height - 1, index, newTable);
-    const $lastCell = tr.doc.resolve(start + lastCell);
+   
+    const startPos = table.start;
+    let anchorOffset = map.map[start];
+    let headOffset = map.map[(map.height - 1) * map.width + end];
 
-    const firstCell = map.positionAt(0, index, newTable);
-    const $firstCell = tr.doc.resolve(start + firstCell);
+     const selection = new CellSelection(
+        tr.doc.resolve(startPos + anchorOffset),
+        tr.doc.resolve(startPos + headOffset)
+    );
 
-    tr.setSelection(CellSelection.colSelection($lastCell, $firstCell));
+    tr.setSelection(selection);
+
+    // const map = TableMap.get(newTable);
+    // const start = table.start;
+    // const index = targetIndex;
+    // const lastCell = map.positionAt(map.height - 1, index, newTable);
+    // const $lastCell = tr.doc.resolve(start + lastCell);
+
+    // const firstCell = map.positionAt(0, index, newTable);
+    // const $firstCell = tr.doc.resolve(start + firstCell);
+
+    // tr.setSelection(CellSelection.colSelection($lastCell, $firstCell));
     return true;
 }
 
@@ -422,16 +441,31 @@ export const moveRow = (moveRowParams: any): boolean => {
 
     if (!select) return true;
 
+    const matrix = getTableNodeMatrix(newTable);
+    const { start, end } = getExtendedRange(targetIndex, matrix, 'row');
     const map = TableMap.get(newTable);
-    const start = table.start;
-    const index = targetIndex;
-    const lastCell = map.positionAt(index, map.width - 1, newTable);
-    const $lastCell = tr.doc.resolve(start + lastCell);
+   
+    const startPos = table.start;
+    let anchorOffset = map.map[start * map.width];
+    let headOffset = map.map[(end + 1) * map.width - 1];
 
-    const firstCell = map.positionAt(index, 0, newTable);
-    const $firstCell = tr.doc.resolve(start + firstCell);
+     const selection = new CellSelection(
+        tr.doc.resolve(startPos + anchorOffset),
+        tr.doc.resolve(startPos + headOffset)
+    );
 
-    tr.setSelection(CellSelection.rowSelection($lastCell, $firstCell));
+    tr.setSelection(selection);
+
+    // const map = TableMap.get(newTable);
+    // const start = table.start;
+    // const index = targetIndex;
+    // const lastCell = map.positionAt(index, map.width - 1, newTable);
+    // const $lastCell = tr.doc.resolve(start + lastCell);
+
+    // const firstCell = map.positionAt(index, 0, newTable);
+    // const $firstCell = tr.doc.resolve(start + firstCell);
+
+    // tr.setSelection(CellSelection.rowSelection($lastCell, $firstCell));
     return true;
 }
 

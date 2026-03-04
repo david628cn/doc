@@ -8,8 +8,8 @@ import {
     tableEditing,
     // RowSelection, 
     // ColumnSelection, 
-    CellSelection,
-    cellAround,
+    // CellSelection,
+    // cellAround,
     // addColumnAfter,
     // deleteColumn,
     // addRowAfter,
@@ -18,8 +18,7 @@ import {
 import { TableNode } from './tableNode';
 // import { TableCell } from './tableCell';
 import {
-    getNodeRect,
-    getCellSelectionDOMRect,
+    getSelectionCellsRect,
     getTableInfo
 } from '@/components/docEditer/core/utils';
 import { CtrolPanel } from './ctrolPanel';
@@ -41,12 +40,10 @@ export const table = ({
             return {
                 update(view: EditorView, prevState: EditorState) {
                     // const pluginState = pluginKey.getState(view.state);
-                    if (prevState && prevState.selection.eq(view.state.selection)) {
-                        return;
-                    }
-                    if (ctrolPanel) {
-                        ctrolPanel.showSelectionCells();
-                    }
+                    // if (prevState && prevState.selection.eq(view.state.selection)) {
+                    //     return;
+                    // }
+                    CtrolPanel.showSelectionCells(view);
                 },
                 destroy() {
                     if (ctrolPanel) {
@@ -61,7 +58,7 @@ export const table = ({
                     const columnResizingPlugState = columnResizingPluginKey.getState(view.state);
                     if (columnResizingPlugState.dragging) {
                         if (ctrolPanel) {
-                            ctrolPanel.showSelectionCells();
+                            CtrolPanel.showSelectionCells(view);
                             ctrolPanel.hideColPanel();
                             ctrolPanel.hideRowPanel();
                         }

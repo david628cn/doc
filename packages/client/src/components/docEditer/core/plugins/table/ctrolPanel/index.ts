@@ -1,31 +1,21 @@
 import { EditorView } from 'prosemirror-view';
-import {
-    // TableMap,
-    // moveTableRow,
-    // moveTableColumn,
-    CellSelection,
-    cellAround
-} from 'prosemirror-tables';
 import { DragDrop } from '@/components/dragDrop';
 import {
     getAxisMap,
-    // getTableMatrix,
     getSafeInfo,
-    // getCellSpanInfo,
-    getCellSpanInfoByCellNode,
-    getExtendedRange,
-    selectCellDimension,
-    findParentNodeClosestToPos,
-    getTableNodeMatrix,
-    getCellSelectionDOMRect,
-    getNodeRect,
-    getCellDimensionRect
-    // getDimensionByCell,
-    // getDimensionDOM,
-    // closestTr
+    selectCellDimensionByCellNodeInfo,
+    getSelectionCellsRect,
+    getCellDimensionRectByCellNodeInfo,
+    getCellNodeInfoByCellDom,
+    moveTableRowEx as moveTableRow,
+    moveTableColumnEx as moveTableColumn,
+    findTable
 } from '@/components/docEditer/core/utils';
-import { getRect, getAlignPos, setPos } from '@/components/utils/align';
-import { moveTableRowEx as moveTableRow, moveTableColumnEx as moveTableColumn } from './utils';
+import { 
+    getRect, 
+    getAlignPos, 
+    setPos 
+} from '@/components/utils/align';
 import { CLASSNAME } from '@/global';
 import './index.less';
 
@@ -53,8 +43,7 @@ export class CtrolPanel {
     indicator: HTMLElement | null | undefined;
     cell: HTMLElement | null | undefined;
     moving: 'col' | 'row' | null = null;
-    colDrag: DragDrop;
-    rowDrag: DragDrop;
+    drag: any;
     current: any;
     matrix: any;
     sourceRange: any;
@@ -77,7 +66,7 @@ export class CtrolPanel {
         this.colPanel.className = `${CLASSNAME}-table-view-col-panel`;
         // this.colPanel.innerHTML = `<div class="${CLASSNAME}-table-view-col-panel-inner"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12C14 13.1046 13.1046 14 12 14C10.8954 14 10 13.1046 10 12Z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M10 5C10 3.89543 10.8954 3 12 3C13.1046 3 14 3.89543 14 5C14 6.10457 13.1046 7 12 7C10.8954 7 10 6.10457 10 5Z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M10 19C10 17.8954 10.8954 17 12 17C13.1046 17 14 17.8954 14 19C14 20.1046 13.1046 21 12 21C10.8954 21 10 20.1046 10 19Z" fill="currentColor"></path></svg></div>`;
         this.colPanel.innerHTML = `<div class="${CLASSNAME}-table-view-col-panel-inner">${svg}</div>`;
-        
+
         this.rowPanel = document.createElement('div');
         this.rowPanel.className = `${CLASSNAME}-table-view-row-panel`;
         this.rowPanel.innerHTML = `<div class="${CLASSNAME}-table-view-row-panel-inner">${svg}</div>`;
@@ -89,9 +78,10 @@ export class CtrolPanel {
         this.ctrolPanel.appendChild(this.rowPanel);
         this.ctrolPanel.appendChild(this.indicator);
 
+        this.drag = {};
         [this.colPanel.firstChild, this.rowPanel.firstChild].forEach((handle: any, index: number) => {
             const type = index === 0 ? 'col' : 'row';
-            this.colDrag = new DragDrop({
+            this.drag[type] = new DragDrop({
                 handle,
                 container: this.tableContainer,
                 // preview: this.preview,
@@ -107,7 +97,6 @@ export class CtrolPanel {
                 }
             });
         });
-
         // this.ctrolPanel.addEventListener('click', this.handleClickPanel, false);
     }
 
@@ -143,24 +132,19 @@ export class CtrolPanel {
     //     }
     // }
     handleStart(type: 'col' | 'row' = 'row', drag: DragDrop) {
-        selectCellDimension(this.view, this.cell as HTMLTableCellElement, type);
-        const cellPos = this.view.posAtDOM(this.cell, 0);
-        const $cellPos = this.view.state.doc.resolve(cellPos);
-        const tableNodeInfo = findParentNodeClosestToPos($cellPos, n => n.type.spec.tableRole === 'table');
-        const cellNodeInfo = findParentNodeClosestToPos($cellPos, n => n.type.spec.tableRole === 'cell' || n.type.spec.tableRole === 'header_cell');
-        // if (tableNodeInfo) {
-        const tableNode = tableNodeInfo.node;
-        this.matrix = getTableNodeMatrix(tableNode);
-        const cellSpanInfo = getCellSpanInfoByCellNode(cellNodeInfo.node, this.matrix);
-        this.sourceRange = getExtendedRange(
-            type === 'col' ? cellSpanInfo.startCol : cellSpanInfo.startRow,
-            this.matrix,
-            type
-        );
-        this.toIndex = this.sourceRange.start;
-        this.previewRect = getCellDimensionRect(this.view, this.cell as HTMLTableCellElement, type, this.view.dom.parentNode as HTMLDivElement);
-        this.createPreview(this.previewRect);
-        drag.preview = this.preview;
+        const cellNodeInfo = getCellNodeInfoByCellDom(this.view, this.cell as HTMLTableCellElement, type);
+        if (!cellNodeInfo) {
+            return;
+        }
+        if (selectCellDimensionByCellNodeInfo(this.view, cellNodeInfo, type)) {
+            this.matrix = cellNodeInfo.matrix;
+            this.sourceRange = cellNodeInfo.cellRange;
+            this.toIndex = this.sourceRange.start;
+            const previewcontainer = this.view.dom.parentNode as HTMLDivElement;
+            this.previewRect = getCellDimensionRectByCellNodeInfo(this.view, cellNodeInfo, type, previewcontainer);
+            this.createPreview(this.previewRect, previewcontainer);
+            drag.preview = this.preview;
+        }
     }
     handleMove(type: 'col' | 'row' = 'row', drag: DragDrop) {
         this.moving = type;
@@ -235,7 +219,7 @@ export class CtrolPanel {
         //     }
         // }
     }
-    createPreview(rect?: any) {
+    createPreview(rect: any, container?: HTMLDivElement) {
         if (this.preview && this.preview.parentNode) {
             this.preview.parentNode.removeChild(this.preview);
         }
@@ -255,7 +239,7 @@ export class CtrolPanel {
                 top: rect.top
             }, true);
         }
-        this.view.dom.parentNode.appendChild(this.preview);
+        (container || document.body).appendChild(this.preview);
     }
     hidePreview() {
         if (this.preview && this.preview.parentNode) {
@@ -335,26 +319,7 @@ export class CtrolPanel {
             this.rowPanel.classList.remove(`${CLASSNAME}-table-view-row-panel-show`);
         }
     }
-    getSelectionCellsRect() {
-        const { selection } = this.view.state;
-        let rect = null;
-        if (selection instanceof CellSelection) {
-            rect = getCellSelectionDOMRect(this.view, selection);
-        } else {
-            const { $anchor } = selection;
-            const cell = cellAround($anchor);
-            if (cell) {
-                rect = getNodeRect(this.view, cell.pos)
-            }
-        }
-        // const tableNodeInfo = findParentNodeClosestToPos(selection.$from, n => n.type.spec.tableRole === 'cell' || n.type.spec.tableRole === 'header_cell');
-        // const dom = view.nodeDOM(tableNodeInfo.pos); 
-        // const tableContainer = closestTableView(dom);
-        // const curCtolPanel = ctrolPanelMap.get(tableContainer);
-        return rect;
-
-    }
-    showSelectionCells() {
+    static showSelectionCells(view: EditorView) {
         if (!CtrolPanel.selectRect) {
             CtrolPanel.selectRect = document.createElement('div');
             CtrolPanel.selectRect.className = `${CLASSNAME}-table-view-cell-selection`;
@@ -366,23 +331,44 @@ export class CtrolPanel {
             inner.appendChild(handle);
             CtrolPanel.selectRect.appendChild(inner);
         }
-        if (CtrolPanel.selectRect.parentNode) {
-            CtrolPanel.selectRect.parentNode.removeChild(CtrolPanel.selectRect);
+        const rect = getSelectionCellsRect(view);
+        if (!rect) {
+            if (CtrolPanel.selectRect.parentNode) {
+                CtrolPanel.selectRect.parentNode.removeChild(CtrolPanel.selectRect);
+            }
+            return;
         }
-        const rect = this.getSelectionCellsRect();
+        const { from } = view.state.selection;
+        const $from = view.state.doc.resolve(from);
+        const tableNodeInfo = findTable($from);
+        const tableContainerDom = view.nodeDOM(tableNodeInfo.pos);
+        const ctrolPanel: any = tableContainerDom.childNodes[1];
+        if (!ctrolPanel) {
+            if (CtrolPanel.selectRect.parentNode) {
+                CtrolPanel.selectRect.parentNode.removeChild(CtrolPanel.selectRect);
+            }
+            return;
+        }
+        if (ctrolPanel !== CtrolPanel.selectRect.parentNode) {
+            if (CtrolPanel.selectRect.parentNode) {
+                CtrolPanel.selectRect.parentNode.removeChild(CtrolPanel.selectRect);
+            }
+            ctrolPanel.appendChild(CtrolPanel.selectRect);
+        }
         CtrolPanel.selectRect.style.width = `${rect.width}px`;
         CtrolPanel.selectRect.style.height = `${rect.height}px`;
-        const ctrolPanelRect = getRect(this.ctrolPanel);
+        const ctrolPanelRect = getRect(ctrolPanel);
         // const l = getPadding(scrop.ctrolPanel, 'l');
         // const t = getPadding(scrop.ctrolPanel, 't');
         setPos(CtrolPanel.selectRect, {
             left: rect.left - ctrolPanelRect.left,
             top: rect.top - ctrolPanelRect.top
         }, true);
-        this.ctrolPanel.appendChild(CtrolPanel.selectRect);
     }
     destroy() {
-        this.colDrag.destroy();
-        this.rowDrag.destroy();
+        for (let n in this.drag) {
+            this.drag[n].destroy?.();
+        }
+        this.drag = null;
     }
 }
