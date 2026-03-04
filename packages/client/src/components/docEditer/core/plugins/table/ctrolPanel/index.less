@@ -42,6 +42,8 @@
             border-radius: 4px;
             background: #ada9a3;
             border: 2px solid #fff;
+            transition-property: all;
+            transition-duration: 300ms;
             // background: #fff;
             // border: 1px solid #e6e5e3;
 
@@ -101,6 +103,8 @@
             border-radius: 4px;
             background: #ada9a3;
             border: 2px solid #fff;
+            transition-property: all;
+            transition-duration: 300ms;
             // background: #fff;
             // border: 1px solid #e6e5e3;
 
@@ -261,5 +265,44 @@
         background: transparent;
         // box-shadow: 0px 0px 10px rgba(15, 15, 15, 0.15) inset;
         // box-shadow: 0 4px 12px rgba(15, 15, 15, 0.15);
+        .@{className}-table-view-cell-selection-handle {
+            width: 6px;
+            height: 22px;
+            color: #ada9a3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            background: #ada9a3;
+            border: 2px solid #fff;
+            position: absolute;
+            right: 0;
+            top: 50%;
+            z-index: 10;
+            pointer-events: auto;
+            cursor: pointer;
+            transform: translate(4px, -50%);
+            transition-property: all;
+            transition-duration: 300ms;
+            svg {
+                // width: 24px;
+                // height: 24px;
+                width: 16px; 
+                height: 16px; 
+                fill: inherit; 
+                flex-shrink: 0; 
+                color: inherit;
+                display: none;
+            }
+            &:hover {
+                width: 14px;
+                background: #fff;
+                border: 1px solid #e6e5e3;
+                transform: translate(8px, -50%);
+                svg {
+                    display: block;
+                }
+            }
+        }
     }
 }

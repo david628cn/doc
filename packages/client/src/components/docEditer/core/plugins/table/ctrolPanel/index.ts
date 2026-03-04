@@ -29,6 +29,7 @@ import { moveTableRowEx as moveTableRow, moveTableColumnEx as moveTableColumn } 
 import { CLASSNAME } from '@/global';
 import './index.less';
 
+const svg = `<svg aria-hidden="true" role="graphics-symbol" viewBox="0 0 20 20"><path d="M6.25 4a1.25 1.25 0 1 0 2.5 0 1.25 1.25 0 0 0-2.5 0m5 0a1.25 1.25 0 1 0 2.5 0 1.25 1.25 0 0 0-2.5 0m1.25 7.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5M6.25 10a1.25 1.25 0 1 0 2.5 0 1.25 1.25 0 0 0-2.5 0m6.25 7.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5M6.25 16a1.25 1.25 0 1 0 2.5 0 1.25 1.25 0 0 0-2.5 0"></path></svg>`;
 
 export type CtrolPanelProps = {
     view: EditorView;
@@ -71,8 +72,6 @@ export class CtrolPanel {
         const inner = this.tableContainer.childNodes[0] as HTMLElement;
         this.table = inner.firstChild as HTMLTableElement;
         this.ctrolPanel = this.tableContainer.childNodes[1] as HTMLElement;
-
-        const svg = `<svg aria-hidden="true" role="graphics-symbol" viewBox="0 0 20 20"><path d="M6.25 4a1.25 1.25 0 1 0 2.5 0 1.25 1.25 0 0 0-2.5 0m5 0a1.25 1.25 0 1 0 2.5 0 1.25 1.25 0 0 0-2.5 0m1.25 7.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5M6.25 10a1.25 1.25 0 1 0 2.5 0 1.25 1.25 0 0 0-2.5 0m6.25 7.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5M6.25 16a1.25 1.25 0 1 0 2.5 0 1.25 1.25 0 0 0-2.5 0"></path></svg>`;
 
         this.colPanel = document.createElement('div');
         this.colPanel.className = `${CLASSNAME}-table-view-col-panel`;
@@ -361,6 +360,10 @@ export class CtrolPanel {
             CtrolPanel.selectRect.className = `${CLASSNAME}-table-view-cell-selection`;
             const inner = document.createElement('div');
             inner.className = `${CLASSNAME}-table-view-cell-selection-inner`;
+            const handle = document.createElement('div');
+            handle.className = `${CLASSNAME}-table-view-cell-selection-handle`;
+            handle.innerHTML = svg;
+            inner.appendChild(handle);
             CtrolPanel.selectRect.appendChild(inner);
         }
         if (CtrolPanel.selectRect.parentNode) {
