@@ -20,7 +20,7 @@ import { TableNode } from './tableNode';
 import {
     getSelectionCellsRect,
     getTableInfo
-} from '@/components/docEditer/core/utils';
+} from '@/components/doc/core/utils';
 import { CtrolPanel } from './ctrolPanel';
 // import { setAlignPos } from '@/components/utils/align';
 import { CLASSNAME } from '@/global';

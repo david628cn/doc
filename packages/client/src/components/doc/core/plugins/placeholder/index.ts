@@ -1,7 +1,7 @@
 import { type EditorState, Plugin, PluginKey } from 'prosemirror-state';
 import type { Node } from 'prosemirror-model';
 import { Decoration, DecorationSet } from 'prosemirror-view';
-import { isNodeEmpty } from '@/components/docEditer/core/utils';
+import { isNodeEmpty } from '@/components/doc/core/utils';
 import { CLASSNAME } from '@/global';
 import './index.less';
 

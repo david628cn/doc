@@ -1,9 +1,9 @@
 import { type ReactNode, useEffect, useRef, useCallback, createContext, useContext, useState } from 'react';
-import { Editor as EditorCompent } from '@/components/docEditer/core/editor';
+import { Doc as DocView } from '@/components/doc/core/doc';
 import { Popup } from '@/components/dropdown';
 import { ToolBar } from '@/components/toolBar';
 import { Menu } from '@/components/menu';
-import { Button } from '@/components/button';
+// import { Button } from '@/components/button';
 import {
     TextIcon,
     Heading1Icon,
@@ -20,7 +20,7 @@ import {
 import { CLASSNAME } from '@/global';
 import './index.less';
 
-export type DocEditorProps = {
+export type DocProps = {
     className?: string;
     content?: any;
     editable?: boolean;
@@ -31,7 +31,7 @@ export type DocEditorProps = {
 
 // export const ParentContext = createContext(null);
 
-export const DocEditor: React.FC<DocEditorProps> = props => {
+export const Doc: React.FC<DocProps> = props => {
     const {
         className = `${CLASSNAME}-editor-body`,
         content = '',
@@ -77,9 +77,11 @@ export const DocEditor: React.FC<DocEditorProps> = props => {
         });
     }
 
-    const handleSelection = (params: any) => {
-        const open = !params.rect ? false : true;
-        if (open) {
+    const handleSelection = ({
+        active,
+        rect
+    }: any) => {
+        if (active) {
             setToolBarData({
                 textAlign: editorRef.current.getTextAlign(),
                 strong: editorRef.current.hasMark('strong'),
@@ -97,8 +99,8 @@ export const DocEditor: React.FC<DocEditorProps> = props => {
             });
         }
         setSelectionUpdate({
-            open,
-            rect: params.rect
+            open: active,
+            rect
         });
     }
 
@@ -111,12 +113,20 @@ export const DocEditor: React.FC<DocEditorProps> = props => {
 
     useEffect(() => {
         if (contentRef.current) {
-            editorRef.current = new EditorCompent({
+            editorRef.current = new DocView({
                 element: contentRef.current,
                 content,
                 editable: editable === false ? false : true,
-                onSuggestion: handleSuggestion,
-                onSelection: handleSelection
+                onAction: (params: any) => {
+                    const { type, data } = params;
+                    if (type === 'selection') {
+                        handleSelection(data);
+                    } else if (type === 'suggestion') {
+                        handleSuggestion(data);
+                    }
+                }
+                // onSuggestion: handleSuggestion,
+                // onSelection: handleSelection
                 // onBlur: handleBlur
                 // content: `<h1>
                 //             This is a very unique heading.
@@ -150,14 +160,14 @@ export const DocEditor: React.FC<DocEditorProps> = props => {
         }
     }, [content]);
 
-    const handleClick = (e: any) => {
-        e.preventDefault();
-        console.log(e)
-        let tr = editorRef.current.view.state.tr;
-        const column = editorRef.current.view.state.schema.nodes.column.createAndFill();
-        const columns = editorRef.current.view.state.schema.nodes.columns.createAndFill();
-        editorRef.current.view.dispatch(tr.replaceSelectionWith(columns).scrollIntoView());
-    }
+    // const handleClick = (e: any) => {
+    //     e.preventDefault();
+    //     console.log(e)
+    //     let tr = editorRef.current.view.state.tr;
+    //     const column = editorRef.current.view.state.schema.nodes.column.createAndFill();
+    //     const columns = editorRef.current.view.state.schema.nodes.columns.createAndFill();
+    //     editorRef.current.view.dispatch(tr.replaceSelectionWith(columns).scrollIntoView());
+    // }
 
     return (
         // <ParentContext.Provider value={editorRef}>

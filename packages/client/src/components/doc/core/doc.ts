@@ -67,7 +67,7 @@ import { CodeBlock } from './nodeViews';
 import schema from './schema';
 import { CLASSNAME } from '@/global';
 // import { contextPath } from '@/api';
-import './editor.less';
+import './doc.less';
 
 
 
@@ -109,7 +109,7 @@ export type JSONContent = {
     [key: string]: any
 }
 
-export type EditorOptions = {
+export type DocOptions = {
     element?: HTMLElement | null | undefined;
     content?: JSONContent | JSONContent[] | Node | string | null | undefined;
     isFocused?: boolean;
@@ -120,21 +120,22 @@ export type EditorOptions = {
     onMount?: Function;
     onUnmount?: Function;
     onUpdate?: Function;
-    onSelectionUpdate?: Function;
+    // onSelectionUpdate?: Function;
     onTransaction?: Function;
-    onFocus?: Function;
-    onBlur?: Function;
-    onInput?: Function;
+    // onFocus?: Function;
+    // onBlur?: Function;
+    // onInput?: Function;
     onDestroy?: Function;
     onContentError?: Function;
     onPaste?: Function;
-    onDrop?: Function;
-    onDelete?: Function;
-    onSuggestion?: Function;
-    onSelection?: Function;
+    onAction?: Function;
+    // onDrop?: Function;
+    // onDelete?: Function;
+    // onSuggestion?: Function;
+    // onSelection?: Function;
 }
 
-export class Editor extends EventEmitter {
+export class Doc extends EventEmitter {
     // element: any;
     public view!: EditorView;
     // public ydoc: any;
@@ -152,7 +153,7 @@ export class Editor extends EventEmitter {
         roomId: 'room-01'
     };
     // plugins: Array<any> | undefined;
-    public options: EditorOptions = {
+    public options: DocOptions = {
         // element: typeof document !== 'undefined' ? document.createElement('div') : null,
         element: document.body,
         content: '',
@@ -163,22 +164,23 @@ export class Editor extends EventEmitter {
         onMount: () => null,
         onUnmount: () => null,
         onUpdate: () => null,
-        onSelectionUpdate: () => null,
+        // onSelectionUpdate: () => null,
         onTransaction: () => null,
-        onFocus: () => null,
-        onBlur: () => null,
-        onInput: () => { },
+        // onFocus: () => null,
+        // onBlur: () => null,
+        // onInput: () => { },
         onDestroy: () => null,
         onContentError: (error: Error) => {
             throw error;
         },
         onPaste: () => null,
-        onDrop: () => null,
-        onDelete: () => null,
-        onSuggestion: () => null,
-        onSelection: () => null
+        onAction: () => null
+        // onDrop: () => null,
+        // onDelete: () => null
+        // onSuggestion: () => null,
+        // onSelection: () => null
     };
-    constructor(options?: EditorOptions) {
+    constructor(options?: DocOptions) {
         super();
         if (options && options.element) {
             const element = typeof options.element === 'string' ? document.getElementById(options.element) : options.element;
@@ -459,27 +461,30 @@ export class Editor extends EventEmitter {
         } as any);
         this.view.dom.classList.add(`${CLASSNAME}-editor`);
     }
-    setOptions(options: EditorOptions = {}) {
+    setOptions(options: DocOptions = {}) {
         this.options = {
             ...this.options,
             ...options
         };
         this.content = this.options.content;
         this.editable = this.options.editable || false;
-        if (typeof this.options.onSuggestion === 'function') {
-            this.on('suggestion', this.options.onSuggestion);
-        }
-        if (typeof this.options.onSelectionUpdate === 'function') {
-            this.on('selectionUpdate', this.options.onSelectionUpdate);
-        }
-        if (typeof this.options.onSelection === 'function') {
-            this.on('selection', this.options.onSelection);
-        }
-        if (typeof this.options.onFocus === 'function') {
-            this.on('focus', this.options.onFocus);
-        }
-        if (typeof this.options.onBlur === 'function') {
-            this.on('blur', this.options.onBlur);
+        // if (typeof this.options.onSuggestion === 'function') {
+        //     this.on('suggestion', this.options.onSuggestion);
+        // }
+        // if (typeof this.options.onSelectionUpdate === 'function') {
+        //     this.on('selectionUpdate', this.options.onSelectionUpdate);
+        // }
+        // if (typeof this.options.onSelection === 'function') {
+        //     this.on('selection', this.options.onSelection);
+        // }
+        // if (typeof this.options.onFocus === 'function') {
+        //     this.on('focus', this.options.onFocus);
+        // }
+        // if (typeof this.options.onBlur === 'function') {
+        //     this.on('blur', this.options.onBlur);
+        // }
+        if (typeof this.options.onAction === 'function') {
+            this.on('action', this.options.onAction);
         }
     }
     set content(content: any) {

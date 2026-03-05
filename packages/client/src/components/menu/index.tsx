@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, type ReactNode } from 'react';
 import { MenuNode } from './menuNode';
 import { CLASSNAME } from '@/global';
+// import { TruckFilled } from '@ant-design/icons';
 // import './index.less';
 
 const recursiveMerge = (tree: any, childrenField: string = 'children', parentKeyField: string = 'parentKey', typeKeyField: string = 'type') => {
@@ -148,10 +149,10 @@ const findChildrenKeys = (tree: any = [], targetKey: string, keyField = 'key', c
 
 const Keys = Object.freeze({
     ENTER: 'Enter',
-    ESC: 'Escape',
-    SPACE: ' ',
-    HOME: 'Home',
-    END: 'End',
+    // ESC: 'Escape',
+    // SPACE: ' ',
+    // HOME: 'Home',
+    // END: 'End',
     LEFT: 'ArrowLeft',
     RIGHT: 'ArrowRight',
     UP: 'ArrowUp',
@@ -186,7 +187,7 @@ export type MenuProps = {
 export const Menu: React.FC<MenuProps> = props => {
     const [selectedKeys, setSelectedKeys] = useState(props.selectedKeys || props.defaultSelectedKeys || []);
     const [openKeys, setOpenKeys] = useState(props.openKeys || props.defaultOpenKeys || []);
-    const [activeKey, setActiveKey] = useState(props.activeKey || props.defaultActiveKey);
+    const [activeKey, setActiveKey] = useState(props.activeKey || props.defaultActiveKey || 0);
 
     const containerRef: any = useRef(null);
 
@@ -205,6 +206,13 @@ export const Menu: React.FC<MenuProps> = props => {
 
     const activeKeyRef: any = useRef(props.activeKey || props.defaultActiveKey);
     activeKeyRef.current = activeKey;
+
+    // useEffect(() => {
+    //     document.addEventListener('keydown', doShortcut);
+    //     return () => {
+    //         document.removeEventListener('keydown', doShortcut);
+    //     }
+    // }, []);
 
     useEffect(() => {
         if ('selectedKeys' in props) {
@@ -328,7 +336,7 @@ export const Menu: React.FC<MenuProps> = props => {
         }
         const { map } = flatRef.current;
         const curItem = map.get(key);
-        if (curItem.parentKey !== null && curItem.parentKey !== undefined) {
+        if (curItem && curItem.parentKey !== null && curItem.parentKey !== undefined) {
             const parentItem = map.get(curItem.parentKey);
             if (parentItem) {
                 const index = (parentItem.children || []).findIndex((node: any) => node.key === key);
@@ -347,6 +355,17 @@ export const Menu: React.FC<MenuProps> = props => {
 
     const doShortcut = (e: any) => {
         const keyCode = e.key;
+        let isIn = false;
+        for (let n in Keys) {
+            if (keyCode === Keys[n]) {
+                isIn = true;
+                break;
+            }
+        }
+        if (!isIn) {
+            return;
+        }
+        e.preventDefault();
         const { map } = flatRef.current;
         let curActiveKey = activeKeyRef.current;
         const curItem = map.get(curActiveKey);
@@ -378,6 +397,7 @@ export const Menu: React.FC<MenuProps> = props => {
                     reActiveKey = curItem.children[0].key;
                 }
                 break;
+            // case Keys.ESC:
             default:
                 return;
         }
@@ -440,18 +460,18 @@ export const Menu: React.FC<MenuProps> = props => {
         <div
             className={`${CLASSNAME}-menu-container`}
             tabIndex={0}
-            onKeyDown={doShortcut}
+            // onKeyDown={doShortcut}
             ref={containerRef}
-            onMouseEnter={() => {
-                if (containerRef.current) {
-                    containerRef.current.focus();
-                }
-            }}
-            onTouchStart={() => {
-                if (containerRef.current) {
-                    containerRef.current.focus();
-                }
-            }}
+            // onMouseEnter={() => {
+            //     if (containerRef.current) {
+            //         containerRef.current.focus();
+            //     }
+            // }}
+            // onTouchStart={() => {
+            //     if (containerRef.current) {
+            //         containerRef.current.focus();
+            //     }
+            // }}
         >
             <MenuNode
                 {...props}

@@ -10,7 +10,7 @@ import {
     moveTableRowEx as moveTableRow,
     moveTableColumnEx as moveTableColumn,
     findTable
-} from '@/components/docEditer/core/utils';
+} from '@/components/doc/core/utils';
 import { 
     getRect, 
     getAlignPos, 
@@ -328,6 +328,10 @@ export class CtrolPanel {
             const handle = document.createElement('div');
             handle.className = `${CLASSNAME}-table-view-cell-selection-handle`;
             handle.innerHTML = svg;
+            document.addEventListener('ciclk', (e: any) => {
+                e.preventDefault();
+                
+            });
             inner.appendChild(handle);
             CtrolPanel.selectRect.appendChild(inner);
         }

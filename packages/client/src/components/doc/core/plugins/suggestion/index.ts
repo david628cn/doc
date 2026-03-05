@@ -2,7 +2,7 @@ import { type EditorState, type Transaction, Plugin, PluginKey } from 'prosemirr
 import { type EditorView, Decoration, DecorationSet } from 'prosemirror-view';
 // import { type ResolvedPos } from 'prosemirror-model';
 // import { getRect } from '@/components/utils/align';
-import { findSuggestionMatch } from '@/components/docEditer/core/utils';
+import { findSuggestionMatch } from '@/components/doc/core/utils';
 import { CLASSNAME } from '@/global';
 import './index.less';
 
@@ -62,6 +62,7 @@ import './index.less';
 //     text: string;
 // } | null;
 
+export const pluginKey = new PluginKey('suggestion');
 
 export const suggestion = ({
     editor,
@@ -81,11 +82,11 @@ export const suggestion = ({
     // /(?:^)?:[^\s:]*/gm    :
 
     const plugin: Plugin = new Plugin({
-        key: new PluginKey('suggestion'),
+        key: pluginKey,
         view(view: EditorView) {
             return {
                 update(view: EditorView, prevState: EditorState) {
-                    const prev = plugin.getState(prevState);
+                    // const prev = plugin.getState(prevState);
                     const next = plugin.getState(view.state);
 
                     // // See how the state changed
@@ -103,20 +104,9 @@ export const suggestion = ({
                     //     return
                     // }
                     // const state = handleExit && !handleStart ? prev : next;
-
-                    const state = next;
-                    const { left, top } = view.coordsAtPos(state.range.from);
-                    let active = state.active;
-                    if (!editor.view.hasFocus()) {
-                        active = false;
-                    }
-                    const params = {
+                    let active = next.active;
+                    let params = {
                         editor,
-                        active,
-                        range: active ? state.range : {from: 0, to: 0},
-                        query: active ? state.query : null,
-                        text: active ? state.text : null,
-                        // items: [],
                         command: (commandProps: any) => {
                             // return command({
                             //     editor,
@@ -124,15 +114,33 @@ export const suggestion = ({
                             //     props: commandProps,
                             // })
                         },
-                        // decorationNode,
-                        rect: active ? {
+                        active,
+                        range: {from: 0, to: 0},
+                        query: null,
+                        text: null,
+                        rect: null
+                    };
+                    if (!editor.view.hasFocus()) {
+                        active = false;
+                    }
+
+                    if (active) {
+                        const { left, top } = view.coordsAtPos(next.range.from);
+                        params.active = active;
+                        params.range = next.range;
+                        params.query = next.query;
+                        params.text = next.text;
+                        params.rect = {
                             width: 100,
                             height: 24,
                             left,
                             top
-                        } : null
-                    };
-                    editor.emit('suggestion', params);
+                        };
+                    }
+                    editor.emit('action', {
+                        type: 'suggestion',
+                        data: params
+                    });
                 },
                 destroy() {
 
@@ -156,8 +164,17 @@ export const suggestion = ({
                 const { composing } = editor.view;
                 const { selection } = tr;
                 const { empty, from } = selection;
-                if (!editor.editable || !(empty || composing)) {
-                    return prevValue;
+                if (!editor.editable || !editor.view.hasFocus() || !(empty || composing)) {
+                    return {
+                            ...prevValue,
+                            active: false,
+                            range: {
+                                from: 0,
+                                to: 0
+                            },
+                            query: null,
+                            text: null
+                        };;
                 }
                 const mate = tr.getMeta('suggestion');
                 const next = {
@@ -220,6 +237,18 @@ export const suggestion = ({
                 // if (next.deco) {
                 // next.deco = next.deco.map(tr.mapping, tr.doc);
                 // console.log('newFrom newTo>>>', next.deco);
+                // }
+                // if (!editor.view.hasFocus()) {
+                //     return {
+                //         ...next,
+                //         active: false,
+                //         range: {
+                //             from: 0,
+                //             to: 0
+                //         },
+                //         query: null,
+                //         text: null
+                //     };
                 // }
                 if (next.active) {
                     if ((from < next.range.from || from > next.range.to) && !composing && !next.composing) {
@@ -311,9 +340,33 @@ export const suggestion = ({
                 return false; // 返回 false 以便文字能正常插入文檔
             },
             handleKeyDown(view: EditorView, event: any) {
-                if (event.key === 'Escape' || event.key === 'Esc') {
-
+                const state = pluginKey.getState(view.state);
+                if (!state.active) {
+                    return false; // 我不活跃，放行给后面的插件
                 }
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', 'Escape', 'Esc'].includes(event.key)) {
+                    editor.emit('action', { type: 'suggestion', data: state });
+                    let tr: Transaction;
+                    if (event.key === 'Escape' || event.key === 'Esc') {
+                        tr = view.state.tr.setMeta('suggestion', {
+                            active: false,
+                            // deco: DecorationSet.empty,
+                            range: {
+                                from: 0,
+                                to: 0
+                            },
+                            query: null,
+                            text: null
+                        });
+                    } else {
+                        tr = view.state.tr.setMeta('suggestion', state);
+                        
+                    }
+                    view.dispatch(tr);
+                    return true;
+                }
+                
+                return false;
             },
             decorations(state: EditorState) {
                 const pluginState = plugin.getState(state);

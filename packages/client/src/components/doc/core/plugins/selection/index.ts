@@ -2,58 +2,12 @@ import { type EditorState, type Transaction, Plugin, PluginKey, NodeSelection, T
 import { type EditorView, Decoration, DecorationSet } from 'prosemirror-view';
 import { Selection } from 'prosemirror-state';
 import { CellSelection } from 'prosemirror-tables';
-import { posToDOMRect } from '@/components/docEditer/core/utils';
+import { posToDOMRect } from '@/components/doc/core/utils';
 import { getPosition, isValidPosition } from '@/components/utils/align';
 // import { CLASSNAME } from '@/global';
 import './index.less';
 
-// const getSelectionBoundingRect = () => {
-//     const { selection } = this.view.state;
-//     const { ranges } = selection;
-
-//     const from = Math.min(...ranges.map((range: any) => range.$from.pos));
-//     const to = Math.max(...ranges.map((range: any) => range.$to.pos));
-
-//     if (selection instanceof NodeSelection) {
-//         const node = this.view.nodeDOM(from) as HTMLElement;
-//         if (node) {
-//             return node.getBoundingClientRect();
-//         }
-//     }
-//     return this.posToDOMRect(from, to);
-// }
-
-// const posToDOMRect(from: number, to: number): DOMRect = () => {
-//     const minPos = 0
-//     const maxPos = this.view.state.doc.content.size;
-//     const resolvedFrom = Math.min(Math.max(from, minPos), maxPos);
-//     const resolvedEnd = Math.min(Math.max(to, minPos), maxPos);
-//     const start = this.view.coordsAtPos(resolvedFrom);
-//     const end = this.view.coordsAtPos(resolvedEnd, -1);
-//     const top = Math.min(start.top, end.top);
-//     const bottom = Math.max(start.bottom, end.bottom);
-//     const left = Math.min(start.left, end.left);
-//     const right = Math.max(start.right, end.right);
-//     const width = right - left;
-//     const height = bottom - top;
-//     const x = left;
-//     const y = top;
-//     const data = {
-//         top,
-//         bottom,
-//         left,
-//         right,
-//         width,
-//         height,
-//         x,
-//         y
-//     };
-
-//     return {
-//         ...data,
-//         toJSON: () => data
-//     };
-// }
+export const pluginKey = new PluginKey('selection');
 
 export const selection = ({ editor }: any) => {
     // let is: any = null;
@@ -84,7 +38,7 @@ export const selection = ({ editor }: any) => {
         }
         const tr = state.tr.setSelection(
             Selection.near(state.doc.resolve(posCoords.pos))
-        )
+        ).setMeta('selection', { active: false });
         editor.view.dispatch(tr);
     }
     const onMouseUp = (e: Event) => {
@@ -93,24 +47,21 @@ export const selection = ({ editor }: any) => {
             clearTimeout(timer);
             const { state } = editor.view;
             const { doc, selection } = state;
-            const { node, from, to, empty, $from } = selection;
+            const { node, from, to, $from, empty } = selection;
             // const cotent = state.doc.textBetween(from, to);
             // const textBefore = $from.parent.textBetween(Math.max(0, $from.parentOffset - 1), $from.parentOffset, null, '\0')
-            
             const isEmptyTextBlock = !doc.textBetween(from, to).length && selection instanceof TextSelection;
             const isCodeBlock = $from.parent.type.spec.code || (selection instanceof NodeSelection && node.type.spec.code);
             const isExcludedNode = selection instanceof NodeSelection && ['imageUpload', 'horizontalRule'].includes(node.type.name);
             const isTableCell = selection instanceof CellSelection;
-            let rect = null;
-            if (from !== to && (!isEmptyTextBlock && !isCodeBlock && !isExcludedNode && !isTableCell)) {
-                rect = posToDOMRect(editor.view, from, to);
-                if (!editor.view.hasFocus()) {
-                    rect = null;
-                }
+            let tr: Transaction;
+            console.log('editor.view.hasFocus()', from, to);
+            if (editor.view.hasFocus() && !empty && from !== to && !isEmptyTextBlock && !isCodeBlock && !isExcludedNode && !isTableCell) {
+                tr = state.tr.setMeta('selection', { active: true });
+            } else {
+                tr = state.tr.setMeta('selection', { active: false });
             }
-            editor.emit('selection', {
-                rect
-            });
+            editor.view.dispatch(tr);
         }, 10);
         
     }
@@ -136,13 +87,29 @@ export const selection = ({ editor }: any) => {
     }
 
     const plugin: Plugin = new Plugin({
-        key: new PluginKey('selection'),
+        key: pluginKey,
         view(view: EditorView) {
             clearEvents();
             addEvent();
             return {
                 update(view: EditorView, prevState: EditorState) {
-
+                    const next = plugin.getState(view.state);
+                    const { from, to } = view.state.selection;
+                    let rect = null;
+                    let active = next.active;
+                    if (from === to) {
+                        active = false;
+                    }
+                    if (active) {
+                        rect = posToDOMRect(view, from, to);
+                    }
+                    editor.emit('action', {
+                        type: 'selection',
+                        data: {
+                            active: next.active,
+                            rect
+                        }
+                    });
                 },
                 destroy() {
                     clearEvents();
@@ -152,19 +119,32 @@ export const selection = ({ editor }: any) => {
         state: {
             init(config: any, instance: EditorState) {
                 return {
-                    text: null,
-                    rect: null
+                    active: false
                 }
             },
             apply(tr: Transaction, preValue: any, oldState: EditorState, newState: EditorState) {
+                const meta = tr.getMeta('selection');
+                if (meta) {
+                    return meta;
+                }
+                const { selection } = tr;
+                const { from, to } = selection;
                 const newValue = {
                     ...preValue
                 };
-
+                if (!editor.editable || from === to || !editor.view.hasFocus()) {
+                    newValue.active = false;
+                }
                 return newValue;
             }
         },
         props: {
+            handleKeyDown(view: EditorView, event: any) {
+                const { state } = view;
+                let tr: Transaction;
+                tr = state.tr.setMeta('selection', { active: true });
+                editor.view.dispatch(tr);
+            },
             decorations(state: EditorState) {
                 // console.log('selection', state.selection.empty, state.selection instanceof NodeSelection);
                 return null;

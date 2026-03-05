@@ -519,16 +519,16 @@ export class DragDrop {
         }
     }
     handleEnd = (e: any) => {
-        if (!this.isTouchEvent(e)) {
-            e.preventDefault();
-        } else {
-            e.returnValue = false;
-        }
-        if (e.stopPropagation) {
-            e.stopPropagation();
-        } else {
-            e.cancelBubble = true;
-        }
+        // if (!this.isTouchEvent(e)) {
+        //     e.preventDefault();
+        // } else {
+        //     e.returnValue = false;
+        // }
+        // if (e.stopPropagation) {
+        //     e.stopPropagation();
+        // } else {
+        //     e.cancelBubble = true;
+        // }
         this.moving = false;
         // this.proxyNode.style.display = 'none';
         if (this.autoScroller) {

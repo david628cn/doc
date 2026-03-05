@@ -15,7 +15,7 @@ import type { Node } from 'prosemirror-model';
 //     splitBlock
 // } from 'prosemirror-commands';
 // import Editor from '../../editor';
-import { getOuterNode, getOuterNodePos, closestBlock } from '@/components/docEditer/core/utils';
+import { getOuterNode, getOuterNodePos, closestBlock } from '@/components/doc/core/utils';
 import { CLASSNAME } from '@/global';
 import './index.less';
 

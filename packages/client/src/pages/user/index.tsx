@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { DocEditor } from '@/components/docEditer';
+import { DocEditor } from '@/components/doc';
 
 interface IProps {
 }
