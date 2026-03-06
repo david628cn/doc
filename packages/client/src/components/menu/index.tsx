@@ -176,6 +176,7 @@ export type MenuProps = {
     items?: any;
     // data?: Array<any> | undefined | null;
     level?: number;
+    shortKey?: boolean;
     // style?: any;
     onSelect?: Function;
     onOpenChange?: Function;
@@ -204,13 +205,17 @@ export const Menu: React.FC<MenuProps> = props => {
     const openKeysRef: any = useRef(props.openKeys || props.defaultOpenKeys || []);
     openKeysRef.current = openKeys;
 
-    const activeKeyRef: any = useRef(props.activeKey || props.defaultActiveKey || (props.items || [])[0]?.key);
+    const activeKeyRef: any = useRef(props.activeKey || props.defaultActiveKey);
     activeKeyRef.current = activeKey;
 
     useEffect(() => {
-        document.addEventListener('keydown', doShortcut, true);
+        if (props.shortKey) {
+            document.addEventListener('keydown', doShortcut, true);
+        }
         return () => {
-            document.removeEventListener('keydown', doShortcut);
+            if (props.shortKey) {
+                document.removeEventListener('keydown', doShortcut);
+            }
         }
     }, []);
 
@@ -233,9 +238,10 @@ export const Menu: React.FC<MenuProps> = props => {
     }, [props.openKeys]);
 
     useEffect(() => {
-        const newActiveKey = (props.items || [])[0]?.key;
-        activeKeyRef.current = newActiveKey;
-        setActiveKey(newActiveKey);
+        // const newActiveKey = (props.items || [])[0]?.key;
+        // activeKeyRef.current = newActiveKey;
+        // setActiveKey(newActiveKey);
+        setActiveKey(null);
     }, [props.items]);
 
     const handleOpenChange = (params: any) => {

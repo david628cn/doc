@@ -274,6 +274,7 @@ export const Doc: React.FC<DocProps> = props => {
                         >
                             <Menu
                                 mode='bubble'
+                                shortKey={true}
                                 items={suggestionState.items}
                             />
                         </Popup>
