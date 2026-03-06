@@ -21,17 +21,18 @@ import './index.less';
 export type ToolbarBaseProps = {
     className?: string;
     children?: any;
+    style?: any;
 }
 
 export const ToolbarBase: React.FC<ToolbarBaseProps> = props => {
-    const { className, children } = props;
+    const { className, children, style } = props;
     let cls: any = [`${CLASSNAME}-toolbar-container`];
     if (className !== undefined) {
         cls.push(className);
     }
     cls = cls.join(' ');
 
-    return <div className={cls}>{children}</div>;
+    return <div className={cls} style={style}>{children}</div>;
 };
 
 export const Separator = () => <div className={`${CLASSNAME}-toolbar-separator`}></div>;
@@ -42,11 +43,13 @@ export type ToolBarProps = {
     data?: any;
     defaultData?: any;
     onChange?: Function;
+    style?: any;
 }
 
 export const ToolBar: React.FC<ToolBarProps> = props => {
+    const { data, defaultData, onChange, ...otherProps } = props;
     return (
-        <ToolbarBase>
+        <ToolbarBase {...otherProps}>
             <Space />
             {/* <ButtonGroup>
                 <DropdownMenu
@@ -117,14 +120,14 @@ export const ToolBar: React.FC<ToolBarProps> = props => {
             </ButtonGroup>
             <Separator /> */}
             <TextAlign
-                value={props.data.textAlign}
+                value={data.textAlign}
                 onChange={(params: any) => {
-                    props.onChange?.({
+                    onChange?.({
                         type: 'textAlign',
                         name: 'textAlign',
                         value: params.value,
                         data: {
-                            ...props.data,
+                            ...data,
                             textAlign: params.value
                         }
                     });
@@ -166,15 +169,15 @@ export const ToolBar: React.FC<ToolBarProps> = props => {
                 <Button
                     type="link"
                     title="Bold"
-                    active={props.data.strong}
+                    active={data.strong}
                     onClick={(params: any) => {
-                        props.onChange?.({
+                        onChange?.({
                             type: 'mark',
                             name: 'strong',
-                            value: !props.data.strong,
+                            value: !data.strong,
                             data: {
-                                ...props.data,
-                                strong: !props.data.strong
+                                ...data,
+                                strong: !data.strong
                             }
                         });
                     }}
@@ -184,15 +187,15 @@ export const ToolBar: React.FC<ToolBarProps> = props => {
                 <Button
                     type="link"
                     title="Italic"
-                    active={props.data.em}
+                    active={data.em}
                     onClick={(params: any) => {
-                        props.onChange?.({
+                        onChange?.({
                             type: 'mark',
                             name: 'em',
-                            value: !props.data.em,
+                            value: !data.em,
                             data: {
-                                ...props.data,
-                                em: !props.data.em
+                                ...data,
+                                em: !data.em
                             }
                         });
                     }}
@@ -202,15 +205,15 @@ export const ToolBar: React.FC<ToolBarProps> = props => {
                 <Button
                     type="link"
                     title="Strikethrough"
-                    active={props.data.s}
+                    active={data.s}
                     onClick={(params: any) => {
-                        props.onChange?.({
+                        onChange?.({
                             type: 'mark',
                             name: 's',
-                            value: !props.data.s,
+                            value: !data.s,
                             data: {
-                                ...props.data,
-                                s: !props.data.s
+                                ...data,
+                                s: !data.s
                             }
                         });
                     }}
@@ -220,15 +223,15 @@ export const ToolBar: React.FC<ToolBarProps> = props => {
                 <Button
                     type="link"
                     title="Underlined"
-                    active={props.data.u}
+                    active={data.u}
                     onClick={(params: any) => {
-                        props.onChange?.({
+                        onChange?.({
                             type: 'mark',
                             name: 'u',
-                            value: !props.data.u,
+                            value: !data.u,
                             data: {
-                                ...props.data,
-                                u: !props.data.u
+                                ...data,
+                                u: !data.u
                             }
                         });
                     }}
@@ -238,15 +241,15 @@ export const ToolBar: React.FC<ToolBarProps> = props => {
                 <Button
                     type="link"
                     title="link"
-                    active={props.data.link}
+                    active={data.link}
                     onClick={(params: any) => {
-                        props.onChange?.({
+                        onChange?.({
                             type: 'mark',
                             name: 'link',
-                            value: !props.data.link,
+                            value: !data.link,
                             data: {
-                                ...props.data,
-                                link: !props.data.link
+                                ...data,
+                                link: !data.link
                             }
                         });
                     }}
@@ -256,15 +259,15 @@ export const ToolBar: React.FC<ToolBarProps> = props => {
                 <Button
                     type="link"
                     title="Code"
-                    active={props.data.code}
+                    active={data.code}
                     onClick={(params: any) => {
-                        props.onChange?.({
+                        onChange?.({
                             type: 'mark',
                             name: 'code',
-                            value: !props.data.code,
+                            value: !data.code,
                             data: {
-                                ...props.data,
-                                code: !props.data.code
+                                ...data,
+                                code: !data.code
                             }
                         });
                     }}
@@ -273,11 +276,11 @@ export const ToolBar: React.FC<ToolBarProps> = props => {
                 </Button>
                 <TextColorDropdown
                     value={{
-                        color: props.data.textStyle.color,
-                        backgroundColor: props.data.textStyle.backgroundColor
+                        color: data.textStyle.color,
+                        backgroundColor: data.textStyle.backgroundColor
                     }}
                     onChange={(params: any) => {
-                        props.onChange?.({
+                        onChange?.({
                             type: 'mark',
                             name: 'textStyle',
                             value: {
@@ -285,7 +288,7 @@ export const ToolBar: React.FC<ToolBarProps> = props => {
                                 backgroundColor: params.value?.backgroundColor
                             },
                             data: {
-                                ...props.data,
+                                ...data,
                                 textStyle: {
                                     color: params.value?.color,
                                     backgroundColor: params.value?.backgroundColor
@@ -297,15 +300,15 @@ export const ToolBar: React.FC<ToolBarProps> = props => {
                 <Button
                     type="link"
                     title="Superscript"
-                    active={props.data.sup}
+                    active={data.sup}
                     onClick={(params: any) => {
-                        props.onChange?.({
+                        onChange?.({
                             type: 'mark',
                             name: 'sup',
-                            value: !props.data.sup,
+                            value: !data.sup,
                             data: {
-                                ...props.data,
-                                sup: !props.data.sup
+                                ...data,
+                                sup: !data.sup
                             }
                         });
                     }}
@@ -315,15 +318,15 @@ export const ToolBar: React.FC<ToolBarProps> = props => {
                 <Button
                     type="link"
                     title="Subscript"
-                    active={props.data.sub}
+                    active={data.sub}
                     onClick={(params: any) => {
-                        props.onChange?.({
+                        onChange?.({
                             type: 'mark',
                             name: 'sub',
-                            value: !props.data.sub,
+                            value: !data.sub,
                             data: {
-                                ...props.data,
-                                sub: !props.data.sub
+                                ...data,
+                                sub: !data.sub
                             }
                         });
                     }}

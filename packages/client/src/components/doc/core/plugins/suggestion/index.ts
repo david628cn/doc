@@ -107,12 +107,11 @@ export const suggestion = ({
                     let active = next.active;
                     let params = {
                         editor,
-                        command: (commandProps: any) => {
-                            // return command({
-                            //     editor,
-                            //     range: state.range,
-                            //     props: commandProps,
-                            // })
+                        command: (is: boolean, params: any) => {
+                            const tr = view.state.tr.setMeta('suggestion', {
+                                active: is
+                            });
+                            view.dispatch(tr);
                         },
                         active,
                         range: {from: 0, to: 0},

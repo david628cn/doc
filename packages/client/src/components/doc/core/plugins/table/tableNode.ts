@@ -4,7 +4,6 @@ import {
     updateColumnsOnResize,
     TableMap
 } from 'prosemirror-tables';
-import { pluginKey } from './index';
 import { setAlignPos } from '@/components/utils/align';
 import { CLASSNAME } from '@/global';
 

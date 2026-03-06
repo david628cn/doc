@@ -34,61 +34,60 @@ export type DocProps = {
 const commandTree = [
     {
         label: '基础节点',
-        key: 'basic',
+        // key: 'basic',
+        type: 'group',
         children: [
-            {
-                label: '文本样式',
-                key: 'typography',
-                children: [
-                    { label: '正文', key: 'text', icon: TextIcon, description: '普通文本输入' },
-                    { label: '标题 1', key: 'heading1', icon: Heading1Icon, description: '最大的标题' },
-                    { label: '标题 2', key: 'heading2', icon: Heading2Icon, description: '中型标题' },
-                    { label: '标题 3', key: 'heading3', icon: Heading3Icon, description: '小型标题' },
-                    { label: '标题 4', key: 'heading4', icon: Heading4Icon, description: '超小标题' }
-                ]
-            },
-            {
-                label: '列表类型',
-                key: 'lists',
-                children: [
-                    { label: '无序列表', key: 'bulletList', icon: BulletListIcon },
-                    { label: '有序列表', key: 'orderedList', icon: OrderedListIcon },
-                    { label: '任务列表', key: 'taskList', icon: TaskListIcon }
-                ]
-            }
+            { label: '正文', key: 'text', icon: TextIcon, description: '普通文本输入' },
+            { label: '标题 1', key: 'heading1', icon: Heading1Icon, description: '最大的标题' },
+            { label: '标题 2', key: 'heading2', icon: Heading2Icon, description: '中型标题' },
+            { label: '标题 3', key: 'heading3', icon: Heading3Icon, description: '小型标题' },
+            { label: '标题 4', key: 'heading4', icon: Heading4Icon, description: '超小标题' }
         ]
     },
     {
-        label: '高级内容',
-        key: 'advanced',
+        label: '列表节点',
+        // key: 'list',
+        type: 'group',
         children: [
-            {
-                label: '块级元素',
-                key: 'blocks',
-                children: [
-                    { label: '引用', key: 'blockquote', icon: BlockquoteIcon },
-                    { label: '代码块', key: 'codeBlock', icon: CodeBlockIcon },
-                    { label: '表格', key: 'table', icon: TableIcon }
-                ]
-            }
+            { label: '无序列表', key: 'bulletList', icon: BulletListIcon },
+            { label: '有序列表', key: 'orderedList', icon: OrderedListIcon },
+            { label: '任务列表', key: 'taskList', icon: TaskListIcon }
+        ]
+    },
+    {
+        label: '高级节点',
+        // key: 'advanced',
+        type: 'group',
+        children: [
+            { label: '引用', key: 'blockquote', icon: BlockquoteIcon },
+            { label: '代码块', key: 'codeBlock', icon: CodeBlockIcon },
+            { label: '表格', key: 'table', icon: TableIcon }
         ]
     }
 ];
 
-const filterItems = (query: string, items: any = []) => {
+const searchTree = (query: string = '', tree: any = []) => {
     if (!query) {
-        return items;
+        return tree;
     }
-    let searchStr = query.trim();
-    if (!searchStr) {
-        return items;
-    }
-    searchStr = searchStr.toLowerCase();
-    return items.filter(item => 
-        item.label.toLowerCase().includes(searchStr) || 
-        item.key.toLowerCase().includes(searchStr)
-    );
-}
+  const keyword = query.toString().toLocaleLowerCase().trim();
+  return tree.map(node => {
+      // 1. 先递归处理子节点
+      const children = node.children ? searchTree(keyword, node.children) : null;
+      
+      // 2. 检查当前节点是否匹配：label 包含关键字 OR 子节点有匹配项
+      const isMatch = node.label.includes(keyword);
+      const hasChildMatch = children && children.length > 0;
+
+      if (isMatch || hasChildMatch) {
+        // 返回当前节点，如果有子节点匹配则带上过滤后的子节点
+        return { ...node, children };
+      }
+      
+      return null;
+    })
+    .filter(node => node !== null); // 移除不匹配的节点
+};
 
 export const Doc: React.FC<DocProps> = props => {
     const {
@@ -102,6 +101,7 @@ export const Doc: React.FC<DocProps> = props => {
         rect: null,
         open: false,
         // query: '',
+        command: (is, params) => {},
         items: []
     });
 
@@ -129,13 +129,13 @@ export const Doc: React.FC<DocProps> = props => {
     const contentRef = useRef(null);
     const editorRef: any = useRef(null);
     const handleSuggestion = (params: any) => {
-        console.log('>>>', params);
-        const items = filterItems(params.query, commandTree);
+        const items = searchTree(params.query, commandTree);
         setSuggestionState({
             open: params.active,
             rect: params.rect,
             // query: params.query,
-            items
+            items,
+            command: params.command
         });
     }
 
@@ -273,9 +273,15 @@ export const Doc: React.FC<DocProps> = props => {
                         // onChange={handleSelectionPopupVisibleChange}
                         >
                             <Menu
+                                className={`${CLASSNAME}-suggestion-menu`}
                                 mode='bubble'
-                                shortKey={true}
+                                shortKey={suggestionState.open}
                                 items={suggestionState.items}
+                                onSelect={(params: any) => {
+                                    suggestionState.command?.(false, {
+                                        key: params.key
+                                    })
+                                }}
                             />
                         </Popup>
                         <Popup

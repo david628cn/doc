@@ -208,14 +208,14 @@ export const Menu: React.FC<MenuProps> = props => {
     const activeKeyRef: any = useRef(props.activeKey || props.defaultActiveKey);
     activeKeyRef.current = activeKey;
 
+    const shortKeyRef = useRef(props.shortKey);
+    shortKeyRef.current = props.shortKey;
+
+
     useEffect(() => {
-        if (props.shortKey) {
-            document.addEventListener('keydown', doShortcut, true);
-        }
+        document.addEventListener('keydown', doShortcut, true);
         return () => {
-            if (props.shortKey) {
-                document.removeEventListener('keydown', doShortcut);
-            }
+            document.removeEventListener('keydown', doShortcut);
         }
     }, []);
 
@@ -230,6 +230,16 @@ export const Menu: React.FC<MenuProps> = props => {
             setActiveKey(props.activeKey || [] || (props.items || [])[0]?.key);
         }
     }, [props.activeKey]);
+
+    useEffect(() => {
+        const activeElement = document.querySelector(`.${CLASSNAME}-menu-item-active`);
+        if (activeElement) {
+            activeElement.scrollIntoView({
+                block: 'nearest',   // 关键：如果可见则不滚动，不可见则滚动至最近边缘
+                behavior: 'smooth'  // 丝滑动画
+            });
+        }
+    }, [activeKeyRef.current]);
 
     useEffect(() => {
         if ('openKeys' in props) {
@@ -320,7 +330,8 @@ export const Menu: React.FC<MenuProps> = props => {
         }
         props.onSelect?.({
             key,
-            selectedKeys: newSelectedKeys
+            selectedKeys: newSelectedKeys,
+            item: flatRef.current.map.get(key)
         });
     }
 
@@ -366,14 +377,29 @@ export const Menu: React.FC<MenuProps> = props => {
     }
 
     const doShortcut = (e: any) => {
+        if (!shortKeyRef.current) {
+            return;
+        }
         const keyCode = e.key;
         let isIn = Object.values(Keys).includes(keyCode);
         if (!isIn) {
             return;
         }
+        const { map } = flatRef.current;
+        if (keyCode === Keys.ENTER) {
+            if (activeKeyRef.current === null || activeKeyRef.current === undefined) {
+                return;
+            }
+            if (map.get(activeKeyRef.current) && !map.get(activeKeyRef.current).children) {
+                e.preventDefault();
+                handleSelect({
+                    key: activeKeyRef.current
+                });
+            }
+            return;
+        }
         e.preventDefault();
         // e.stopPropagation();
-        const { map } = flatRef.current;
         let curActiveKey = activeKeyRef.current || -1;
         let reActiveKey;
         const curItem = map.get(curActiveKey);
@@ -417,7 +443,7 @@ export const Menu: React.FC<MenuProps> = props => {
             key: reActiveKey,
             action: 'active'
         });
-    
+
         // const sub = map.get(reActiveKey);
         // if (sub.children && sub.children.length > 0) {
         //     handleOpenChange({
@@ -425,7 +451,7 @@ export const Menu: React.FC<MenuProps> = props => {
         //         action: 'active'
         //     });
         // }
-        
+
         const parentKeys: any = findParentKeys(mergeRef.current, reActiveKey);
         // const sub = map.get(reActiveKey);
         const newOpenKeys: Array<string> = [].concat(parentKeys || []);
@@ -473,16 +499,16 @@ export const Menu: React.FC<MenuProps> = props => {
             tabIndex={0}
             // onKeyDown={doShortcut}
             ref={containerRef}
-            // onMouseEnter={() => {
-            //     if (containerRef.current) {
-            //         containerRef.current.focus();
-            //     }
-            // }}
-            // onTouchStart={() => {
-            //     if (containerRef.current) {
-            //         containerRef.current.focus();
-            //     }
-            // }}
+        // onMouseEnter={() => {
+        //     if (containerRef.current) {
+        //         containerRef.current.focus();
+        //     }
+        // }}
+        // onTouchStart={() => {
+        //     if (containerRef.current) {
+        //         containerRef.current.focus();
+        //     }
+        // }}
         >
             <MenuNode
                 {...props}
