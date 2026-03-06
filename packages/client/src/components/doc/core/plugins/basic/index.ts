@@ -2,11 +2,11 @@ import { Plugin, PluginKey } from 'prosemirror-state';
 import { Slice, Fragment } from 'prosemirror-model';
 import type { EditorView } from 'prosemirror-view';
 
-const key = new PluginKey('basic');
+export const basicKey = new PluginKey('basic');
 
 export const basic = ({ editor }: any) => {
     const plugin: Plugin = new Plugin({
-        key,
+        key: basicKey,
         props: {
             handleDOMEvents: {
                 focus(view: EditorView, event: Event): boolean {

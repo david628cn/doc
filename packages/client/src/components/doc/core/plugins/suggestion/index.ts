@@ -62,7 +62,7 @@ import './index.less';
 //     text: string;
 // } | null;
 
-export const pluginKey = new PluginKey('suggestion');
+export const suggestionPluginKey = new PluginKey('suggestion');
 
 export const suggestion = ({
     editor,
@@ -82,7 +82,7 @@ export const suggestion = ({
     // /(?:^)?:[^\s:]*/gm    :
 
     const plugin: Plugin = new Plugin({
-        key: pluginKey,
+        key: suggestionPluginKey,
         view(view: EditorView) {
             return {
                 update(view: EditorView, prevState: EditorState) {
@@ -340,7 +340,7 @@ export const suggestion = ({
                 return false; // 返回 false 以便文字能正常插入文檔
             },
             handleKeyDown(view: EditorView, event: any) {
-                const state = pluginKey.getState(view.state);
+                const state = suggestionPluginKey.getState(view.state);
                 if (!state.active) {
                     return false; // 我不活跃，放行给后面的插件
                 }

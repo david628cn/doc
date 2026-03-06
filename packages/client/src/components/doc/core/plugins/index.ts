@@ -7,3 +7,4 @@ export * from './link';
 export * from './basic';
 export * from './uniqueID';
 export * from './table';
+export * from './codeBlock';

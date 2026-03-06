@@ -1,11 +1,13 @@
 import { type EditorState, type Transaction, Plugin, PluginKey } from 'prosemirror-state';
 // import { Slice, Fragment } from 'prosemirror-model';
 // import type { EditorView } from 'prosemirror-view';
-import { v4 as uuidv4 } from 'uuid'
+import { v4 as uuidv4 } from 'uuid';
+
+export const uniqueIDPluginKey = new PluginKey('uniqueID');
 
 export const uniqueID = ({ editor }: any) => {
     const plugin: Plugin = new Plugin({
-        key: new PluginKey('uniqueID'),
+        key: uniqueIDPluginKey,
         appendTransaction: (transactions: readonly Transaction[], oldState: EditorState, newState: EditorState) => {
             // 1. 检查文档是否发生变化
             const hasDocChanges = transactions.some(transaction => transaction.docChanged) && !oldState.doc.eq(newState.doc);

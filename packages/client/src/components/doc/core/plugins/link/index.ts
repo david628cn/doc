@@ -32,9 +32,11 @@ const findParentWithLink = (dom: any) => {
 //     }
 // }
 
+export const linkKey = new PluginKey('link');
+
 export const link = ({ editor }: any) => {
     const plugin: Plugin = new Plugin({
-        key: new PluginKey('link'),
+        key: linkKey,
         props: {
             handleClickOn(view: EditorView, pos: number, node: Node, nodePos: number, event: Event): boolean {
                 const target: any = findParentWithLink(event.target);

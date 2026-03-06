@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { DocEditor } from '@/components/doc';
+import { Doc } from '@/components/doc';
 
 interface IProps {
 }
@@ -19,7 +19,7 @@ const Page: React.FC<IProps> = props => {
                 width: '960px',
                 // flex: 1
             }}>
-                <DocEditor/>
+                <Doc/>
             </div>
             
         </div>

@@ -115,11 +115,13 @@ import { undo, redo } from 'prosemirror-history';
 //     return true;
 // }
 
+export const keymapsKey = new PluginKey('keymaps');
+
 const keymaps = ({ editor }: any) => {
     // console.log('baseKeymap', baseKeymap);
     // const EnterFunc = baseKeymap['Enter'];
     return new Plugin({
-        key: new PluginKey('keymaps'),
+        key: keymapsKey,
         props: {
             handleKeyDown: keydownHandler({
                 ...baseKeymap,

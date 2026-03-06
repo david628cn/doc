@@ -5,9 +5,11 @@ import { isNodeEmpty } from '@/components/doc/core/utils';
 import { CLASSNAME } from '@/global';
 import './index.less';
 
+export const placeholderKey = new PluginKey('placeholder');
+
 export const placeholder = ({ editor }: any) => {
     const plugin: Plugin = new Plugin({
-        key: new PluginKey('placeholder'),
+        key: placeholderKey,
         props: {
             decorations(state: EditorState) {
                 if (!editor.editable) {

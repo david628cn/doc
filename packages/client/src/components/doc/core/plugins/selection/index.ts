@@ -7,7 +7,7 @@ import { getPosition, isValidPosition } from '@/components/utils/align';
 // import { CLASSNAME } from '@/global';
 import './index.less';
 
-export const pluginKey = new PluginKey('selection');
+export const selectionPluginKey = new PluginKey('selection');
 
 export const selection = ({ editor }: any) => {
     // let is: any = null;
@@ -87,7 +87,7 @@ export const selection = ({ editor }: any) => {
     }
 
     const plugin: Plugin = new Plugin({
-        key: pluginKey,
+        key: selectionPluginKey,
         view(view: EditorView) {
             clearEvents();
             addEvent();

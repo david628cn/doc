@@ -149,6 +149,8 @@ const handleFactory: any = ({
     return rs;
 }
 
+export const dragHandleKey = new PluginKey('dragHandle');
+
 export const dragHandle = ({ editor, container }: any) => {
     let activeDom: HTMLElement;
     let activeNode: Node;
@@ -319,7 +321,7 @@ export const dragHandle = ({ editor, container }: any) => {
     });
 
     const plugin: Plugin = new Plugin({
-        key: new PluginKey('dragHandle'),
+        key: dragHandleKey,
         view(view: EditorView) {
             return {
                 update(view: EditorView, prevState: EditorState) {

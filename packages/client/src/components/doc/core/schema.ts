@@ -157,33 +157,61 @@ const schema: any = {
         /// A code listing. Disallows marks or non-text inline
         /// nodes by default. Represented as a `<pre>` element with a
         /// `<code>` element inside of it.
-        codeBlock: {
+        code_block: {
+            attrs: { language: { default: 'javascript' } }, // 默认语言
             content: "text*",
             marks: "",
             group: "block",
-            attrs: {
-                dataBlockId: {
-                    default: null,
-                    validate: "string|null"
-                }
-            },
             code: true,
             defining: true,
-            parseDOM: [
-                {
-                    tag: "pre",
-                    preserveWhitespace: "full",
-                    getAttrs: (dom: any) => {
-                        return {
-                            dataBlockId: dom.getAttribute('data-block-id')
-                        };
-                    }
-                }
-            ],
-            toDOM(node: any) {
-                return ["pre", { ['data-block-id']: node.attrs.dataBlockId }, ["code", 0]];
-            }
+            parseDOM: [{
+                tag: "pre",
+                preserveWhitespace: "full",
+                // 从 HTML 的 class 中提取语言，例如 class="language-typescript"
+                getAttrs: node => ({
+                    language: node.getAttribute("data-language") || 'javascript'
+                })
+            }],
+            toDOM: node => ["pre", { "data-language": node.attrs.language }, ["code", 0]]
+            // 2. 动态切换语言 (逻辑层)
+            // 你需要一个方法来修改当前代码块的属性。可以通过一个简单的命令实现：
+            // javascript
+            // function setLanguage(view, lang) {
+            //     const { selection, tr } = view.state;
+            //     // 找到当前选区所在的 code_block 节点位置
+            //     const pos = selection.$from.before(); 
+            //     // 修改属性
+            //     view.dispatch(tr.setNodeMarkup(pos, null, { language: lang }));
+            // }
         },
+
+        // code_block: {
+        //     content: "text*",
+        //     marks: "",
+        //     group: "block",
+        //     attrs: {
+        //         dataBlockId: {
+        //             default: null,
+        //             validate: "string|null"
+        //         }
+        //     },
+        //     code: true,
+        //     defining: true,
+        //     parseDOM: [
+        //         {
+        //             tag: "pre",
+        //             preserveWhitespace: "full",
+        //             getAttrs: (dom: any) => {
+        //                 return {
+        //                     dataBlockId: dom.getAttribute('data-block-id')
+        //                 };
+        //             }
+        //         }
+        //     ],
+        //     toDOM(node: any) {
+        //         return ["pre", { ['data-block-id']: node.attrs.dataBlockId }, ["code", 0]];
+        //     }
+        // },
         /// The text node.
         text: {
             group: "inline"

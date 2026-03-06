@@ -26,7 +26,7 @@ import { CtrolPanel } from './ctrolPanel';
 import { CLASSNAME } from '@/global';
 import './index.less';
 
-export const pluginKey = new PluginKey('table');
+export const tablePluginKey = new PluginKey('table');
 
 export const table = ({
     editor
@@ -35,7 +35,7 @@ export const table = ({
     let ctrolPanel: any;
 
     const plugin: Plugin = new Plugin({
-        key: pluginKey,
+        key: tablePluginKey,
         view(view: EditorView) {
             return {
                 update(view: EditorView, prevState: EditorState) {

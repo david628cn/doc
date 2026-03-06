@@ -61,6 +61,7 @@ import {
     suggestion,
     // placeholder,
     selection,
+    shiki,
     table
 } from './plugins';
 import { CodeBlock } from './nodeViews';
@@ -213,6 +214,7 @@ export class Doc extends EventEmitter {
 
 
         let plugins = [
+            shiki,
             history(),
             selection({
                 editor: this
@@ -334,10 +336,10 @@ export class Doc extends EventEmitter {
                 spellcheck: false,
                 // contenteditable: this.options.editable
             } as any,
-            nodeViews: {
-                // tableView: (node: Node, view: EditorView, getPos: any): any => new TableView(node, view, getPos)
-                codeBlock: (node: Node, view: EditorView, getPos: any): any => new CodeBlock(node, view, getPos)
-            } as any,
+            // nodeViews: {
+            //     // tableView: (node: Node, view: EditorView, getPos: any): any => new TableView(node, view, getPos)
+            //     code_block: (node: Node, view: EditorView, getPos: any): any => new CodeBlock(node, view, getPos)
+            // } as any,
             // handleDOMEvents: {
             //     blur: (view: EditorView, event: Event) => {
             //         editor.isFocused = true;
