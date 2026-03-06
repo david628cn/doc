@@ -208,7 +208,7 @@ export const Menu: React.FC<MenuProps> = props => {
     activeKeyRef.current = activeKey;
 
     useEffect(() => {
-        document.addEventListener('keydown', doShortcut);
+        document.addEventListener('keydown', doShortcut, true);
         return () => {
             document.removeEventListener('keydown', doShortcut);
         }
@@ -222,7 +222,7 @@ export const Menu: React.FC<MenuProps> = props => {
 
     useEffect(() => {
         if ('activeKey' in props) {
-            setActiveKey(props.activeKey || []);
+            setActiveKey(props.activeKey || [] || (props.items || [])[0]?.key);
         }
     }, [props.activeKey]);
 
@@ -232,9 +232,11 @@ export const Menu: React.FC<MenuProps> = props => {
         }
     }, [props.openKeys]);
 
-    // useEffect(() => {
-    //     // activeKeyRef.current = (props.items || [])[0]?.key;
-    // }, [props.items]);
+    useEffect(() => {
+        const newActiveKey = (props.items || [])[0]?.key;
+        activeKeyRef.current = newActiveKey;
+        setActiveKey(newActiveKey);
+    }, [props.items]);
 
     const handleOpenChange = (params: any) => {
         const { key, action } = params;
@@ -359,23 +361,17 @@ export const Menu: React.FC<MenuProps> = props => {
 
     const doShortcut = (e: any) => {
         const keyCode = e.key;
-        let isIn = false;
-        for (let n in Keys) {
-            if (keyCode === Keys[n]) {
-                isIn = true;
-                break;
-            }
-        }
+        let isIn = Object.values(Keys).includes(keyCode);
         if (!isIn) {
             return;
         }
         e.preventDefault();
         // e.stopPropagation();
         const { map } = flatRef.current;
-        let curActiveKey = activeKeyRef.current;
+        let curActiveKey = activeKeyRef.current || -1;
+        let reActiveKey;
         const curItem = map.get(curActiveKey);
         let { index, list }: any = getKeyInParenIndex(curActiveKey);
-        let reActiveKey;
         switch (keyCode) {
             case Keys.UP:
                 index -= 1;
@@ -392,13 +388,13 @@ export const Menu: React.FC<MenuProps> = props => {
                 reActiveKey = list[index];
                 break;
             case Keys.LEFT:
-                if (curItem.parentKey !== null && curItem.parentKey !== undefined) {
+                if (curItem && curItem.parentKey !== null && curItem.parentKey !== undefined) {
                     const m = getKeyInParenIndex(curItem.parentKey);
                     reActiveKey = m.list[m.index];
                 }
                 break;
             case Keys.RIGHT:
-                if (curItem.children && curItem.children.length > 0) {
+                if (curItem && curItem.children && curItem.children.length > 0) {
                     reActiveKey = curItem.children[0].key;
                 }
                 break;
@@ -406,13 +402,16 @@ export const Menu: React.FC<MenuProps> = props => {
             default:
                 return;
         }
+
         if (reActiveKey === null || reActiveKey === undefined) {
             return;
         }
+
         handleActiveChange({
             key: reActiveKey,
             action: 'active'
         });
+    
         // const sub = map.get(reActiveKey);
         // if (sub.children && sub.children.length > 0) {
         //     handleOpenChange({
@@ -420,11 +419,12 @@ export const Menu: React.FC<MenuProps> = props => {
         //         action: 'active'
         //     });
         // }
+        
         const parentKeys: any = findParentKeys(mergeRef.current, reActiveKey);
         // const sub = map.get(reActiveKey);
         const newOpenKeys: Array<string> = [].concat(parentKeys || []);
         const sub = map.get(reActiveKey);
-        if (sub.children && sub.children.length > 0 && !openKeysRef.current.includes(reActiveKey)) {
+        if (sub && sub.children && sub.children.length > 0 && !openKeysRef.current.includes(reActiveKey)) {
             newOpenKeys.push(reActiveKey);
         }
         if (!('openKeys' in props)) {

@@ -5,9 +5,6 @@ import { CLASSNAME } from '@/global';
 import '@/global/animate.less';
 // import { PopupMenu } from './popupMenu';
 
-const mouseEnterDelay = 0.1;
-const mouseLeaveDelay = 0.1;
-
 export type SubMenuProps = {
     className?: string;
     title?: string;
@@ -159,7 +156,7 @@ export const SubMenu: React.FC<SubMenuProps> = props => {
                 });
             }
             
-        }, mouseEnterDelay);
+        }, 0.1);
 
     }
 
@@ -176,7 +173,7 @@ export const SubMenu: React.FC<SubMenuProps> = props => {
                 });
             }
             
-        }, mouseLeaveDelay);
+        }, 0.1);
     }
 
     const handlePopupMouseEnter = (e: any) => {
@@ -186,7 +183,7 @@ export const SubMenu: React.FC<SubMenuProps> = props => {
                     key: item.key,
                     action: 'active'
                 });
-            }, mouseEnterDelay);
+            }, 0.1);
         }
         
     }
@@ -198,7 +195,7 @@ export const SubMenu: React.FC<SubMenuProps> = props => {
                     key: item.key,
                     action: 'cancel'
                 });
-            }, mouseLeaveDelay);
+            }, 0.1);
         }
         
     }

@@ -31,6 +31,50 @@ export type DocProps = {
 
 // export const ParentContext = createContext(null);
 
+const commandTree = [
+    {
+        label: '基础节点',
+        key: 'basic',
+        children: [
+            {
+                label: '文本样式',
+                key: 'typography',
+                children: [
+                    { label: '正文', key: 'text', icon: TextIcon, description: '普通文本输入' },
+                    { label: '标题 1', key: 'heading1', icon: Heading1Icon, description: '最大的标题' },
+                    { label: '标题 2', key: 'heading2', icon: Heading2Icon, description: '中型标题' },
+                    { label: '标题 3', key: 'heading3', icon: Heading3Icon, description: '小型标题' },
+                    { label: '标题 4', key: 'heading4', icon: Heading4Icon, description: '超小标题' }
+                ]
+            },
+            {
+                label: '列表类型',
+                key: 'lists',
+                children: [
+                    { label: '无序列表', key: 'bulletList', icon: BulletListIcon },
+                    { label: '有序列表', key: 'orderedList', icon: OrderedListIcon },
+                    { label: '任务列表', key: 'taskList', icon: TaskListIcon }
+                ]
+            }
+        ]
+    },
+    {
+        label: '高级内容',
+        key: 'advanced',
+        children: [
+            {
+                label: '块级元素',
+                key: 'blocks',
+                children: [
+                    { label: '引用', key: 'blockquote', icon: BlockquoteIcon },
+                    { label: '代码块', key: 'codeBlock', icon: CodeBlockIcon },
+                    { label: '表格', key: 'table', icon: TableIcon }
+                ]
+            }
+        ]
+    }
+];
+
 const filterItems = (query: string, items: any = []) => {
     if (!query) {
         return items;
@@ -85,64 +129,8 @@ export const Doc: React.FC<DocProps> = props => {
     const contentRef = useRef(null);
     const editorRef: any = useRef(null);
     const handleSuggestion = (params: any) => {
-        const items = filterItems(params.query, [
-        {
-            label: 'Text',
-            key: 'text',
-            icon: TextIcon
-        },
-        {
-            label: 'Heading 1',
-            key: 'heading1',
-            icon: Heading1Icon
-        },
-        {
-            label: 'Heading 2',
-            key: 'heading2',
-            icon: Heading2Icon
-        },
-        {
-            label: 'Heading 3',
-            key: 'heading3',
-            icon: Heading3Icon
-        },
-        {
-            label: 'Heading 4',
-            key: 'heading4',
-            icon: Heading4Icon
-        },
-        {
-            label: 'Bullet list',
-            key: 'bulletList',
-            icon: BulletListIcon
-        },
-        {
-            label: 'Ordered list',
-            key: 'orderedList',
-            icon: OrderedListIcon
-        },
-        {
-            label: 'Task list',
-            key: 'taskList',
-            icon: TaskListIcon
-        },
-
-        {
-            label: 'Blockquote',
-            key: 'blockquote',
-            icon: BlockquoteIcon
-        },
-        {
-            label: 'CodeBlock',
-            key: 'codeBlock',
-            icon: CodeBlockIcon
-        },
-        {
-            label: 'Table',
-            key: 'table',
-            icon: TableIcon
-        }
-        ]);
+        console.log('>>>', params);
+        const items = filterItems(params.query, commandTree);
         setSuggestionState({
             open: params.active,
             rect: params.rect,
@@ -285,6 +273,7 @@ export const Doc: React.FC<DocProps> = props => {
                         // onChange={handleSelectionPopupVisibleChange}
                         >
                             <Menu
+                                mode='bubble'
                                 items={suggestionState.items}
                             />
                         </Popup>

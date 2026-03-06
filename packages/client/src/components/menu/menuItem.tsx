@@ -58,19 +58,19 @@ export const MenuItem: React.FC<MenuItemProps> = props => {
         onSelect?.(e);
     }
 
-    const handleMouseEnter = (e: any) => {
-        onActiveChange?.({
-            key: item.key,
-            action: 'active'
-        });
-    }
+    // const handleMouseEnter = (e: any) => {
+    //     onActiveChange?.({
+    //         key: item.key,
+    //         action: 'active'
+    //     });
+    // }
 
-    const handleMouseLeave = (e: any) => {
-        onActiveChange?.({
-            key: item.key,
-            action: 'cancel'
-        });
-    }
+    // const handleMouseLeave = (e: any) => {
+    //     onActiveChange?.({
+    //         key: item.key,
+    //         action: 'cancel'
+    //     });
+    // }
 
     return (
         <li
@@ -91,8 +91,8 @@ export const MenuItem: React.FC<MenuItemProps> = props => {
                 onClick={handleSelect}
                 // onPointerDown={handlePointerDown}
                 // { ...otherProps }
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
+                // onMouseEnter={handleMouseEnter}
+                // onMouseLeave={handleMouseLeave}
             >
                 {icon && <span className={`${CLASSNAME}-menu-item-icon`}>{icon}</span>}
                 {label && <span className={`${CLASSNAME}-menu-item-content`}>{label}</span>}

@@ -344,21 +344,18 @@ export const suggestion = ({
                 if (!state.active) {
                     return false; // 我不活跃，放行给后面的插件
                 }
-                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', 'Escape', 'Esc'].includes(event.key)) {
-                    let tr: Transaction;
-                    if (event.key === 'Escape' || event.key === 'Esc') {
-                        tr = view.state.tr.setMeta('suggestion', {
-                            active: false,
-                            // deco: DecorationSet.empty,
-                            range: {
-                                from: 0,
-                                to: 0
-                            },
-                            query: null,
-                            text: null
-                        });
-                        view.dispatch(tr);
-                    }
+                if (event.key === 'Escape' || event.key === 'Esc') {
+                    const tr = view.state.tr.setMeta('suggestion', {
+                        active: false,
+                        // deco: DecorationSet.empty,
+                        range: {
+                            from: 0,
+                            to: 0
+                        },
+                        query: null,
+                        text: null
+                    });
+                    view.dispatch(tr);
                     return true;
                 }
                 return false;
