@@ -31,6 +31,21 @@ export type DocProps = {
 
 // export const ParentContext = createContext(null);
 
+const filterItems = (query: string, items: any = []) => {
+    if (!query) {
+        return items;
+    }
+    let searchStr = query.trim();
+    if (!searchStr) {
+        return items;
+    }
+    searchStr = searchStr.toLowerCase();
+    return items.filter(item => 
+        item.label.toLowerCase().includes(searchStr) || 
+        item.key.toLowerCase().includes(searchStr)
+    );
+}
+
 export const Doc: React.FC<DocProps> = props => {
     const {
         className = `${CLASSNAME}-editor-body`,
@@ -42,7 +57,8 @@ export const Doc: React.FC<DocProps> = props => {
     const [suggestionState, setSuggestionState] = useState({
         rect: null,
         open: false,
-        query: ''
+        // query: '',
+        items: []
     });
 
     const [selectionUpdate, setSelectionUpdate] = useState({
@@ -69,11 +85,69 @@ export const Doc: React.FC<DocProps> = props => {
     const contentRef = useRef(null);
     const editorRef: any = useRef(null);
     const handleSuggestion = (params: any) => {
-        // console.log('handleSuggestion', params);
+        const items = filterItems(params.query, [
+        {
+            label: 'Text',
+            key: 'text',
+            icon: TextIcon
+        },
+        {
+            label: 'Heading 1',
+            key: 'heading1',
+            icon: Heading1Icon
+        },
+        {
+            label: 'Heading 2',
+            key: 'heading2',
+            icon: Heading2Icon
+        },
+        {
+            label: 'Heading 3',
+            key: 'heading3',
+            icon: Heading3Icon
+        },
+        {
+            label: 'Heading 4',
+            key: 'heading4',
+            icon: Heading4Icon
+        },
+        {
+            label: 'Bullet list',
+            key: 'bulletList',
+            icon: BulletListIcon
+        },
+        {
+            label: 'Ordered list',
+            key: 'orderedList',
+            icon: OrderedListIcon
+        },
+        {
+            label: 'Task list',
+            key: 'taskList',
+            icon: TaskListIcon
+        },
+
+        {
+            label: 'Blockquote',
+            key: 'blockquote',
+            icon: BlockquoteIcon
+        },
+        {
+            label: 'CodeBlock',
+            key: 'codeBlock',
+            icon: CodeBlockIcon
+        },
+        {
+            label: 'Table',
+            key: 'table',
+            icon: TableIcon
+        }
+        ]);
         setSuggestionState({
             open: params.active,
             rect: params.rect,
-            query: params.query
+            // query: params.query,
+            items
         });
     }
 
@@ -211,64 +285,7 @@ export const Doc: React.FC<DocProps> = props => {
                         // onChange={handleSelectionPopupVisibleChange}
                         >
                             <Menu
-                                items={[
-                                    {
-                                        label: 'Text',
-                                        key: 'text',
-                                        icon: TextIcon
-                                    },
-                                    {
-                                        label: 'Heading 1',
-                                        key: 'heading1',
-                                        icon: Heading1Icon
-                                    },
-                                    {
-                                        label: 'Heading 2',
-                                        key: 'heading2',
-                                        icon: Heading2Icon
-                                    },
-                                    {
-                                        label: 'Heading 3',
-                                        key: 'heading3',
-                                        icon: Heading3Icon
-                                    },
-                                    {
-                                        label: 'Heading 4',
-                                        key: 'heading4',
-                                        icon: Heading4Icon
-                                    },
-                                    {
-                                        label: 'Bullet list',
-                                        key: 'bulletList',
-                                        icon: BulletListIcon
-                                    },
-                                    {
-                                        label: 'Ordered list',
-                                        key: 'orderedList',
-                                        icon: OrderedListIcon
-                                    },
-                                    {
-                                        label: 'Task list',
-                                        key: 'taskList',
-                                        icon: TaskListIcon
-                                    },
-
-                                    {
-                                        label: 'Blockquote',
-                                        key: 'blockquote',
-                                        icon: BlockquoteIcon
-                                    },
-                                    {
-                                        label: 'CodeBlock',
-                                        key: 'codeBlock',
-                                        icon: CodeBlockIcon
-                                    },
-                                    {
-                                        label: 'Table',
-                                        key: 'table',
-                                        icon: TableIcon
-                                    }
-                                ]}
+                                items={suggestionState.items}
                             />
                         </Popup>
                         <Popup

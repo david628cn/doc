@@ -345,7 +345,6 @@ export const suggestion = ({
                     return false; // 我不活跃，放行给后面的插件
                 }
                 if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', 'Escape', 'Esc'].includes(event.key)) {
-                    editor.emit('action', { type: 'suggestion', data: state });
                     let tr: Transaction;
                     if (event.key === 'Escape' || event.key === 'Esc') {
                         tr = view.state.tr.setMeta('suggestion', {
@@ -358,14 +357,10 @@ export const suggestion = ({
                             query: null,
                             text: null
                         });
-                    } else {
-                        tr = view.state.tr.setMeta('suggestion', state);
-                        
+                        view.dispatch(tr);
                     }
-                    view.dispatch(tr);
                     return true;
                 }
-                
                 return false;
             },
             decorations(state: EditorState) {

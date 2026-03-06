@@ -187,7 +187,7 @@ export type MenuProps = {
 export const Menu: React.FC<MenuProps> = props => {
     const [selectedKeys, setSelectedKeys] = useState(props.selectedKeys || props.defaultSelectedKeys || []);
     const [openKeys, setOpenKeys] = useState(props.openKeys || props.defaultOpenKeys || []);
-    const [activeKey, setActiveKey] = useState(props.activeKey || props.defaultActiveKey || 0);
+    const [activeKey, setActiveKey] = useState(props.activeKey || props.defaultActiveKey);
 
     const containerRef: any = useRef(null);
 
@@ -204,15 +204,15 @@ export const Menu: React.FC<MenuProps> = props => {
     const openKeysRef: any = useRef(props.openKeys || props.defaultOpenKeys || []);
     openKeysRef.current = openKeys;
 
-    const activeKeyRef: any = useRef(props.activeKey || props.defaultActiveKey);
+    const activeKeyRef: any = useRef(props.activeKey || props.defaultActiveKey || (props.items || [])[0]?.key);
     activeKeyRef.current = activeKey;
 
-    // useEffect(() => {
-    //     document.addEventListener('keydown', doShortcut);
-    //     return () => {
-    //         document.removeEventListener('keydown', doShortcut);
-    //     }
-    // }, []);
+    useEffect(() => {
+        document.addEventListener('keydown', doShortcut);
+        return () => {
+            document.removeEventListener('keydown', doShortcut);
+        }
+    }, []);
 
     useEffect(() => {
         if ('selectedKeys' in props) {
@@ -231,6 +231,10 @@ export const Menu: React.FC<MenuProps> = props => {
             setOpenKeys(props.openKeys || []);
         }
     }, [props.openKeys]);
+
+    // useEffect(() => {
+    //     // activeKeyRef.current = (props.items || [])[0]?.key;
+    // }, [props.items]);
 
     const handleOpenChange = (params: any) => {
         const { key, action } = params;
@@ -366,6 +370,7 @@ export const Menu: React.FC<MenuProps> = props => {
             return;
         }
         e.preventDefault();
+        // e.stopPropagation();
         const { map } = flatRef.current;
         let curActiveKey = activeKeyRef.current;
         const curItem = map.get(curActiveKey);

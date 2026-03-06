@@ -213,10 +213,13 @@ export class Doc extends EventEmitter {
 
 
         let plugins = [
-            // basic({
-            //     editor: this
-            // }),
             history(),
+            selection({
+                editor: this
+            }),
+            suggestion({
+                editor: this
+            }),
             link({
                 editor: this
             }),
@@ -224,12 +227,6 @@ export class Doc extends EventEmitter {
             // tableEditing(),
             // gapCursor(),
             ...table({
-                editor: this
-            }),
-            selection({
-                editor: this
-            }),
-            suggestion({
                 editor: this
             }),
             uniqueID({

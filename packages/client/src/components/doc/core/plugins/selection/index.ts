@@ -55,7 +55,7 @@ export const selection = ({ editor }: any) => {
             const isExcludedNode = selection instanceof NodeSelection && ['imageUpload', 'horizontalRule'].includes(node.type.name);
             const isTableCell = selection instanceof CellSelection;
             let tr: Transaction;
-            console.log('editor.view.hasFocus()', from, to);
+            // console.log('editor.view.hasFocus()', from, to);
             if (editor.view.hasFocus() && !empty && from !== to && !isEmptyTextBlock && !isCodeBlock && !isExcludedNode && !isTableCell) {
                 tr = state.tr.setMeta('selection', { active: true });
             } else {
