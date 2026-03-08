@@ -42,6 +42,55 @@ import './index.less';
 // customElements.define('zf-collapse', ZfCollapse);
 
 
+// export function calculateStartPosition(
+//     cursorPosition: number,
+//     previousNode: Node | null,
+//     triggerChar?: string
+// ): number {
+//     if (!previousNode?.text || !triggerChar) {
+//         return cursorPosition;
+//     }
+
+//     const commandText = previousNode.text;
+//     const triggerCharIndex = commandText.lastIndexOf(triggerChar);
+
+//     if (triggerCharIndex === -1) {
+//         return cursorPosition;
+//     }
+
+//     const textLength = commandText.substring(triggerCharIndex).length;
+
+//     return cursorPosition - textLength;
+// }
+
+// if (!isMention) {
+//     const cursorPosition = selection.$from.pos
+//     const previousNode = selection.$head?.nodeBefore
+
+//     const startPosition = previousNode
+//         ? calculateStartPosition(
+//             cursorPosition,
+//             previousNode,
+//             internalSuggestionPropsRef.current.char
+//         )
+//         : selection.$from.start()
+
+//     const transaction = state.tr.deleteRange(
+//         startPosition,
+//         cursorPosition
+//     )
+//     view.dispatch(transaction)
+// }
+
+// const nodeAfter = view.state.selection.$to.nodeAfter
+// const overrideSpace = nodeAfter?.text?.startsWith(" ")
+
+// const rangeToUse = { ...range }
+
+// if (overrideSpace) {
+//     rangeToUse.to += 1
+// }
+
 // interface Trigger {
 //     char?: string;
 //     allowSpaces?: boolean;
@@ -122,7 +171,7 @@ export const suggestion = ({
                             }
                             editor.view.dispatch(tr);
                             editor.view.focus();
-         
+
                             // const { view } = editor;
                             // const { state } = view;
                             // const { $from } = state.selection;
