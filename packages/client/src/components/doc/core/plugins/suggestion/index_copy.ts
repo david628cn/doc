@@ -111,18 +111,7 @@ export const suggestion = ({
                             let tr = editor.view.state.tr.setMeta('suggestion', {
                                 active: ds.active,
                             });
-                            const pluginState = suggestionPluginKey.getState(editor.view.state);
-                            const targetDeco = pluginState.deco.find().find(d => d.spec.id === 'suggestion');
-                            if (targetDeco) {
-                                console.log(`找到了！范围是 ${targetDeco.from} 到 ${targetDeco.to}`);
-                                const { from, to } = targetDeco;
-                                tr = tr.delete(from, to);
-                                const selection = TextSelection.near(tr.doc.resolve(from));
-                                tr = tr.setSelection(selection).scrollIntoView();
-                            }
-                            editor.view.dispatch(tr);
-                            editor.view.focus();
-         
+
                             // const { view } = editor;
                             // const { state } = view;
                             // const { $from } = state.selection;
@@ -207,14 +196,14 @@ export const suggestion = ({
             init() {
                 return {
                     active: false,
+                    // deco: DecorationSet.empty,
                     range: {
                         from: 0,
                         to: 0
                     },
                     query: null,
                     text: null,
-                    deco: DecorationSet.empty
-                    // decorationId: null
+                    decorationId: null
                 };
             },
             apply(tr: Transaction, prevValue: any, prevState: EditorState, state: EditorState) {
@@ -230,8 +219,7 @@ export const suggestion = ({
                             to: 0
                         },
                         query: null,
-                        text: null,
-                        deco: DecorationSet.empty
+                        text: null
                     };;
                 }
                 const mate = tr.getMeta('suggestion');
@@ -261,8 +249,7 @@ export const suggestion = ({
                                 to: 0
                             },
                             query: null,
-                            text: null,
-                            deco: DecorationSet.empty
+                            text: null
                         };
                     }
                     const match = findSuggestionMatch({
@@ -278,27 +265,9 @@ export const suggestion = ({
                                 to: 0
                             },
                             query: null,
-                            text: null,
-                            deco: DecorationSet.empty
+                            text: null
                         };
                     }
-                    const isEmpty = !match.query?.length;
-                    const classNames = [`${CLASSNAME}-suggestion`];
-
-                    if (isEmpty) {
-                        classNames.push(`${CLASSNAME}-suggestion-empty`)
-                    }
-                    const deco = DecorationSet.create(state.doc, [
-                        Decoration.inline(match.range.from, match.range.to, {
-                            nodeName: 'span',
-                            class: classNames.join(' '),
-                            // 'data-decoration-id': pluginState.decorationId,
-                            placeholder: '搜索...'
-                        }, {
-                            id: 'suggestion',
-                            type: 'suggestion' // 你也可以添加其他自定义字段
-                        })
-                    ]);
                     return {
                         ...next,
                         active: true,
@@ -307,8 +276,7 @@ export const suggestion = ({
                             to: match.range.to
                         },
                         query: match.query,
-                        text: match.text,
-                        deco
+                        text: match.text
                     };
                 }
 
@@ -355,8 +323,7 @@ export const suggestion = ({
                                 to: 0
                             },
                             query: null,
-                            text: null,
-                            deco: DecorationSet.empty
+                            text: null
                         };
                     } else {
                         next.active = true;
@@ -370,39 +337,16 @@ export const suggestion = ({
                                 to: 0
                             },
                             query: null,
-                            text: null,
-                            deco: DecorationSet.empty
+                            text: null
                         };
                     }
                     // console.log('match>>>', next.decorationId);
                     // next.decorationId = `id-${Math.floor(Math.random() * 0xffffffff)}`;
-
-                    const isEmpty = !match.query?.length;
-                    const classNames = [`${CLASSNAME}-suggestion`];
-
-                    if (isEmpty) {
-                        classNames.push(`${CLASSNAME}-suggestion-empty`)
-                    }
-                    const deco = DecorationSet.create(state.doc, [
-                        Decoration.inline(match.range.from, match.range.to, {
-                            nodeName: 'span',
-                            class: classNames.join(' '),
-                            // 'data-decoration-id': pluginState.decorationId,
-                            placeholder: '搜索...'
-                        }, {
-                            id: 'suggestion',
-                            type: 'suggestion' // 你也可以添加其他自定义字段
-                        })
-                    ]);
-
                     next.active = true;
                     next.range.from = match.range.from;
                     next.range.to = match.range.to;
                     next.query = match.query;
                     next.text = match.text;
-                    next.deco = deco;
-
-
                 }
                 return next;
             }
@@ -451,7 +395,7 @@ export const suggestion = ({
                 if (event.key === 'Escape' || event.key === 'Esc') {
                     const tr = view.state.tr.setMeta('suggestion', {
                         active: false,
-                        deco: DecorationSet.empty,
+                        // deco: DecorationSet.empty,
                         range: {
                             from: 0,
                             to: 0
@@ -466,29 +410,29 @@ export const suggestion = ({
             },
             decorations(state: EditorState) {
                 const pluginState = plugin.getState(state);
-                if (!pluginState.active || !pluginState.deco || pluginState.deco.find().length <= 0) {
+                if (!pluginState.active) {
                     return null;
                 }
 
                 // if (pluginState.deco && pluginState.deco.find().length > 0) {
-                return pluginState.deco;
+                //     return pluginState.deco;
                 // }
 
-                // const isEmpty = !pluginState.query?.length;
-                // const classNames = [`${CLASSNAME}-suggestion`];
+                const isEmpty = !pluginState.query?.length;
+                const classNames = [`${CLASSNAME}-suggestion`];
 
-                // if (isEmpty) {
-                //     classNames.push(`${CLASSNAME}-suggestion-empty`)
-                // }
+                if (isEmpty) {
+                    classNames.push(`${CLASSNAME}-suggestion-empty`)
+                }
 
-                // return DecorationSet.create(state.doc, [
-                //     Decoration.inline(pluginState.range.from, pluginState.range.to, {
-                //         nodeName: 'span',
-                //         class: classNames.join(' '),
-                //         // 'data-decoration-id': pluginState.decorationId,
-                //         placeholder: '搜索...'
-                //     })
-                // ]);
+                return DecorationSet.create(state.doc, [
+                    Decoration.inline(pluginState.range.from, pluginState.range.to, {
+                        nodeName: 'span',
+                        class: classNames.join(' '),
+                        'data-decoration-id': pluginState.decorationId,
+                        placeholder: '搜索...'
+                    })
+                ]);
 
                 // return pluginState.deco;
             }
