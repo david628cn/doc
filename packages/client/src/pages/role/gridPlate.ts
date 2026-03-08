@@ -1,4 +1,4 @@
-import { DragDrop } from './dragDrop';
+import { DragDrop } from '../../components/dragDrop';
 
 
 
