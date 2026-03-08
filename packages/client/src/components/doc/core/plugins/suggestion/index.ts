@@ -1,5 +1,6 @@
 import { type EditorState, type Transaction, Plugin, PluginKey, TextSelection } from 'prosemirror-state';
 import { type EditorView, Decoration, DecorationSet } from 'prosemirror-view';
+import { type Node, type Schema, Fragment } from 'prosemirror-model';
 // import { type ResolvedPos } from 'prosemirror-model';
 // import { getRect } from '@/components/utils/align';
 import { findSuggestionMatch } from '@/components/doc/core/utils';
@@ -41,27 +42,39 @@ import './index.less';
 // // 注册自定义元素
 // customElements.define('zf-collapse', ZfCollapse);
 
+export const createTable = (schema: Schema, rows: number = 3, cols: number = 3) => {
+    const { table, table_row, table_cell, paragraph } = schema.nodes;
+    const rowsArr = [];
 
-// export function calculateStartPosition(
-//     cursorPosition: number,
-//     previousNode: Node | null,
-//     triggerChar?: string
-// ): number {
-//     if (!previousNode?.text || !triggerChar) {
-//         return cursorPosition;
-//     }
+    for (let i = 0; i < rows; i++) {
+        const cells = [];
+        for (let j = 0; j < cols; j++) {
+            // 每个单元格内部必须至少有一个基础块节点（通常是 paragraph）
+            const cell = table_cell.createAndFill(null, Fragment.from(paragraph.create()));
+            cells.push(cell);
+        }
+        rowsArr.push(table_row.create(null, Fragment.from(cells)));
+    }
 
-//     const commandText = previousNode.text;
-//     const triggerCharIndex = commandText.lastIndexOf(triggerChar);
+    return table.create(null, Fragment.from(rowsArr));
+}
 
-//     if (triggerCharIndex === -1) {
-//         return cursorPosition;
-//     }
-
-//     const textLength = commandText.substring(triggerCharIndex).length;
-
-//     return cursorPosition - textLength;
-// }
+export const calculateStartPosition = (
+    cursorPosition: number,
+    previousNode: Node | null | undefined,
+    triggerChar?: string
+): number => {
+    if (!previousNode?.text || !triggerChar) {
+        return cursorPosition;
+    }
+    const commandText = previousNode.text;
+    const triggerCharIndex = commandText.lastIndexOf(triggerChar);
+    if (triggerCharIndex === -1) {
+        return cursorPosition;
+    }
+    const textLength = commandText.substring(triggerCharIndex).length;
+    return cursorPosition - textLength;
+}
 
 // if (!isMention) {
 //     const cursorPosition = selection.$from.pos
@@ -90,6 +103,7 @@ import './index.less';
 // if (overrideSpace) {
 //     rangeToUse.to += 1
 // }
+
 
 // interface Trigger {
 //     char?: string;
@@ -160,64 +174,54 @@ export const suggestion = ({
                             let tr = editor.view.state.tr.setMeta('suggestion', {
                                 active: ds.active,
                             });
-                            const pluginState = suggestionPluginKey.getState(editor.view.state);
-                            const targetDeco = pluginState.deco.find().find(d => d.spec.id === 'suggestion');
-                            if (targetDeco) {
-                                console.log(`找到了！范围是 ${targetDeco.from} 到 ${targetDeco.to}`);
-                                const { from, to } = targetDeco;
-                                tr = tr.delete(from, to);
-                                const selection = TextSelection.near(tr.doc.resolve(from));
-                                tr = tr.setSelection(selection).scrollIntoView();
+                            const cursorPosition = editor.view.state.selection.$from.pos;
+                            const previousNode = editor.view.state.selection.$head?.nodeBefore;
+
+                            const startPosition = previousNode
+                                ? calculateStartPosition(cursorPosition, previousNode, '/')
+                                : editor.view.state.selection.$from.start();
+
+                            tr = tr.deleteRange(startPosition, cursorPosition);
+
+                            const $startPosition = tr.doc.resolve(startPosition);
+                            // const isParentEmpty = $startPosition.parent.content.size === 0 || $startPosition.parent.textContent.trim() === '';
+                            const isParentEmpty = $startPosition.parent.content.size === 0 || $startPosition.parent.textContent === '';
+
+                            const nodeType = editor.view.state.schema.nodes[ds.nodeType];
+                            let newNode: Node;
+                            if (ds.nodeType === 'table') {
+                                newNode = createTable(editor.view.state.schema, 3, 3);
+                            } else {
+                                console.log('ds.nodeAttr', ds);
+                                newNode = nodeType.createAndFill(ds.nodeAttr || {});
                             }
-                            editor.view.dispatch(tr);
+
+                            if (isParentEmpty) {
+                                // 逻辑 A：如果为空，直接 setBlockType 转换整行
+                                console.log('替换');
+                                // 【核心修正】：计算父节点在 doc 中的绝对坐标
+                                // $from.start() 是内容起点，$from.start() - 1 是节点开启标签位置
+                                const startOfParent = $startPosition.start() - 1;
+                                const endOfParent = startOfParent + $startPosition.parent.nodeSize;
+
+                                // 直接用 table 替换掉整个 paragraph 节点范围
+                                // 这一步会物理抹除旧行，原地放入新块
+                                tr = tr.replaceWith(startOfParent, endOfParent, newNode);
+                                const resolvedPos = tr.doc.resolve(startOfParent);
+                                const selection = TextSelection.near(resolvedPos);
+                                tr = tr.setSelection(selection);
+                            } else {
+                                // 逻辑 B：如果不为空，在当前位置插入块（会自动切断行）
+                                console.log('插入');
+                                tr = tr.replaceWith(startPosition, startPosition, newNode);
+                                const resolvedPos = tr.doc.resolve(startPosition + 1);
+                                const selection = TextSelection.near(resolvedPos);
+                                tr = tr.setSelection(selection);
+                            }
+                            // const nodeAfter = view.state.selection.$to.nodeAfter;
+                            // const overrideSpace = nodeAfter?.text?.startsWith(" ");
+                            editor.view.dispatch(tr.scrollIntoView());
                             editor.view.focus();
-
-                            // const { view } = editor;
-                            // const { state } = view;
-                            // const { $from } = state.selection;
-                            // const parent = $from.parent;
-
-                            // // 1. 获取当前指令文字的长度 (例如 "/table" 的长度)
-                            // const commandLength = ds.range.to - ds.range.from;
-
-                            // // 2. 核心修正：获取除去“指令”外，父节点剩余的所有文本内容
-                            // // 这里通过 replace 直接把指令部分删掉，看剩下的是不是全是空白
-                            // const fullText = parent.textContent;
-                            // const commandText = fullText.slice($from.parentOffset, $from.parentOffset + commandLength);
-                            // const remainingText = fullText.replace(commandText, '');
-
-                            // // 只要剩余内容全为空白（包括指令前的空格），就视为“替换模式”
-                            // const isEffectivelyEmpty = remainingText.trim() === '';
-
-                            // let targetSelectionPos;
-
-                            // if (isEffectivelyEmpty) {
-                            //     // 【替换模式】：强制清理全行并转换
-                            //     // 获取当前 Parent 节点在文档中的绝对起始和终点位置
-                            //     const startOfParent = ds.range.from - $from.parentOffset;
-                            //     const endOfParent = startOfParent + parent.nodeSize; // 使用 nodeSize 覆盖整个节点范围
-
-                            //     const nodeType = state.schema.nodes[ds.nodeType];
-
-                            //     // 规范：先用 deleteRange 彻底抹除包括空格在内的旧节点
-                            //     // 然后在原位置 setBlockType
-                            //     tr = tr.delete(startOfParent, startOfParent + parent.content.size)
-                            //         .setBlockType(startOfParent, startOfParent, nodeType, ds.nodeAttr || {});
-
-                            //     targetSelectionPos = startOfParent;
-                            // } else {
-                            //     // 【插入模式】：前面有实质文字，仅替换指令本身
-                            //     const nodeType = state.schema.nodes[ds.nodeType];
-                            //     const newNode = nodeType.createAndFill(ds.nodeAttr || {});
-
-                            //     tr = tr.replaceWith(ds.range.from, ds.range.to, newNode);
-                            //     targetSelectionPos = ds.range.from + 1;
-                            // }
-
-                            // // 后续 Selection 恢复逻辑保持不变...
-                            // const selection = TextSelection.near(tr.doc.resolve(targetSelectionPos));
-                            // view.dispatch(tr.setSelection(selection).scrollIntoView());
-                            // view.focus();
                         },
                         active,
                         range: { from: 0, to: 0 },
@@ -256,14 +260,14 @@ export const suggestion = ({
             init() {
                 return {
                     active: false,
+                    // deco: DecorationSet.empty,
                     range: {
                         from: 0,
                         to: 0
                     },
                     query: null,
                     text: null,
-                    deco: DecorationSet.empty
-                    // decorationId: null
+                    decorationId: null
                 };
             },
             apply(tr: Transaction, prevValue: any, prevState: EditorState, state: EditorState) {
@@ -279,8 +283,7 @@ export const suggestion = ({
                             to: 0
                         },
                         query: null,
-                        text: null,
-                        deco: DecorationSet.empty
+                        text: null
                     };;
                 }
                 const mate = tr.getMeta('suggestion');
@@ -310,8 +313,7 @@ export const suggestion = ({
                                 to: 0
                             },
                             query: null,
-                            text: null,
-                            deco: DecorationSet.empty
+                            text: null
                         };
                     }
                     const match = findSuggestionMatch({
@@ -327,27 +329,9 @@ export const suggestion = ({
                                 to: 0
                             },
                             query: null,
-                            text: null,
-                            deco: DecorationSet.empty
+                            text: null
                         };
                     }
-                    const isEmpty = !match.query?.length;
-                    const classNames = [`${CLASSNAME}-suggestion`];
-
-                    if (isEmpty) {
-                        classNames.push(`${CLASSNAME}-suggestion-empty`)
-                    }
-                    const deco = DecorationSet.create(state.doc, [
-                        Decoration.inline(match.range.from, match.range.to, {
-                            nodeName: 'span',
-                            class: classNames.join(' '),
-                            // 'data-decoration-id': pluginState.decorationId,
-                            placeholder: '搜索...'
-                        }, {
-                            id: 'suggestion',
-                            type: 'suggestion' // 你也可以添加其他自定义字段
-                        })
-                    ]);
                     return {
                         ...next,
                         active: true,
@@ -356,8 +340,7 @@ export const suggestion = ({
                             to: match.range.to
                         },
                         query: match.query,
-                        text: match.text,
-                        deco
+                        text: match.text
                     };
                 }
 
@@ -404,8 +387,7 @@ export const suggestion = ({
                                 to: 0
                             },
                             query: null,
-                            text: null,
-                            deco: DecorationSet.empty
+                            text: null
                         };
                     } else {
                         next.active = true;
@@ -419,39 +401,16 @@ export const suggestion = ({
                                 to: 0
                             },
                             query: null,
-                            text: null,
-                            deco: DecorationSet.empty
+                            text: null
                         };
                     }
                     // console.log('match>>>', next.decorationId);
                     // next.decorationId = `id-${Math.floor(Math.random() * 0xffffffff)}`;
-
-                    const isEmpty = !match.query?.length;
-                    const classNames = [`${CLASSNAME}-suggestion`];
-
-                    if (isEmpty) {
-                        classNames.push(`${CLASSNAME}-suggestion-empty`)
-                    }
-                    const deco = DecorationSet.create(state.doc, [
-                        Decoration.inline(match.range.from, match.range.to, {
-                            nodeName: 'span',
-                            class: classNames.join(' '),
-                            // 'data-decoration-id': pluginState.decorationId,
-                            placeholder: '搜索...'
-                        }, {
-                            id: 'suggestion',
-                            type: 'suggestion' // 你也可以添加其他自定义字段
-                        })
-                    ]);
-
                     next.active = true;
                     next.range.from = match.range.from;
                     next.range.to = match.range.to;
                     next.query = match.query;
                     next.text = match.text;
-                    next.deco = deco;
-
-
                 }
                 return next;
             }
@@ -500,7 +459,7 @@ export const suggestion = ({
                 if (event.key === 'Escape' || event.key === 'Esc') {
                     const tr = view.state.tr.setMeta('suggestion', {
                         active: false,
-                        deco: DecorationSet.empty,
+                        // deco: DecorationSet.empty,
                         range: {
                             from: 0,
                             to: 0
@@ -515,29 +474,29 @@ export const suggestion = ({
             },
             decorations(state: EditorState) {
                 const pluginState = plugin.getState(state);
-                if (!pluginState.active || !pluginState.deco || pluginState.deco.find().length <= 0) {
+                if (!pluginState.active) {
                     return null;
                 }
 
                 // if (pluginState.deco && pluginState.deco.find().length > 0) {
-                return pluginState.deco;
+                //     return pluginState.deco;
                 // }
 
-                // const isEmpty = !pluginState.query?.length;
-                // const classNames = [`${CLASSNAME}-suggestion`];
+                const isEmpty = !pluginState.query?.length;
+                const classNames = [`${CLASSNAME}-suggestion`];
 
-                // if (isEmpty) {
-                //     classNames.push(`${CLASSNAME}-suggestion-empty`)
-                // }
+                if (isEmpty) {
+                    classNames.push(`${CLASSNAME}-suggestion-empty`)
+                }
 
-                // return DecorationSet.create(state.doc, [
-                //     Decoration.inline(pluginState.range.from, pluginState.range.to, {
-                //         nodeName: 'span',
-                //         class: classNames.join(' '),
-                //         // 'data-decoration-id': pluginState.decorationId,
-                //         placeholder: '搜索...'
-                //     })
-                // ]);
+                return DecorationSet.create(state.doc, [
+                    Decoration.inline(pluginState.range.from, pluginState.range.to, {
+                        nodeName: 'span',
+                        class: classNames.join(' '),
+                        'data-decoration-id': pluginState.decorationId,
+                        placeholder: '搜索...'
+                    })
+                ]);
 
                 // return pluginState.deco;
             }

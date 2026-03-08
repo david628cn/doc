@@ -38,11 +38,11 @@ const commandTree = [
         // key: 'basic',
         type: 'group',
         children: [
-            { label: '正文', key: 'paragraph', nodeType: 'paragraph', nodeAttrs: null, icon: TextIcon, description: '普通文本输入' },
-            { label: '标题 1', key: 'heading1', nodeType: 'heading', nodeAttrs: { level: 1 }, icon: Heading1Icon, description: '最大的标题' },
-            { label: '标题 2', key: 'heading2', nodeType: 'heading', nodeAttrs: { level: 2 }, icon: Heading2Icon, description: '中型标题' },
-            { label: '标题 3', key: 'heading3', nodeType: 'heading', nodeAttrs: { level: 3 }, icon: Heading3Icon, description: '小型标题' },
-            { label: '标题 4', key: 'heading4', nodeType: 'heading', nodeAttrs: { level: 4 }, icon: Heading4Icon, description: '超小标题' }
+            { label: '正文', key: 'paragraph', nodeType: 'paragraph', nodeAttr: null, icon: TextIcon, description: '普通文本输入' },
+            { label: '标题 1', key: 'heading1', nodeType: 'heading', nodeAttr: { level: 1 }, icon: Heading1Icon, description: '最大的标题' },
+            { label: '标题 2', key: 'heading2', nodeType: 'heading', nodeAttr: { level: 2 }, icon: Heading2Icon, description: '中型标题' },
+            { label: '标题 3', key: 'heading3', nodeType: 'heading', nodeAttr: { level: 3 }, icon: Heading3Icon, description: '小型标题' },
+            { label: '标题 4', key: 'heading4', nodeType: 'heading', nodeAttr: { level: 4 }, icon: Heading4Icon, description: '超小标题' }
         ]
     },
     {
@@ -50,9 +50,9 @@ const commandTree = [
         // key: 'list',
         type: 'group',
         children: [
-            { label: '无序列表', key: 'bullet_list', nodeType: 'bullet_list', nodeAttrs: null, icon: BulletListIcon },
-            { label: '有序列表', key: 'ordered_list', nodeType: 'ordered_list', nodeAttrs: null, icon: OrderedListIcon },
-            // { label: '任务列表', key: 'task_list', nodeType: 'task_list', nodeAttrs: null, icon: TaskListIcon }
+            { label: '无序列表', key: 'bullet_list', nodeType: 'bullet_list', nodeAttr: null, icon: BulletListIcon },
+            { label: '有序列表', key: 'ordered_list', nodeType: 'ordered_list', nodeAttr: null, icon: OrderedListIcon },
+            // { label: '任务列表', key: 'task_list', nodeType: 'task_list', nodeAttr: null, icon: TaskListIcon }
         ]
     },
     {
@@ -60,9 +60,9 @@ const commandTree = [
         // key: 'advanced',
         type: 'group',
         children: [
-            { label: '引用', key: 'blockquote', nodeType: 'blockquote', nodeAttrs: null, icon: BlockquoteIcon },
-            { label: '代码块', key: 'code_block', nodeType: 'code_block', nodeAttrs: null, icon: CodeBlockIcon },
-            { label: '表格', key: 'table', nodeType: 'table', nodeAttrs: null, icon: TableIcon }
+            { label: '引用', key: 'blockquote', nodeType: 'blockquote', nodeAttr: null, icon: BlockquoteIcon },
+            { label: '代码块', key: 'code_block', nodeType: 'code_block', nodeAttr: null, icon: CodeBlockIcon },
+            { label: '表格', key: 'table', nodeType: 'table', nodeAttr: null, icon: TableIcon }
         ]
     }
 ];
