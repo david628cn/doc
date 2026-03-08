@@ -1,4 +1,4 @@
-import { type EditorState, type Transaction, Plugin, PluginKey } from 'prosemirror-state';
+import { type EditorState, type Transaction, Plugin, PluginKey, TextSelection } from 'prosemirror-state';
 import { type EditorView, Decoration, DecorationSet } from 'prosemirror-view';
 // import { type ResolvedPos } from 'prosemirror-model';
 // import { getRect } from '@/components/utils/align';
@@ -107,14 +107,60 @@ export const suggestion = ({
                     let active = next.active;
                     let params = {
                         editor,
-                        command: (is: boolean, params: any) => {
-                            const tr = view.state.tr.setMeta('suggestion', {
-                                active: is
+                        command: (ds: any) => {
+                            let tr = editor.view.state.tr.setMeta('suggestion', {
+                                active: ds.active,
                             });
-                            view.dispatch(tr);
+
+                            // const { view } = editor;
+                            // const { state } = view;
+                            // const { $from } = state.selection;
+                            // const parent = $from.parent;
+
+                            // // 1. 获取当前指令文字的长度 (例如 "/table" 的长度)
+                            // const commandLength = ds.range.to - ds.range.from;
+
+                            // // 2. 核心修正：获取除去“指令”外，父节点剩余的所有文本内容
+                            // // 这里通过 replace 直接把指令部分删掉，看剩下的是不是全是空白
+                            // const fullText = parent.textContent;
+                            // const commandText = fullText.slice($from.parentOffset, $from.parentOffset + commandLength);
+                            // const remainingText = fullText.replace(commandText, '');
+
+                            // // 只要剩余内容全为空白（包括指令前的空格），就视为“替换模式”
+                            // const isEffectivelyEmpty = remainingText.trim() === '';
+
+                            // let targetSelectionPos;
+
+                            // if (isEffectivelyEmpty) {
+                            //     // 【替换模式】：强制清理全行并转换
+                            //     // 获取当前 Parent 节点在文档中的绝对起始和终点位置
+                            //     const startOfParent = ds.range.from - $from.parentOffset;
+                            //     const endOfParent = startOfParent + parent.nodeSize; // 使用 nodeSize 覆盖整个节点范围
+
+                            //     const nodeType = state.schema.nodes[ds.nodeType];
+
+                            //     // 规范：先用 deleteRange 彻底抹除包括空格在内的旧节点
+                            //     // 然后在原位置 setBlockType
+                            //     tr = tr.delete(startOfParent, startOfParent + parent.content.size)
+                            //         .setBlockType(startOfParent, startOfParent, nodeType, ds.nodeAttr || {});
+
+                            //     targetSelectionPos = startOfParent;
+                            // } else {
+                            //     // 【插入模式】：前面有实质文字，仅替换指令本身
+                            //     const nodeType = state.schema.nodes[ds.nodeType];
+                            //     const newNode = nodeType.createAndFill(ds.nodeAttr || {});
+
+                            //     tr = tr.replaceWith(ds.range.from, ds.range.to, newNode);
+                            //     targetSelectionPos = ds.range.from + 1;
+                            // }
+
+                            // // 后续 Selection 恢复逻辑保持不变...
+                            // const selection = TextSelection.near(tr.doc.resolve(targetSelectionPos));
+                            // view.dispatch(tr.setSelection(selection).scrollIntoView());
+                            // view.focus();
                         },
                         active,
-                        range: {from: 0, to: 0},
+                        range: { from: 0, to: 0 },
                         query: null,
                         text: null,
                         rect: null
@@ -156,7 +202,8 @@ export const suggestion = ({
                         to: 0
                     },
                     query: null,
-                    text: null
+                    text: null,
+                    decorationId: null
                 };
             },
             apply(tr: Transaction, prevValue: any, prevState: EditorState, state: EditorState) {
@@ -165,15 +212,15 @@ export const suggestion = ({
                 const { empty, from } = selection;
                 if (!editor.editable || !editor.view.hasFocus() || !(empty || composing)) {
                     return {
-                            ...prevValue,
-                            active: false,
-                            range: {
-                                from: 0,
-                                to: 0
-                            },
-                            query: null,
-                            text: null
-                        };;
+                        ...prevValue,
+                        active: false,
+                        range: {
+                            from: 0,
+                            to: 0
+                        },
+                        query: null,
+                        text: null
+                    };;
                 }
                 const mate = tr.getMeta('suggestion');
                 const next = {
@@ -293,6 +340,8 @@ export const suggestion = ({
                             text: null
                         };
                     }
+                    // console.log('match>>>', next.decorationId);
+                    // next.decorationId = `id-${Math.floor(Math.random() * 0xffffffff)}`;
                     next.active = true;
                     next.range.from = match.range.from;
                     next.range.to = match.range.to;
@@ -380,7 +429,8 @@ export const suggestion = ({
                     Decoration.inline(pluginState.range.from, pluginState.range.to, {
                         nodeName: 'span',
                         class: classNames.join(' '),
-                        placeholder: '筛选...'
+                        'data-decoration-id': pluginState.decorationId,
+                        placeholder: '搜索...'
                     })
                 ]);
 

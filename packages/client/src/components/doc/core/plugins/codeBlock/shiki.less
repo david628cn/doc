@@ -54,3 +54,14 @@
         overflow-x: auto;
     }
 }
+
+/* 强制隐藏代码块内部的所有 ProseMirror 辅助占位符 */
+// .prosemirror-highlight code .ProseMirror-trailingBreak,
+// .prosemirror-highlight code .ProseMirror-separator {
+//   display: none !important;
+// }
+
+/* 如果使用了行号插件，针对空行号进行隐藏 */
+// .shiki-line:last-child:has(.ProseMirror-trailingBreak) {
+//   display: none;
+// }

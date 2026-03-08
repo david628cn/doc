@@ -19,6 +19,7 @@ import {
 } from '@/assets/Icon';
 import { CLASSNAME } from '@/global';
 import './index.less';
+import { a } from 'shiki/dist/langs-bundle-full-C-zczmvu.mjs';
 
 export type DocProps = {
     className?: string;
@@ -37,11 +38,11 @@ const commandTree = [
         // key: 'basic',
         type: 'group',
         children: [
-            { label: '正文', key: 'text', icon: TextIcon, description: '普通文本输入' },
-            { label: '标题 1', key: 'heading1', icon: Heading1Icon, description: '最大的标题' },
-            { label: '标题 2', key: 'heading2', icon: Heading2Icon, description: '中型标题' },
-            { label: '标题 3', key: 'heading3', icon: Heading3Icon, description: '小型标题' },
-            { label: '标题 4', key: 'heading4', icon: Heading4Icon, description: '超小标题' }
+            { label: '正文', key: 'paragraph', nodeType: 'paragraph', nodeAttrs: null, icon: TextIcon, description: '普通文本输入' },
+            { label: '标题 1', key: 'heading1', nodeType: 'heading', nodeAttrs: { level: 1 }, icon: Heading1Icon, description: '最大的标题' },
+            { label: '标题 2', key: 'heading2', nodeType: 'heading', nodeAttrs: { level: 2 }, icon: Heading2Icon, description: '中型标题' },
+            { label: '标题 3', key: 'heading3', nodeType: 'heading', nodeAttrs: { level: 3 }, icon: Heading3Icon, description: '小型标题' },
+            { label: '标题 4', key: 'heading4', nodeType: 'heading', nodeAttrs: { level: 4 }, icon: Heading4Icon, description: '超小标题' }
         ]
     },
     {
@@ -49,9 +50,9 @@ const commandTree = [
         // key: 'list',
         type: 'group',
         children: [
-            { label: '无序列表', key: 'bulletList', icon: BulletListIcon },
-            { label: '有序列表', key: 'orderedList', icon: OrderedListIcon },
-            { label: '任务列表', key: 'taskList', icon: TaskListIcon }
+            { label: '无序列表', key: 'bullet_list', nodeType: 'bullet_list', nodeAttrs: null, icon: BulletListIcon },
+            { label: '有序列表', key: 'ordered_list', nodeType: 'ordered_list', nodeAttrs: null, icon: OrderedListIcon },
+            // { label: '任务列表', key: 'task_list', nodeType: 'task_list', nodeAttrs: null, icon: TaskListIcon }
         ]
     },
     {
@@ -59,9 +60,9 @@ const commandTree = [
         // key: 'advanced',
         type: 'group',
         children: [
-            { label: '引用', key: 'blockquote', icon: BlockquoteIcon },
-            { label: '代码块', key: 'codeBlock', icon: CodeBlockIcon },
-            { label: '表格', key: 'table', icon: TableIcon }
+            { label: '引用', key: 'blockquote', nodeType: 'blockquote', nodeAttrs: null, icon: BlockquoteIcon },
+            { label: '代码块', key: 'code_block', nodeType: 'code_block', nodeAttrs: null, icon: CodeBlockIcon },
+            { label: '表格', key: 'table', nodeType: 'table', nodeAttrs: null, icon: TableIcon }
         ]
     }
 ];
@@ -100,8 +101,10 @@ export const Doc: React.FC<DocProps> = props => {
     const [suggestionState, setSuggestionState] = useState({
         rect: null,
         open: false,
-        // query: '',
-        command: (is, params) => {},
+        query: '',
+        text: '',
+        range: null,
+        command: (params: any) => {},
         items: []
     });
 
@@ -132,8 +135,10 @@ export const Doc: React.FC<DocProps> = props => {
         const items = searchTree(params.query, commandTree);
         setSuggestionState({
             open: params.active,
+            text: params.text,
             rect: params.rect,
-            // query: params.query,
+            query: params.query,
+            range: params.range,
             items,
             command: params.command
         });
@@ -278,8 +283,13 @@ export const Doc: React.FC<DocProps> = props => {
                                 shortKey={suggestionState.open}
                                 items={suggestionState.items}
                                 onSelect={(params: any) => {
-                                    suggestionState.command?.(false, {
-                                        key: params.key
+                                    suggestionState.command?.({
+                                        // active: false,
+                                        nodeType: params.item.nodeType,
+                                        nodeAttr: params.item.nodeAttr,
+                                        text: suggestionState.text,
+                                        query: suggestionState.query,
+                                        range: suggestionState.range
                                     })
                                 }}
                             />

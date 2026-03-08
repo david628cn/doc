@@ -248,26 +248,26 @@ const schema: any = {
             }
         },
         /// A hard line break, represented in the DOM as `<br>`.
-        hardBreak: {
+        hard_line_break: {
             inline: true,
             group: "inline",
-            attrs: {
-                dataBlockId: {
-                    default: null,
-                    validate: "string|null"
-                }
-            },
+            // attrs: {
+            //     dataBlockId: {
+            //         default: null,
+            //         validate: "string|null"
+            //     }
+            // },
             selectable: false,
             parseDOM: [{
                 tag: "br",
-                getAttrs: (dom: any) => {
-                    return {
-                        dataBlockId: dom.getAttribute('data-block-id')
-                    };
-                }
+                // getAttrs: (dom: any) => {
+                //     return {
+                //         dataBlockId: dom.getAttribute('data-block-id')
+                //     };
+                // }
             }],
             toDOM(node: any) {
-                return ["br", { ['data-block-id']: node.attrs.dataBlockId }];
+                return ["br"];
             }
         },
         ordered_list: {
@@ -293,7 +293,7 @@ const schema: any = {
                 }
             }],
             toDOM(node: any) {
-                return node.attrs.order == 1 ? ["ul", { ['data-block-id']: node.attrs.dataBlockId }, 0] : ["ol", { ['data-block-id']: node.attrs.dataBlockId, start: node.attrs.order }, 0];
+                return node.attrs.order == 1 ? ["ol", { ['data-block-id']: node.attrs.dataBlockId }, 0] : ["ol", { ['data-block-id']: node.attrs.dataBlockId, start: node.attrs.order }, 0];
             }
         },
         bullet_list: {
