@@ -60,6 +60,7 @@ const commandTree = [
         // key: 'advanced',
         type: 'group',
         children: [
+            { label: '分栏', key: 'columns', nodeType: 'columns', nodeAttr: null, icon: BlockquoteIcon },
             { label: '引用', key: 'blockquote', nodeType: 'blockquote', nodeAttr: null, icon: BlockquoteIcon },
             { label: '代码块', key: 'code_block', nodeType: 'code_block', nodeAttr: null, icon: CodeBlockIcon },
             { label: '表格', key: 'table', nodeType: 'table', nodeAttr: null, icon: TableIcon }
