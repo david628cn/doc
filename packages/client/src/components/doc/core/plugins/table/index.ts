@@ -1,5 +1,5 @@
 import { type EditorState, type Transaction, Plugin, PluginKey, EditorStateConfig } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
+import { type EditorView } from 'prosemirror-view';
 // import { type Node } from 'prosemirror-model';
 import {
     // TableMap,

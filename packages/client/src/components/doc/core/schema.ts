@@ -354,7 +354,7 @@ const schema: any = {
             },
             parseDOM: [
                 {
-                    tag: "div.columns-layout",
+                    tag: `div.${CLASSNAME}-columns`,
                     getAttrs: (dom: any) => {
                         return {
                             dataBlockId: dom.getAttribute('data-block-id')
@@ -364,8 +364,8 @@ const schema: any = {
             ],
             toDOM: (node: any) => ["div", {
                 ['data-block-id']: node.attrs.dataBlockId,
-                class: "columns-layout",
-                style: "display: flex;gap: 1rem;"
+                class: `${CLASSNAME}-columns`,
+                style: "display: flex;justify-content: space-between;"
             }, 0]
         },
         // 单个列
@@ -377,14 +377,13 @@ const schema: any = {
                     default: null,
                     validate: "string|null"
                 },
-                width: {
-                    default: null,
-                    validate: "string|null"
+                ratio: {
+                    default: 0.5
                 }
             },
             parseDOM: [
                 {
-                    tag: "div.column",
+                    tag: `div.${CLASSNAME}-column`,
                     getAttrs: (dom: any) => {
                         return {
                             dataBlockId: dom.getAttribute('data-block-id'),
@@ -393,11 +392,23 @@ const schema: any = {
                     }
                 }
             ],
-            toDOM: (node: any) => ["div", {
-                ['data-block-id']: node.attrs.dataBlockId,
-                class: "column",
-                style: `flex: 1; width: ${node.attrs.width};background: #eee`
-            }, 0]
+            toDOM: (node: any) => {
+                // 假设中间有 1 个 12px 的间隙
+                // 逻辑：该列宽度 = 总宽度的比例 - (间隙宽度 / 2)
+                // 多栏通用公式（N 栏）
+                // 如果你有 
+                // 栏，总共有 
+                // 个间隙。假设每个间隙宽 
+                // ，公式应为：
+                // width: calc(Ratio * 100% - (G * (N-1) / N))
+
+                const widthStyle = `calc(${node.attrs.ratio * 100}% - 3px)`;
+                return ["div", {
+                    ['data-block-id']: node.attrs.dataBlockId,
+                    class: `${CLASSNAME}-column`,
+                    style: `width: ${widthStyle};flex: 0 0 auto;padding: 10px;backgroud-color: #eee`
+                }, 0]
+            }
 
             // function insertColumns(state, dispatch) {
             //     const { schema } = state;

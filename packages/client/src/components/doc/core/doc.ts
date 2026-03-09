@@ -52,6 +52,7 @@ import {
 } from 'y-prosemirror';
 
 import { EventEmitter } from './eventEmitter';
+import { gapCursor } from 'prosemirror-gapcursor';
 import {
     // basic,
     uniqueID,
@@ -62,9 +63,10 @@ import {
     // placeholder,
     selection,
     shiki,
-    table
+    table,
+    columns
 } from './plugins';
-import { CodeBlock } from './nodeViews';
+// import { CodeBlock } from './nodeViews';
 import schema from './schema';
 import { CLASSNAME } from '@/global';
 // import { contextPath } from '@/api';
@@ -216,6 +218,7 @@ export class Doc extends EventEmitter {
         let plugins = [
             shiki,
             history(),
+            gapCursor(),
             selection({
                 editor: this
             }),
@@ -229,6 +232,9 @@ export class Doc extends EventEmitter {
             // tableEditing(),
             // gapCursor(),
             ...table({
+                editor: this
+            }),
+            columns({
                 editor: this
             }),
             uniqueID({

@@ -57,7 +57,7 @@ import { getRect } from "@/components/utils/align";
 //         if (hEnd > cEnd) return hEnd - cEnd;
 //         // 超出左/上邊界：返回超出的距離 (負數)
 //         if (hStart < cStart) return hStart - cStart;
-        
+
 //         return 0;
 //     }
 
@@ -153,7 +153,7 @@ export class AutoScroller {
 
         const dw = width / 2;
         const dh = height / 2;
-        
+
         const maxLeft = container.left + container.width;
         const maxTop = container.top + container.height;
 
@@ -237,6 +237,33 @@ export class AutoScroller {
     }
 }
 
+// let rafId = null;
+// let latestX = 0; // 存储最新的坐标
+
+// const onMouseMove = (e) => {
+//     latestX = e.clientX; // 实时记录物理坐标，不涉及计算
+
+//     if (!rafId) {
+//         rafId = requestAnimationFrame(() => {
+//             // 1. 此时只在屏幕刷新时刻执行一次计算
+//             updateDOMWidth(latestX);
+
+//             // 2. 执行完立即清空 ID，允许下一帧进入
+//             rafId = null;
+//         });
+//     }
+// };
+
+// const onMouseUp = (e) => {
+//     // 关键：停止所有待执行的渲染任务
+//     if (rafId) {
+//         cancelAnimationFrame(rafId);
+//         rafId = null;
+//     }
+
+//     // 确保最后一次物理位置被持久化到数据层
+//     applyFinalTransaction(e.clientX);
+// };
 
 export type DragDropProps = {
     container?: HTMLElement | null | undefined;
@@ -512,7 +539,7 @@ export class DragDrop {
 
         // this.setPos(this.handle, this.endXY);
         // this.autoScroll();
- 
+
         this.onMove(e, this);
         if (this.autoScroller) {
             this.autoScroller.update(getRect(this.preview), getRect(this.container));

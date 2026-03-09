@@ -191,6 +191,14 @@ export const suggestion = ({
                             let newNode: Node;
                             if (ds.nodeType === 'table') {
                                 newNode = createTable(editor.view.state.schema, 3, 3);
+                            } else if (ds.nodeType === 'columns') {
+                                let { columns, column, paragraph } = editor.view.state.schema.nodes;
+                                // 创建两个空的栏位，每个栏位包含一个初始段落
+                                newNode = columns.create(null, [
+                                    column.create(null, paragraph.create()),
+                                    column.create(null, paragraph.create()),
+                                    column.create(null, paragraph.create())
+                                ]);
                             } else {
                                 console.log('ds.nodeAttr', ds);
                                 newNode = nodeType.createAndFill(ds.nodeAttr || {});
