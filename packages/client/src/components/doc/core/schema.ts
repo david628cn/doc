@@ -365,7 +365,7 @@ const schema: any = {
             toDOM: (node: any) => ["div", {
                 ['data-block-id']: node.attrs.dataBlockId,
                 class: `${CLASSNAME}-columns`,
-                style: "display: flex;justify-content: space-between;"
+                style: "display: flex;position: relative;flex-grow: 1;"
             }, 0]
         },
         // 单个列
@@ -406,7 +406,7 @@ const schema: any = {
                 return ["div", {
                     ['data-block-id']: node.attrs.dataBlockId,
                     class: `${CLASSNAME}-column`,
-                    style: `width: ${widthStyle};flex: 0 0 auto;padding: 10px;backgroud-color: #eee`
+                    style: `width: ${widthStyle};display: flex;position: relative;flex-grow: 0;flex-shrink: 0;background: #f9f9f9;`
                 }, 0]
             }
 
