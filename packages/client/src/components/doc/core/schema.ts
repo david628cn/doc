@@ -350,6 +350,9 @@ const schema: any = {
                 dataBlockId: {
                     default: null,
                     validate: "string|null"
+                },
+                gap: {
+                    default: 20
                 }
             },
             parseDOM: [
@@ -365,7 +368,7 @@ const schema: any = {
             toDOM: (node: any) => ["div", {
                 ['data-block-id']: node.attrs.dataBlockId,
                 class: `${CLASSNAME}-columns`,
-                style: "display: flex;position: relative;flex-grow: 1;"
+                style: `width: 100%;position: relative;display: flex;flex-wrap: wrap;gap: ${node.attrs.gap};`
             }, 0]
         },
         // 单个列
@@ -401,12 +404,13 @@ const schema: any = {
                 // 个间隙。假设每个间隙宽 
                 // ，公式应为：
                 // width: calc(Ratio * 100% - (G * (N-1) / N))
+                // const widthStyle = `calc(${node.attrs.ratio * 100}% - 3px)`;
+                // const count = node.parent.childCount;
 
-                const widthStyle = `calc(${node.attrs.ratio * 100}% - 3px)`;
                 return ["div", {
                     ['data-block-id']: node.attrs.dataBlockId,
                     class: `${CLASSNAME}-column`,
-                    style: `width: ${widthStyle};display: flex;position: relative;flex-grow: 0;flex-shrink: 0;background: #f9f9f9;`
+                    style: `position: relative;padding: 20px;display: flex;flex-grow: 0;flex-shrink: 0;`
                 }, 0]
             }
 

@@ -195,9 +195,15 @@ export const suggestion = ({
                                 let { columns, column, paragraph } = editor.view.state.schema.nodes;
                                 // 创建两个空的栏位，每个栏位包含一个初始段落
                                 newNode = columns.create(null, [
-                                    column.create(null, paragraph.create()),
-                                    column.create(null, paragraph.create()),
-                                    column.create(null, paragraph.create())
+                                    column.create({
+                                        ratio: 0.3
+                                    }, paragraph.create()),
+                                    column.create({
+                                        ratio: 0.4
+                                    }, paragraph.create()),
+                                    column.create({
+                                        ratio: 0.3
+                                    }, paragraph.create())
                                 ]);
                             } else {
                                 console.log('ds.nodeAttr', ds);
