@@ -8,15 +8,13 @@
 //     // background: #eee;
 // }
 .@{className}-column-resizer-handle {
-    width: 6px;
-    // height: 100%;
-    position: relative;
+    width: 10px;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    z-index: 10;
     cursor: col-resize;
-    display: flex;
     background: #000;
-    transition-property: opacity;
-    transition-duration: .2s;
-    transition-timing-function: ease-out;
     opacity: 0;
     &:hover {
         opacity: 1;

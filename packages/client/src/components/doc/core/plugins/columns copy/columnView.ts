@@ -8,7 +8,8 @@ export class ColumnView {
     node: Node;
     view: EditorView;
     getPos: () => number;
-    controlBar: HTMLDivElement;
+    resizerLeft: HTMLDivElement;
+    resizerRight: HTMLDivElement;
 
     constructor(node: Node, view: EditorView, getPos: () => number) {
         this.node = node;
@@ -21,7 +22,8 @@ export class ColumnView {
         this.dom.style.position = 'relative';
         this.dom.style.padding = '20px';
         this.dom.style.display = 'flex';
-        this.dom.style.background = '#eee';
+        this.dom.style.border = '1px solid #0B120E24';
+        this.dom.style.borderRadius = '4px';
         this.dom.style.flexGrow = '0';
         this.dom.style.flexShrink = '0';
 
@@ -29,12 +31,29 @@ export class ColumnView {
         this.contentDOM = document.createElement('div');
         this.contentDOM.className = `${CLASSNAME}-column`;
         this.contentDOM.style.width = '100%';
+        this.contentDOM.style.boxSizing = 'border-box';
         this.dom.appendChild(this.contentDOM);
 
         // 3. 創建控制條（即拖動柄）
-        // this.controlBar = document.createElement('div');
-        // this.controlBar.className = `${CLASSNAME}-column-control-bar`;
-        // this.dom.appendChild(this.controlBar);
+        this.resizerLeft = document.createElement('div');
+        this.resizerLeft.className = `${CLASSNAME}-column-resizer-handle`;
+        this.resizerLeft.style.width = '10px';
+        this.resizerLeft.style.height = '100%';
+        this.resizerLeft.style.position = 'absolute';
+        this.resizerLeft.style.left = '0';
+        this.resizerLeft.style.top = '0';
+        this.resizerLeft.style.display = 'none';
+        this.dom.appendChild(this.resizerLeft);
+
+        this.resizerRight = document.createElement('div');
+        this.resizerRight.className = `${CLASSNAME}-column-resizer-handle`;
+        this.resizerRight.style.width = '10px';
+        this.resizerRight.style.height = '100%';
+        this.resizerRight.style.position = 'absolute';
+        this.resizerRight.style.right = '0';
+        this.resizerRight.style.top = '0';
+        this.resizerRight.style.display = 'none';
+        this.dom.appendChild(this.resizerRight);
 
         // 4. 事件綁定
         // this.controlBar.addEventListener('mousedown', this.handleMouseDown.bind(this));
@@ -62,12 +81,28 @@ export class ColumnView {
         if (!ctx) {
             return;
         }
-
-        const { parent } = ctx;
+console.log('>>>>>>', ctx);
+        const { parent, index, isLast } = ctx;
         const n = parent.childCount;
         const gap = parent.attrs.gap;
         const compensation = (gap * (n - 1) / n);
         this.dom.style.width = `calc(${this.node.attrs.ratio * 100}% - ${compensation}px)`;
+
+        if (index === 0) {
+            this.resizerLeft.style.width = `${gap + 1}px`;
+            this.resizerLeft.style.left = `-${gap + 1}px`;
+            this.resizerLeft.style.display = 'block';
+        } else {
+            this.resizerLeft.style.width = `${gap + 1}px`;
+            this.resizerLeft.style.left = `-${gap + 1}px`;
+            this.resizerLeft.style.display = 'none';
+        }
+
+        this.resizerRight.style.width = `${gap + 1}px`;
+        this.resizerRight.style.right = `-${gap + 1}px`;
+        this.resizerRight.style.display = 'block';
+        
+        
 
         // 視覺區分：最後一列的柄可以用於添加
         // if (isLast) {

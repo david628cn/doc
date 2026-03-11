@@ -199,10 +199,10 @@ export const suggestion = ({
                                         ratio: 0.3
                                     }, paragraph.create()),
                                     column.create({
-                                        ratio: 0.4
+                                        ratio: 0.3
                                     }, paragraph.create()),
                                     column.create({
-                                        ratio: 0.3
+                                        ratio: 0.4
                                     }, paragraph.create())
                                 ]);
                             } else {

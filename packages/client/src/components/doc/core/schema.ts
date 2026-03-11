@@ -352,7 +352,7 @@ const schema: any = {
                     validate: "string|null"
                 },
                 gap: {
-                    default: 20
+                    default: 12
                 }
             },
             parseDOM: [
@@ -368,7 +368,7 @@ const schema: any = {
             toDOM: (node: any) => ["div", {
                 ['data-block-id']: node.attrs.dataBlockId,
                 class: `${CLASSNAME}-columns`,
-                style: `width: 100%;position: relative;display: flex;flex-wrap: wrap;gap: ${node.attrs.gap};`
+                style: `width: 100%;position: relative;display: flex;box-sizing: border-box;`
             }, 0]
         },
         // 单个列
@@ -376,10 +376,10 @@ const schema: any = {
             content: "block+", // 列内部可以包含段落、列表等
             isolating: true,   // 重要：防止 Backspace 删掉列结构导致不同步
             attrs: {
-                dataBlockId: {
-                    default: null,
-                    validate: "string|null"
-                },
+                // dataBlockId: {
+                //     default: null,
+                //     validate: "string|null"
+                // },
                 ratio: {
                     default: 0.5
                 }
@@ -389,7 +389,7 @@ const schema: any = {
                     tag: `div.${CLASSNAME}-column`,
                     getAttrs: (dom: any) => {
                         return {
-                            dataBlockId: dom.getAttribute('data-block-id'),
+                            // dataBlockId: dom.getAttribute('data-block-id'),
                             width: dom.style.width
                         };
                     }
@@ -410,7 +410,7 @@ const schema: any = {
                 return ["div", {
                     ['data-block-id']: node.attrs.dataBlockId,
                     class: `${CLASSNAME}-column`,
-                    style: `position: relative;padding: 20px;display: flex;flex-grow: 0;flex-shrink: 0;`
+                    style: `width: calc(${node.attrs.ratio * 100}% - 6px);min-width: 0;position: relative;padding: 20px;display: flex;flex-grow: 0;flex-basis: 0;flex-shrink: 0;border: 1px solid #ddd;`
                 }, 0]
             }
 
