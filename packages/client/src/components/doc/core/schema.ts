@@ -350,10 +350,10 @@ const schema: any = {
                 dataBlockId: {
                     default: null,
                     validate: "string|null"
-                },
-                gap: {
-                    default: 12
                 }
+                // gap: {
+                //     default: 12
+                // }
             },
             parseDOM: [
                 {
@@ -381,7 +381,7 @@ const schema: any = {
                 //     validate: "string|null"
                 // },
                 ratio: {
-                    default: 0.5
+                    default: 0
                 }
             },
             parseDOM: [
@@ -396,57 +396,12 @@ const schema: any = {
                 }
             ],
             toDOM: (node: any) => {
-                // 假设中间有 1 个 12px 的间隙
-                // 逻辑：该列宽度 = 总宽度的比例 - (间隙宽度 / 2)
-                // 多栏通用公式（N 栏）
-                // 如果你有 
-                // 栏，总共有 
-                // 个间隙。假设每个间隙宽 
-                // ，公式应为：
-                // width: calc(Ratio * 100% - (G * (N-1) / N))
-                // const widthStyle = `calc(${node.attrs.ratio * 100}% - 3px)`;
-                // const count = node.parent.childCount;
-
                 return ["div", {
                     ['data-block-id']: node.attrs.dataBlockId,
                     class: `${CLASSNAME}-column`,
-                    style: `width: calc(${node.attrs.ratio * 100}% - 6px);min-width: 0;position: relative;padding: 20px;display: flex;flex-grow: 0;flex-basis: 0;flex-shrink: 0;border: 1px solid #ddd;`
+                    style: `width: calc(${node.attrs.ratio}% - 6px);padding: 6px;border-radius: 10px;border: 1px solid #ddd;`
                 }, 0]
             }
-
-            // function insertColumns(state, dispatch) {
-            //     const { schema } = state;
-            //     // 创建一个包含两列，每列各有一个空段落的结构
-            //     const para = schema.nodes.paragraph.create();
-            //     const col = schema.nodes.column.create(null, [para]);
-            //     const columns = schema.nodes.columns.create(null, [col, col]);
-
-            //     const columnNode = schema.nodes.column.create(null, schema.nodes.paragraph.create());
-            //     const columnsNode = schema.nodes.columns.create(null, [columnNode, columnNode]);
-
-            //     if (dispatch) {
-            //       dispatch(state.tr.replaceSelectionWith(columnsNode).scrollIntoView());
-            //     }
-            //     return true;
-            //   }
-
-            // .columns-layout { display: flex; gap: 10px; }
-            // .column { flex: 1; border: 1px dashed #ccc; min-height: 50px; }
-
-            /* 确保列在空内容时也可点击，防止同步状态在 UI 层卡死 */
-            // .column {
-            //     min-height: 50px;
-            //     outline: none;
-            // }
-
-            // .column:empty::before {
-            //     content: ' ';
-            //     display: inline-block;
-            // }
-
-            // .columns-layout {
-            //     margin: 1em 0;
-            // }
         },
         mention: {
             inline: true,

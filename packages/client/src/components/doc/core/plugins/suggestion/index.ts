@@ -196,13 +196,13 @@ export const suggestion = ({
                                 // 创建两个空的栏位，每个栏位包含一个初始段落
                                 newNode = columns.create(null, [
                                     column.create({
-                                        ratio: 0.3
+                                        ratio: 30
                                     }, paragraph.create()),
                                     column.create({
-                                        ratio: 0.3
+                                        ratio: 30
                                     }, paragraph.create()),
                                     column.create({
-                                        ratio: 0.4
+                                        ratio: 40
                                     }, paragraph.create())
                                 ]);
                             } else {
