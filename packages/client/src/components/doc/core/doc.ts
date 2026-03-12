@@ -64,7 +64,8 @@ import {
     selection,
     shiki,
     table,
-    columns
+    columns,
+    image
 } from './plugins';
 // import { CodeBlock } from './nodeViews';
 import schema from './schema';
@@ -226,6 +227,9 @@ export class Doc extends EventEmitter {
                 editor: this
             }),
             link({
+                editor: this
+            }),
+            image({
                 editor: this
             }),
             // columnResizing(),

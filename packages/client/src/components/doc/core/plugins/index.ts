@@ -9,3 +9,4 @@ export * from './uniqueID';
 export * from './table';
 export * from './codeBlock';
 export * from './columns';
+export * from './image';

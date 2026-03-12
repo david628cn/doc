@@ -25,7 +25,7 @@ const schema: any = {
                 tag: "p",
                 getAttrs: (dom: any) => {
                     return {
-                        dataBlockId: dom.getAttribute('data-block-id'),
+                        dataBlockId: dom.getAttribute("data-block-id"),
                         // 从 style 属性中解析对齐值
                         textAlign: dom.style.textAlign
                     };
@@ -35,10 +35,10 @@ const schema: any = {
                 // 将属性渲染为 CSS 样式
                 return (!node.attrs.textAlign || node.attrs.textAlign === 'left') ?
                     ["p", {
-                        ['data-block-id']: node.attrs.dataBlockId
+                        ["data-block-id"]: node.attrs.dataBlockId
                     }, 0] :
                     ["p", {
-                        ['data-block-id']: node.attrs.dataBlockId,
+                        ["data-block-id"]: node.attrs.dataBlockId,
                         style: `text-align: ${node.attrs.textAlign}`
                     }, 0];
             }
@@ -59,14 +59,14 @@ const schema: any = {
                     tag: "blockquote",
                     getAttrs: (dom: any) => {
                         return {
-                            dataBlockId: dom.getAttribute('data-block-id')
+                            dataBlockId: dom.getAttribute("data-block-id")
                         };
                     }
                 }
             ],
             toDOM(node: any) {
                 return ["blockquote", {
-                    ['data-block-id']: node.attrs.dataBlockId
+                    ["data-block-id"]: node.attrs.dataBlockId
                 }, 0];
             }
         },
@@ -103,42 +103,42 @@ const schema: any = {
                 {
                     tag: "h1",
                     getAttrs: (dom: any) => ({
-                        dataBlockId: dom.getAttribute('data-block-id'),
+                        dataBlockId: dom.getAttribute("data-block-id"),
                         level: 1,
                         textAlign: dom.style.textAlign
                     }),
                 }, {
                     tag: "h2",
                     getAttrs: (dom: any) => ({
-                        dataBlockId: dom.getAttribute('data-block-id'),
+                        dataBlockId: dom.getAttribute("data-block-id"),
                         level: 2,
                         textAlign: dom.style.textAlign
                     }),
                 }, {
                     tag: "h3",
                     getAttrs: (dom: any) => ({
-                        dataBlockId: dom.getAttribute('data-block-id'),
+                        dataBlockId: dom.getAttribute("data-block-id"),
                         level: 3,
                         textAlign: dom.style.textAlign
                     }),
                 }, {
                     tag: "h4",
                     getAttrs: (dom: any) => ({
-                        dataBlockId: dom.getAttribute('data-block-id'),
+                        dataBlockId: dom.getAttribute("data-block-id"),
                         level: 4,
                         textAlign: dom.style.textAlign
                     }),
                 }, {
                     tag: "h5",
                     getAttrs: (dom: any) => ({
-                        dataBlockId: dom.getAttribute('data-block-id'),
+                        dataBlockId: dom.getAttribute("data-block-id"),
                         level: 5,
                         textAlign: dom.style.textAlign
                     }),
                 }, {
                     tag: "h6",
                     getAttrs: (dom: any) => ({
-                        dataBlockId: dom.getAttribute('data-block-id'),
+                        dataBlockId: dom.getAttribute("data-block-id"),
                         level: 6,
                         textAlign: dom.style.textAlign
                     }),
@@ -146,9 +146,9 @@ const schema: any = {
             ],
             toDOM(node: any) {
                 return (!node.attrs.textAlign || node.attrs.textAlign === 'left') ?
-                    ["h" + node.attrs.level, { ['data-block-id']: node.attrs.dataBlockId }, 0] :
+                    ["h" + node.attrs.level, { ["data-block-id"]: node.attrs.dataBlockId }, 0] :
                     ["h" + node.attrs.level, {
-                        ['data-block-id']: node.attrs.dataBlockId,
+                        ["data-block-id"]: node.attrs.dataBlockId,
                         style: `text-align: ${node.attrs.textAlign}`
                     }, 0];
 
@@ -203,13 +203,13 @@ const schema: any = {
         //             preserveWhitespace: "full",
         //             getAttrs: (dom: any) => {
         //                 return {
-        //                     dataBlockId: dom.getAttribute('data-block-id')
+        //                     dataBlockId: dom.getAttribute("data-block-id")
         //                 };
         //             }
         //         }
         //     ],
         //     toDOM(node: any) {
-        //         return ["pre", { ['data-block-id']: node.attrs.dataBlockId }, ["code", 0]];
+        //         return ["pre", { ["data-block-id"]: node.attrs.dataBlockId }, ["code", 0]];
         //     }
         // },
         /// The text node.
@@ -220,7 +220,6 @@ const schema: any = {
         /// `alt`, and `href` attributes. The latter two default to the empty
         /// string.
         image: {
-            inline: true,
             attrs: {
                 dataBlockId: {
                     default: null,
@@ -228,23 +227,30 @@ const schema: any = {
                 },
                 src: { validate: "string" },
                 alt: { default: null, validate: "string|null" },
-                title: { default: null, validate: "string|null" }
+                title: { default: null, validate: "string|null" },
+                width: { default: null },
+                height: { default: null },
             },
             group: "inline",
+            inline: true,    // 允许光标在左右停留
             draggable: true,
+            selectable: true,
+            atom: true,      // 告诉 PM 这是一个原子节点，光标不能进入内部
             parseDOM: [{
                 tag: "img[src]", getAttrs(dom: any) {
                     return {
-                        dataBlockId: dom.getAttribute('data-block-id'),
+                        dataBlockId: dom.getAttribute("data-block-id"),
                         src: dom.getAttribute("src"),
                         title: dom.getAttribute("title"),
-                        alt: dom.getAttribute("alt")
+                        alt: dom.getAttribute("alt"),
+                        width: dom.getAttribute("width"),
+                        height: dom.getAttribute("height")
                     }
                 }
             }],
             toDOM(node: any) {
-                const { src, alt, title } = node.attrs;
-                return ["img", { ['data-block-id']: node.attrs.dataBlockId, src, alt, title }];
+                const { src, alt, title, width, height } = node.attrs;
+                return ["img", { ["data-block-id"]: node.attrs.dataBlockId, src, alt, title }];
             }
         },
         /// A hard line break, represented in the DOM as `<br>`.
@@ -262,7 +268,7 @@ const schema: any = {
                 tag: "br",
                 // getAttrs: (dom: any) => {
                 //     return {
-                //         dataBlockId: dom.getAttribute('data-block-id')
+                //         dataBlockId: dom.getAttribute("data-block-id")
                 //     };
                 // }
             }],
@@ -287,13 +293,13 @@ const schema: any = {
                 tag: "ol",
                 getAttrs(dom: HTMLElement) {
                     return {
-                        dataBlockId: dom.getAttribute('data-block-id'),
+                        dataBlockId: dom.getAttribute("data-block-id"),
                         order: dom.hasAttribute("start") ? +dom.getAttribute("start")! : 1
                     };
                 }
             }],
             toDOM(node: any) {
-                return node.attrs.order == 1 ? ["ol", { ['data-block-id']: node.attrs.dataBlockId }, 0] : ["ol", { ['data-block-id']: node.attrs.dataBlockId, start: node.attrs.order }, 0];
+                return node.attrs.order == 1 ? ["ol", { ["data-block-id"]: node.attrs.dataBlockId }, 0] : ["ol", { ["data-block-id"]: node.attrs.dataBlockId, start: node.attrs.order }, 0];
             }
         },
         bullet_list: {
@@ -310,13 +316,13 @@ const schema: any = {
                     tag: "ul",
                     getAttrs: (dom: any) => {
                         return {
-                            dataBlockId: dom.getAttribute('data-block-id')
+                            dataBlockId: dom.getAttribute("data-block-id")
                         };
                     }
                 }
             ],
             toDOM(node: any) {
-                return ["ul", { ['data-block-id']: node.attrs.dataBlockId }, 0];
+                return ["ul", { ["data-block-id"]: node.attrs.dataBlockId }, 0];
             }
         },
         list_item: {
@@ -332,13 +338,13 @@ const schema: any = {
                     tag: "li",
                     getAttrs: (dom: any) => {
                         return {
-                            dataBlockId: dom.getAttribute('data-block-id')
+                            dataBlockId: dom.getAttribute("data-block-id")
                         };
                     }
                 }
             ],
             toDOM(node: any) {
-                return ["li", { ['data-block-id']: node.attrs.dataBlockId }, 0]
+                return ["li", { ["data-block-id"]: node.attrs.dataBlockId }, 0]
             },
             defining: true
         },
@@ -360,13 +366,13 @@ const schema: any = {
                     tag: `div.${CLASSNAME}-columns`,
                     getAttrs: (dom: any) => {
                         return {
-                            dataBlockId: dom.getAttribute('data-block-id')
+                            dataBlockId: dom.getAttribute("data-block-id")
                         };
                     }
                 }
             ],
             toDOM: (node: any) => ["div", {
-                ['data-block-id']: node.attrs.dataBlockId,
+                ["data-block-id"]: node.attrs.dataBlockId,
                 class: `${CLASSNAME}-columns`,
                 style: `width: 100%;position: relative;display: flex;box-sizing: border-box;`
             }, 0]
@@ -389,7 +395,7 @@ const schema: any = {
                     tag: `div.${CLASSNAME}-column`,
                     getAttrs: (dom: any) => {
                         return {
-                            // dataBlockId: dom.getAttribute('data-block-id'),
+                            // dataBlockId: dom.getAttribute("data-block-id"),
                             width: dom.style.width
                         };
                     }
@@ -397,7 +403,7 @@ const schema: any = {
             ],
             toDOM: (node: any) => {
                 return ["div", {
-                    ['data-block-id']: node.attrs.dataBlockId,
+                    ["data-block-id"]: node.attrs.dataBlockId,
                     class: `${CLASSNAME}-column`,
                     style: `width: calc(${node.attrs.ratio}% - 6px);padding: 6px;border-radius: 10px;border: 1px solid #ddd;`
                 }, 0]

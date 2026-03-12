@@ -1,4 +1,4 @@
-import { getRect } from "@/components/utils/align";
+import { getRect } from '@/components/utils/align';
 
 // export class AutoScroller {
 //     container: HTMLElement;

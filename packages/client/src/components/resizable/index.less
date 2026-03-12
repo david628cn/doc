@@ -1,0 +1,170 @@
+@import url(@/global/index.less);
+
+.@{className}-resizable-handle {
+    position: absolute;
+    z-index: 100;
+    font-size: 1px;
+    line-height: 6px;
+    overflow: hidden;
+    zoom: 1;
+    pointer-events: auto;
+    background: #029bd4;
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: .2s;
+    transition-timing-function: ease-out;
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.@{className}-resizable-handle-east {
+    width: 10px;
+    cursor: e-resize;
+    right: 0;
+    top: 0;
+    height: 100%;
+}
+
+.@{className}-resizable-handle-south {
+    width: 100%;
+    cursor: s-resize;
+    left: 0;
+    bottom: 0;
+    height: 10px;
+}
+
+.@{className}-resizable-handle-west {
+    width: 10px;
+    cursor: w-resize;
+    left: 0;
+    top: 0;
+    height: 100%;
+}
+
+.@{className}-resizable-handle-north {
+    width: 100%;
+    cursor: n-resize;
+    left: 0;
+    top: 0;
+    height: 10px;
+}
+
+.@{className}-resizable-handle-southeast {
+    width: 10px;
+    cursor: se-resize;
+    right: 0;
+    bottom: 0;
+    height: 10px;
+    z-index: 101;
+    // background: #029bd4;
+}
+
+.@{className}-resizable-handle-northwest {
+    width: 10px;
+    cursor: nw-resize;
+    left: 0;
+    top: 0;
+    height: 10px;
+    z-index: 101;
+    // background: #029bd4;
+}
+
+.@{className}-resizable-handle-northeast {
+    width: 10px;
+    cursor: ne-resize;
+    right: 0;
+    top: 0;
+    height: 10px;
+    z-index: 101;
+    // background: #029bd4;
+}
+
+.@{className}-resizable-handle-southwest {
+    width: 10px;
+    cursor: sw-resize;
+    left: 0;
+    bottom: 0;
+    height: 10px;
+    z-index: 101;
+    // background: #029bd4;
+}
+
+.@{className}-resizable-over .@{className}-resizable-handle-east,
+.@{className}-resizable-over .@{className}-resizable-handle-west,
+.@{className}-resizable-pinned .@{className}-resizable-handle-east,
+.@{className}-resizable-pinned .@{className}-resizable-handle-west {
+    background-position: 0;
+}
+
+.@{className}-resizable-over .@{className}-resizable-handle-north,
+.@{className}-resizable-over .@{className}-resizable-handle-south,
+.@{className}-resizable-pinned .@{className}-resizable-handle-north,
+.@{className}-resizable-pinned .@{className}-resizable-handle-south {
+    background-position: top;
+}
+
+.@{className}-resizable-over .@{className}-resizable-handle-southeast,
+.@{className}-resizable-pinned .@{className}-resizable-handle-southeast {
+    background-position: 0 0;
+}
+
+.@{className}-resizable-over .@{className}-resizable-handle-northwest,
+.@{className}-resizable-pinned .@{className}-resizable-handle-northwest {
+    background-position: 100% 100%;
+}
+
+.@{className}-resizable-over .@{className}-resizable-handle-northeast,
+.@{className}-resizable-pinned .@{className}-resizable-handle-northeast {
+    background-position: 0 100%;
+}
+
+.@{className}-resizable-over .@{className}-resizable-handle-southwest,
+.@{className}-resizable-pinned .@{className}-resizable-handle-southwest {
+    background-position: 100% 0;
+}
+
+.@{className}-resizable-proxy {
+    position: absolute;
+    overflow: hidden;
+    display: none;
+    left: 0;
+    top: 0;
+    z-index: 50000;
+    border: 1px solid rgba(0, 160, 239, .6);
+    background-color: rgba(0, 193, 222, .2);
+}
+
+.@{className}-resizable-overlay {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    display: none;
+    left: 0;
+    top: 0;
+    z-index: 200000;
+}
+
+// .@{className}-resizable-over .@{className}-resizable-handle-east,
+// .@{className}-resizable-over .@{className}-resizable-handle-north,
+// .@{className}-resizable-over .@{className}-resizable-handle-northeast,
+// .@{className}-resizable-over .@{className}-resizable-handle-northwest,
+// .@{className}-resizable-over .@{className}-resizable-handle-south,
+// .@{className}-resizable-over .@{className}-resizable-handle-southeast,
+// .@{className}-resizable-over .@{className}-resizable-handle-southwest,
+// .@{className}-resizable-over .@{className}-resizable-handle-west,
+// .@{className}-resizable-overlay,
+// .@{className}-resizable-pinned .@{className}-resizable-handle-east,
+// .@{className}-resizable-pinned .@{className}-resizable-handle-north,
+// .@{className}-resizable-pinned .@{className}-resizable-handle-northeast,
+// .@{className}-resizable-pinned .@{className}-resizable-handle-northwest,
+// .@{className}-resizable-pinned .@{className}-resizable-handle-south,
+// .@{className}-resizable-pinned .@{className}-resizable-handle-southeast,
+// .@{className}-resizable-pinned .@{className}-resizable-handle-southwest,
+// .@{className}-resizable-pinned .@{className}-resizable-handle-west {
+//     opacity: 0;
+// }
+
+.@{className}-resizable-overlay {
+    background-color: #fff;
+}
