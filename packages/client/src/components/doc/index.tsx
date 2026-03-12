@@ -60,6 +60,7 @@ const commandTree = [
         // key: 'advanced',
         type: 'group',
         children: [
+            { label: '图片', key: 'image', nodeType: 'image', nodeAttr: { src: 'https://cdn.prod.website-files.com/649fb1e58cd0c1375ad3909b/696fa9f85ef6d1dab2c74e24_recap-q1-26-blog.jpg' }, icon: BlockquoteIcon },
             { label: '分栏', key: 'columns', nodeType: 'columns', nodeAttr: null, icon: BlockquoteIcon },
             { label: '引用', key: 'blockquote', nodeType: 'blockquote', nodeAttr: null, icon: BlockquoteIcon },
             { label: '代码块', key: 'code_block', nodeType: 'code_block', nodeAttr: null, icon: CodeBlockIcon },
