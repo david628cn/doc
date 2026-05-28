@@ -2,7 +2,7 @@
 	"name": "client",
 	"version": "1.0.0",
 	"private": true, 
-  	"workspaces": ["packages/*"],
+	"workspaces": ["packages/*", "collab-server"],
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},

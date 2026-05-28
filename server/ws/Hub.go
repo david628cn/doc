@@ -14,7 +14,7 @@ func (h *Hub) GetRoom(id string) *Room {
 	room := &Room{
 		ID:         id,
 		Clients:    make(map[*Client]bool),
-		Broadcast:  make(chan []byte),
+		Broadcast:  make(chan Message, 1024), // 统一使用 Message 结构体
 		Register:   make(chan *Client),
 		Unregister: make(chan *Client),
 	}

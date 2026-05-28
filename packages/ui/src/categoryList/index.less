@@ -1,0 +1,82 @@
+@import url(../config/index.less);
+
+.@{className}-category-list {
+    width: 100%;
+    // border-radius: 8px;
+    // border: 1px solid rgba(28, 19, 1, 0.1);
+    overflow: hidden;
+    background: #fff;
+
+    .@{className}-category-list-header {
+        display: flex;
+        gap: 6px;
+        padding: 0 10px;
+        .@{className}-category-list-search {
+            margin-top: 10px;
+            flex: 1;
+        }
+    }
+
+    .@{className}-category-list-center {
+        width: 100%;
+        position: relative;
+        height: 400px; // 必须有固定高度
+        overflow: auto; // 开启滚动
+        scroll-behavior: smooth; // 平滑滚动
+        padding: 0 0 6px 0;
+
+        .@{className}-category-list-panel {
+            width: 100%;
+        }
+
+        .@{className}-category-list-panel-label {
+            position: sticky; // 开启标题吸顶
+            top: 0;
+            background: #fff; // 避免背景透明导致重叠
+            z-index: 10;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+    }
+
+    .@{className}-category-list-footer {
+        padding: 6px 0;
+        border-top: 1px solid rgba(28, 19, 1, 0.1);
+    }
+
+    .@{className}-category-list-panel-list {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 6px;
+        padding: 0 10px;
+
+        .@{className}-category-list-panel-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1; // 保持正方形
+            font-size: 20px;
+            cursor: pointer;
+            border-radius: 6px;
+
+            &.@{className}-category-list-active {
+                background: rgba(42, 28, 0, 0.07);
+                // color: #000;
+                // 如果是 Emoji，可以加一个特殊的缩放或边框
+                // transform: scale(1.1);
+                transition: transform 0.2s ease;
+            }
+
+            &:hover {
+                background: rgba(234, 234, 235, 1);
+            }
+        }
+        .@{className}-category-list-panel-item-icon {
+            display: inline-block;
+            white-space: nowrap; // 强制表情和肤色修饰符在同一行，防止分裂成方块
+            font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", system-ui, sans-serif;
+            line-height: 1;
+        }
+    }
+}

@@ -1,0 +1,90 @@
+@import url(../config/index.less);
+
+:root {
+    --z-index-alert: 2010;
+}
+
+.@{className}-alert-container {
+    position: fixed;
+    top: 24px;
+    bottom: auto;
+    right: 24px;
+    z-index: var(--z-index-alert);
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    max-height: calc(100vh - 48px);
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    .@{className}-alert-item {
+        pointer-events: all;
+        background: #fff;
+        margin-bottom: 16px;
+        padding: 16px 20px;
+        border-radius: 8px;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08), 0 3px 6px rgba(0, 0, 0, 0.12);
+        width: 380px;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        /* justify-content: start; */
+        align-items: start;
+        // 动画基础
+        // max-height: 200px;
+        opacity: 1;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: alert-fade-in 0.3s ease-out;
+
+        &.@{className}-alert-success { border-left: 4px solid #52c41a; color: #52c41a;}
+        &.@{className}-alert-error { border-left: 4px solid #ff4d4f; color: #ff4d4f;}
+        &.@{className}-alert-info { border-left: 4px solid #1677ff; color: #1677ff;}
+        &.@{className}-alert-warning { border-left: 4px solid #faad14; color: #faad14;}
+
+        // 退出状态：向右平移并缩回
+        &.@{className}-alert-leaving {
+            opacity: 0;
+            max-height: 0;
+            margin-bottom: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            transform: translateX(100%);
+        }
+
+        .@{className}-alert-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            .@{className}-alert-icon { margin-right: 12px; font-size: 18px; }
+            .@{className}-alert-title { font-weight: 600; color: #000; font-size: 16px; }
+        }
+
+        .@{className}-alert-description {
+            margin-left: 30px;
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+            // 关键属性：强制在任意字符间换行
+            word-break: break-all; 
+            // 或者使用这个，对中文和英文都比较友好
+            overflow-wrap: break-word; 
+        }
+
+        .@{className}-alert-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            color: #999;
+            cursor: pointer;
+            &:hover { color: #333; }
+        }
+    }
+}
+
+@keyframes alert-fade-in {
+    from { opacity: 0; transform: translateX(100%); }
+    to { opacity: 1; transform: translateX(0); }
+}

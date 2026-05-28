@@ -1,0 +1,60 @@
+@import url('@/config/index.less');
+
+.@{className}-page-login-container {
+	width: 100vw;
+	height: 100vh;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	overflow: hidden;
+	background: #000000 url(@/assets/images/gradient_login.png) center center repeat;
+
+	.@{className}-page-login-center {
+		width: 100%;
+		flex: 1;
+		display: flex;
+		justify-content: center;
+		padding: 0 32px 32px 32px;
+
+		.ant-tabs {
+			width: 100%;
+		}
+		.ant-tabs-tab {
+			font-size: 16px;
+			font-weight: normal;
+			line-height: 22px;
+		}
+
+		.@{className}-page-login-inner {
+			padding: 48px 43px 32px;
+			position: relative;
+			border-radius: 20px;
+			box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+			background-color: #fff;
+			position: absolute;
+			left: 50%;
+			top: 20%;
+			transform: translate(-50%, 0);
+			width: 500px;
+		}
+	}
+}
+
+@media screen and (max-width: 768px) {
+	.@{className}-page-login-container {
+		width: 100% !important;
+		background: #fff !important;
+
+		.@{className}-page-login-center {
+			.@{className}-page-login-inner {
+				width: 100% !important;
+				height: inherit !important;
+				padding: 0 !important;
+				margin-top: 0 !important;
+				box-shadow: none !important;
+				background: none !important;
+			}
+		}
+	}
+}

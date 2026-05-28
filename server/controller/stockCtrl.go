@@ -1,21 +1,28 @@
 package controller
 
 import (
-	"app/common"
 	"app/playload"
 	"app/services"
+	"app/utils"
 	"fmt"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-type StockCtrl struct{}
+type StockCtrl struct {
+	StockSrv *services.StockService
+}
 
-func (c *StockCtrl) List(context *gin.Context) {
-	var params playload.ConditionRequest
-	if err := context.ShouldBindJSON(&params); err != nil {
-		context.JSON(http.StatusOK, playload.ResponseError(err.Error(), nil))
+func NewStockCtrl(stockSrv *services.StockService) *StockCtrl {
+	return &StockCtrl{
+		StockSrv: stockSrv,
+	}
+}
+
+func (c *StockCtrl) List(ctx *gin.Context) {
+	var params playload.ConditionReq
+	if err := ctx.ShouldBindJSON(&params); err != nil {
+		playload.SendError(ctx, err.Error())
 		return
 	}
 	offsetLimit := playload.OffsetLimitData(params.PageNum, params.PageSize)
@@ -50,33 +57,31 @@ func (c *StockCtrl) List(context *gin.Context) {
 		Offset:  &offsetLimit.Offset,
 		Limit:   &offsetLimit.Limit,
 	}
-	srv := services.StockService{}
-	result, err := srv.FindList(conditionData)
+	result, err := c.StockSrv.FindList(ctx, &conditionData)
 	if err != nil {
-		context.JSON(http.StatusOK, playload.ResponseError(err.Error(), nil))
+		playload.SendError(ctx, err.Error())
 		return
 	}
-	count, err := srv.FindCount(conditionData)
+	count, err := c.StockSrv.FindCount(ctx, &conditionData)
 	if err != nil {
-		context.JSON(http.StatusOK, playload.ResponseError(err.Error(), nil))
+		playload.SendError(ctx, err.Error())
 		return
 	}
-	context.JSON(http.StatusOK, playload.ResponseSuccess("查询成功", playload.PaginationData{List: result, Total: count}))
+	playload.SendSuccess(ctx, playload.PaginationData{List: result, Total: count}, "查询成功")
 }
 
-func (c *StockCtrl) Trade(context *gin.Context) {
-	var params playload.TradeRequest
-	if err := context.ShouldBindJSON(&params); err != nil {
-		context.JSON(http.StatusOK, playload.ResponseError(err.Error(), nil))
+func (c *StockCtrl) Trade(ctx *gin.Context) {
+	var params playload.TradeReq
+	if err := ctx.ShouldBindJSON(&params); err != nil {
+		playload.SendError(ctx, err.Error())
 		return
 	}
-	result, err := common.LoadJSON(fmt.Sprintf("F:/python-space/qoue/sync/data/trade/%s-%s.json", params.Code, params.Date.Format("2006-01-02")))
+	result, err := utils.LoadJSON(fmt.Sprintf("F:/python-space/qoue/sync/data/trade/%s/%s-%s.json", params.Date.Format("2006-01-02"), params.Code, params.Date.Format("2006-01-02")))
 	if err != nil {
-		context.JSON(http.StatusOK, playload.ResponseError(err.Error(), nil))
+		playload.SendError(ctx, err.Error())
 		return
 	}
-	srv := services.StockService{}
-	stocks, err := srv.FindList(playload.ConditionData{
+	stocks, err := c.StockSrv.FindList(ctx, &playload.ConditionData{
 		Filter: &[]playload.Expression{
 			{
 				Field: "code",
@@ -95,29 +100,5 @@ func (c *StockCtrl) Trade(context *gin.Context) {
 			result = append([]interface{}{fmt.Sprintf("09:15:00,%.2f,0,0,4", stocks[0].Prev)}, slice...)
 		}
 	}
-	context.JSON(http.StatusOK, playload.ResponseSuccess("查询成功", result))
+	playload.SendSuccess(ctx, result, "查询成功")
 }
-
-//func CreateUsers(context *gin.Context) {
-//	var users model.Users
-//	if err := context.ShouldBindJSON(&users); err != nil {
-//		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-//		return
-//	}
-//
-//	if result := db.DB.Create(&users); result.Error != nil {
-//		context.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
-//		return
-//	}
-//
-//	context.JSON(http.StatusCreated, users)
-//}
-//
-//func GetUsers(context *gin.Context) {
-//	var users []model.Users
-//	if result := db.DB.Find(&users); result.Error != nil {
-//		context.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
-//		return
-//	}
-//	context.JSON(http.StatusOK, users)
-//}

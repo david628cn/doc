@@ -1,0 +1,77 @@
+# editor/server 一键编排：API + PostgreSQL + Redis（Redis 已预留，应用侧接入 config.redis 即可使用）
+#
+# 启动：在 editor/server 目录
+#   docker compose up -d --build
+# 前端 Nginx 默认 http://localhost:8080 ，API 仍映射 APP_PORT（默认 9000）。
+# 数据库：首次需导入表结构，例如（在 editor/server 目录）：
+#   docker compose exec -T db psql -U postgres -d doc < sql.sql
+#   或执行 migrations 目录下脚本（视部署规范而定）
+# 环境：可复制 deploy/.env.example 为 deploy/.env 后 docker compose --env-file deploy/.env up -d
+
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: packages/app/Dockerfile
+    image: doc-space-web:latest
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      - app
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: doc-space-server:latest
+    ports:
+      - "${APP_PORT:-9000}:9000"
+    volumes:
+      - ./deploy/config.docker.yaml:/app/config.yaml:ro
+      - server_uploads:/app/uploads
+      - server_logs:/app/logs
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      GIN_MODE: release
+      # 预留：接入 Redis 时可读取（需代码侧 viper.BindEnv 或自行合并）
+      REDIS_ADDR: redis:6379
+      REDIS_DB: "0"
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-doc}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    # 无密码；若需密码：改为 command: redis-server --appendonly yes --requirepass yourpass
+    # 并同步修改 deploy/config.docker.yaml 中 redis.password
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    # 默认不映射到宿主机；本机调试 Redis 可取消注释
+    # ports:
+    #   - "6379:6379"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  server_uploads:
+  server_logs:

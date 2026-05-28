@@ -1,0 +1,39 @@
+@import url(../../../config/index.less);
+
+
+.@{className}-text-color-panel {
+    // width: 200px;
+    padding: 8px;
+    border-radius: 8px;
+    box-sizing: border-box;
+    background: #ffffff;
+
+    // box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+    .@{className}-text-color-panel-reset {
+        width: 100%;
+        // line-height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        padding: 3px 6px;
+        cursor: pointer;
+        border-radius: 10px;
+        font-size: 14px;
+        transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+        color: #1c2024;
+        border: 1px solid #ddd;
+        background-color: transparent;
+
+        // 鼠标移入（Hover）时的微交互：平滑加深颜色并高亮
+        &:hover {
+            // color: #1677ff;
+            background-color: rgba(0, 0, 0, 0.02); // 淡淡的灰色背景反馈
+        }
+
+        // 点击（Active）瞬间的视觉压下回馈
+        &:active {
+            transform: scale(0.98);
+        }
+    }
+}

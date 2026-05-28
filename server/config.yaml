@@ -1,15 +1,17 @@
 server:
-  port: 8000
+  port: 9000
   env: "dev" #production
 proxy:
-  allow_origins: ["http://127.0.0.1:3000", "http://localhost:3000", "http://127.0.0.1:3100", "http://localhost:3100"]
+  allow_origins: ["http://127.0.0.1:3000", "http://localhost:3000", "http://127.0.0.1:3100", "http://localhost:3100", "http://127.0.0.1:3300", "http://localhost:3300"]
+  # allow_origins: ["*"]
   allow_methods: ["*"]
   allow_headers: ["*"]
 #  allow_credentials: false
 #  max_age: 12
   trusted_proxies: ["127.0.0.1"]
 database:
-  dsn: "root:root123@tcp(127.0.0.1:3306)/qoue?charset=utf8mb4&parseTime=True&loc=Local"
+  # dsn: "root:root123@tcp(127.0.0.1:3306)/qoue?charset=utf8mb4&parseTime=True&loc=Local"
+  dsn: "postgres://postgres:root@127.0.0.1:5432/doc?sslmode=disable"
 jwt:
 #  secret_type: "jwt"
   secret_key: "__abcd__"
@@ -26,7 +28,18 @@ zap:
 upload:
   path: "./uploads"
 web:
-  static: ["./web/static"]
-  index_html: "./web/index.html"
+  # 挂载到 URL /static（按需）；Vite 主资源在 /assets，由 main.go 自动挂载 web/dist/assets
+  static: ["./web/dist/static"]
+  index_html: "./web/dist/index.html"
+# 多副本：redis.addr + key_prefix（与 collab REDIS_PREFIX 区分）+ verify_cache_ttl_seconds。可覆盖 GIN_REDIS_KEY_PREFIX、GIN_WS_REDIS_CHANNEL、COLLAB_VERIFY_CACHE_SECONDS。
+#redis:
+#  addr: "127.0.0.1:6379"
+#  key_prefix: "gin:"
+#  verify_cache_ttl_seconds: 0
+# 與 editor/collab-server/collab.config.json 中 internalSecret 保持一致；生產環境請改用環境變量 COLLAB_INTERNAL_SECRET 覆蓋。
+collab:
+  internal_secret: "doc-space-dev-collab-internal"
+  # 与 Hocuspocus 同端口：POST /internal/collab/expand-ydoc（见 collab-server onRequest）
+  expand_ydoc_url: "http://127.0.0.1:1234"
 #templates:
 #  path: "templates/*"

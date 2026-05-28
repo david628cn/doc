@@ -1,0 +1,28 @@
+@import url('@/config/index.less');
+
+.@{className}-group-starred {
+	&__row {
+		width: 100%;
+		padding: 10px 12px;
+		border: 1px solid rgba(0, 0, 0, 0.06);
+		border-radius: 8px;
+		margin-bottom: 8px;
+		background: #fff;
+		box-sizing: border-box;
+	}
+
+	&__row:hover {
+		background: rgba(0, 0, 0, 0.02);
+	}
+
+	&__row-main {
+		flex: 1;
+		min-width: 0;
+		text-align: left;
+		padding: 0;
+		border: none;
+		background: transparent;
+		cursor: pointer;
+		font: inherit;
+	}
+}

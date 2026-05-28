@@ -1,0 +1,129 @@
+/* ==========================================================================
+   ✨ 1. 强行将官方自带的工具栏改造成底部的黑色一体化长条
+   ========================================================================== */
+.yarl__toolbar {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 40px !important;
+    /* 常驻屏幕底部正中央 */
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    right: auto !important;
+    width: auto !important;
+    height: auto !important;
+
+    /* 黑色圆角长条背景 */
+    background: rgba(30, 30, 30, 0.85) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    padding: 8px 22px !important;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    z-index: 99999 !important;
+    pointer-events: auto !important;
+    /* 开启点击响应 */
+}
+
+/* 2. 精准定位：塞在长条最左侧的页码 */
+.yarl__custom-bottom-counter {
+    order: -2 !important;
+    /* 关键：使其在 Flex 布局中冲到最前面 */
+    color: #ffffff !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    padding-right: 16px !important;
+    margin-right: 4px !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.25) !important;
+    /* 垂直分割线 */
+    white-space: nowrap !important;
+    user-select: none !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* 强制隐藏原本混在底部长条里的官方关闭图标，防止重叠 */
+.yarl__button_close {
+    display: none !important;
+}
+
+/* 工具栏内官方插件按钮的通用样式微调 */
+.yarl__toolbar .yarl__button {
+    padding: 4px 6px !important;
+    color: #cccccc !important;
+    background: transparent !important;
+}
+
+.yarl__toolbar .yarl__button:hover {
+    color: #ffffff !important;
+}
+
+/* ==========================================================================
+   ✨ 3. 全局最顶层悬浮：100% 出现、100% 可点的右上角圆形关闭按钮
+   ========================================================================== */
+.custom-final-top-close-btn {
+    position: fixed !important;
+    top: 25px !important;
+    right: 25px !important;
+    width: 44px !important;
+    height: 44px !important;
+    background: rgba(40, 40, 40, 0.6) !important;
+    border: none !important;
+    border-radius: 50% !important;
+    color: #ffffff !important;
+    font-size: 20px !important;
+    cursor: pointer !important;
+
+    /* 关键：使用 flex 居中✕，并强行将其推到视图最顶层 */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 2147483647 !important;
+    /* 浏览器极限层级，绝对不会被任何东西遮挡 */
+    pointer-events: auto !important;
+    /* 强制捕获点击 */
+    transition: background 0.2s !important;
+}
+
+.custom-final-top-close-btn:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* ==========================================================================
+   ✨ 4. 其他常规组件微调
+   ========================================================================== */
+/* 左右大箭头常驻 */
+.yarl__navigation_prev,
+.yarl__navigation_next {
+    display: flex !important;
+    background: rgba(40, 40, 40, 0.15) !important;
+    width: 80px !important;
+    height: 80px !important;
+    border-radius: 100% !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.yarl__navigation_prev:hover,
+.yarl__navigation_next:hover {
+    background: rgba(24, 24, 24, 0.7) !important;
+    color: #ffffff !important;
+}
+
+/* 图片下方的文字标题定位 */
+.yarl__custom-title-text {
+    position: fixed;
+    bottom: 110px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ffffff;
+    font-size: 14px;
+    z-index: 99998;
+    background: #000000;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}

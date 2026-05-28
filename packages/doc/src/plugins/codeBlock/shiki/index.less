@@ -1,0 +1,195 @@
+@import url(../../../config/index.less);
+
+.@{className}-block-type-code_block {
+    // --- 业界主流配色方案 (浅色) ---
+    margin: 16px 0;
+    position: relative;
+    --background: #f8f9fa;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 10px;
+    background: var(--prosemirror-highlight-bg, var(--background, inherit));
+    // transition: height 0.2s ease;
+    .@{className}-block-type-code_block-tools {
+        padding: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .@{className}-block-type-code_block-tools-left {
+        display: flex;
+        gap: 6px;
+    }
+    .@{className}-block-type-code_block-tools-right {
+        display: flex;
+        gap: 6px;
+    }
+
+    .@{className}-block-type-code_block-select {
+        height: 24px;
+        min-height: 24px;
+        font-size: 12px;
+        color: #1c2024;
+        border-color: rgba(0, 0, 0, 0.12);
+        background-color: transparent;
+    }
+    .@{className}-block-type-code_block-select.@{className}-ui-select-disabled {
+        // background-color: #fff;
+        // color: rgba(0, 0, 0, 0.65);
+        border-color: transparent;
+        cursor: default;
+        .@{className}-ui-select-small {
+            display: none;
+        }
+    }
+
+    .@{className}-block-type-code_block-button {
+        height: 24px;
+        line-height: 24px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        // gap: 2px;
+        padding: 0 6px;
+        cursor: pointer;
+        border-radius: 6px;
+        font-size: 12px;
+        color: #1c2024;
+        background-color: transparent;
+        border: 0;
+        transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+        &:hover {
+            background-color: #ddd;
+        }
+        svg {
+            transition: transform 0.3s;
+        }
+    }
+    .@{className}-block-type-code_block-switcher-close {
+        svg {
+            transform: rotate(-90deg);
+        }
+    }
+
+    pre {
+        max-height: 800px;
+        position: relative;
+        text-align: left;
+        white-space: pre;
+        word-spacing: normal;
+        word-break: normal;
+        word-wrap: normal;
+        tab-size: 4;
+        font-size: 14px;
+        // font-weight: normal;
+        -webkit-hyphens: none;
+        hyphens: none;
+        z-index: 1;
+        background: 0 0;
+        outline: none;
+        margin: 0;
+        overflow: auto;
+        border-top: 1px solid rgba(0, 0, 0, 0.12);
+        // border: 1px solid rgba(0, 0, 0, 0.12);
+        // border-radius: 10px;
+        // background: var(--prosemirror-highlight-bg, var(--background, inherit));
+    }
+
+    code {
+        color: #000;
+        color: var(--code);
+        padding: 2.5px 5px;
+        border-radius: 6px;
+        font-size: 1em;
+        position: relative;
+        color: var(--prosemirror-highlight, inherit);
+        // overflow: auto;
+        .line-number {
+            width: 2.6rem;
+            position: sticky;
+            left: 0;
+            display: inline-flex;
+            justify-content: flex-end;
+            font-variant-numeric: tabular-nums;
+            overflow: visible;
+            text-wrap: nowrap;
+            opacity: 1;
+            -webkit-user-select: none;
+            user-select: none;
+            color: transparent;
+            padding: 5px 10px 0 20px;
+            margin-right: 20px;
+            // border-right: 1px solid rgba(0, 0, 0, 0.12);
+            background: var(--prosemirror-highlight-bg, var(--background, inherit));
+        }
+        // &:has(.line-number.ProseMirror-widget) {
+        //     padding-left: 4em;
+        // }
+        // &::after {
+        //     width: 100%;
+        //     display: inline-block;
+        //     content: '';
+        //     position: absolute;
+        //     bottom: 0;
+        //     border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+        // }
+    }
+
+    pre>code {
+        padding: 0 10px 16px 10px;
+        display: block;
+        border: none !important;
+        background: transparent !important;
+        // overflow-x: auto;
+    }
+}
+.@{className}-block-wrapper-collapsed {
+    pre {
+        display: none;
+        // height: 0;
+    }
+}
+
+/* 1. 给你的代码块容器重置计数器 */
+.@{className}-block-type-code_block pre {
+    counter-reset: line-counter; /* 确立当前代码块从 0 开始计数 */
+    position: relative;
+    // padding-left: 3.5rem !important; /* 给左侧的行号留出绝对干净的固定一栏通道 */
+}
+
+/* 2. 找到 Shiki 渲染的每一个独立代码行（假设 Shiki 每一行是一个带 class 的 span 或 div）
+ * 如果插件没有给每行特殊 class，可以直接针对 pre 内部的直接块级子元素或换行进行捕获
+ */
+.@{className}-block-type-code_block pre .line-number,
+.@{className}-block-type-code_block pre [data-line],
+.@{className}-block-type-code_block pre > div {
+    // position: relative;
+    counter-increment: line-counter; /* 每发现一行，计数器在主线程自动 +1 */
+}
+
+/* 3. 利用性能极高的 ::before 伪元素，将当前计数值以文本形式“投影”在左侧通道内 */
+.@{className}-block-type-code_block pre .line-number::before,
+.@{className}-block-type-code_block pre [data-line]::before,
+.@{className}-block-type-code_block pre > div::before {
+    content: counter(line-counter);  /* 自动读取当前计数值并渲染 */
+    position: absolute;
+    // left: -3rem;                     /* 绝对定位到左侧刚才留出的通道 */
+    width: 2.2rem;
+    text-align: right;               /* 数字向右对齐，专业排版规范 */
+    color: #a0a0a2;                  /* 优雅的行号灰色 */
+    font-family: Menlo, Monaco, Consolas, monospace;
+    font-size: 12px;
+    user-select: none;               /* 极为关键：防止用户鼠标划选正文代码时把行号也选中复制走 */
+    pointer-events: none;            /* 防止干扰鼠标点击 */
+}
+
+/* 强制隐藏代码块内部的所有 ProseMirror 辅助占位符 */
+// .prosemirror-highlight code .ProseMirror-trailingBreak,
+// .prosemirror-highlight code .ProseMirror-separator {
+//   display: none !important;
+// }
+
+/* 如果使用了行号插件，针对空行号进行隐藏 */
+// .shiki-line:last-child:has(.ProseMirror-trailingBreak) {
+//   display: none;
+// }

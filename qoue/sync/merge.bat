@@ -1,0 +1,2 @@
+cd
+python merge.py

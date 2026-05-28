@@ -1,0 +1,184 @@
+@import url(../../config/index.less);
+
+.@{className}-select {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 11px 4px 11px;
+    width: 100%;
+    min-height: 32px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(0, 0, 0, 0.65);
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    outline: none;
+    box-sizing: border-box;
+    margin: 0;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+
+    .@{className}-select-value {
+        display: flex;
+        flex: 1;
+    }
+
+    .@{className}-select-small {
+        width: 1rem;
+        height: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &-disabled {
+        background-color: #f5f5f5;
+        color: #bfbfbf;
+        border-color: #d9d9d9;
+        cursor: not-allowed;
+
+        // 让右侧小箭头同步变灰
+        .@{className}-ui-select-small {
+            color: #bfbfbf;
+        }
+    }
+
+    // 2. 只读状态样式
+    &-readonly {
+        background-color: #fafafa;
+        cursor: default; // 不显示禁用标志，但也不显示手型指针
+        border-color: #d9d9d9;
+
+        // 只读时可隐藏右侧小箭头增加语义辨识度（可选）
+        .@{className}-select-small { display: none; }
+    }
+}
+
+.@{className}-select-popuover {
+    position: absolute;
+    z-index: 1010;
+    left: 0;
+    top: 0;
+    display: none;
+    .@{className}-select-popuover-inner {
+        width: 100%;
+        color: #0a0a0a;
+        font-size: 14px;
+        display: flex;
+        flex-direction: column;
+        border-radius: 10px;
+        // padding: 4px;
+        border-radius: 10px;
+        box-sizing: border-box;
+        background: #fff;
+        border: 1px solid #ddd;
+        transition-property: opacity;
+        transition-duration: 0.3s;
+        transition-timing-function: ease-out;
+        box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+        animation-name: slideDownIn;
+        -webkit-animation-duration: 0.2s;
+        animation-duration: 0.2s;
+        -webkit-animation-fill-mode: both;
+        animation-fill-mode: both;
+    }
+
+    .@{className}-select-search-wrap {
+        padding: 10px;
+        flex-shrink: 0;
+    }
+
+    .@{className}-select-search-input {
+        position: relative;
+        display: inline-block;
+        padding: 4px 11px;
+        width: 100%;
+        min-height: 32px;
+        cursor: text;
+        font-size: 14px;
+        line-height: 1.5;
+        color: #262626;
+        background-color: #fff;
+        background-image: none;
+        border: 1px solid #e5e5e5;
+        border-radius: 10px;
+        outline: none;
+        box-sizing: border-box;
+        margin: 0;
+        transition: all .3s cubic-bezier(.645, .045, .355, 1);
+        // transition: all 0.2s;
+
+        &::placeholder {
+            color: rgba(0, 0, 0, 0.25);
+        }
+
+        // &:hover {
+        //     border-color: #1677ff;
+        // }
+        &:focus,
+        &.@{className}-input-active {
+            outline: 0; // 必须禁用原生外框
+            // border-color: #1677ff;
+            // 关键：0 0 0 2px 这种写法能实现顺着圆角的扩散效果
+            // box-shadow: 0 0 0 2px rgba(5, 145, 255, 0.1); 
+            box-shadow: 0 0 0 3px rgba(168, 168, 168, 0.5);
+            border-color: #a1a1a1;
+        }
+
+        &:disabled {
+            color: rgba(0, 0, 0, 0.25);
+            background-color: #f5f5f5;
+            border-color: #d9d9d9;
+            cursor: not-allowed;
+        }
+
+        &.@{className}-input-error {
+            // border-color: #ff4d4f;
+            border-color: #e7000b;
+            box-shadow: 0 0 0 3px rgba(231, 0, 11, 0.2);
+
+            &:hover {
+                // border-color: #ff7875;
+                border-color: #e7000b;
+                box-shadow: 0 0 0 3px rgba(231, 0, 11, 0.2);
+            }
+
+            &:focus {
+                // border-color: #ff7875;
+                // box-shadow: 0 0 0 2px rgba(255, 38, 5, 0.06);
+                border-color: #e7000b;
+                box-shadow: 0 0 0 3px rgba(231, 0, 11, 0.2);
+            }
+        }
+    }
+
+    .@{className}-select-popuover-empty {
+        padding: 0 10px 10px 10px;
+        text-align: center;
+        color: #94a3b8;
+        font-size: 13px;
+    }
+
+}
+
+.@{className}-select-menu-wrapper {
+    width: 100%;
+    max-height: 380px;
+    overflow: auto;
+    .@{className}-menu-container {
+        background: transparent;
+    }
+}
+    
+
+.@{className}-select.@{className}-select-open {
+    box-shadow: 0 0 0 3px rgba(168, 168, 168, 0.5);
+    border-color: #a1a1a1;
+}
+
+.@{className}-select-popuover.@{className}-select-popuover-open {
+    display: block;
+}

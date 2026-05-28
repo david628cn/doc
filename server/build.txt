@@ -1,0 +1,13 @@
+SET CGO_ENABLED=0
+SET GOOS=linux
+SET GOARCH=amd64
+go build -o goapp
+
+
+go mod tidy  # 清理未使用的依赖项并更新go.mod和go.sum文件。
+go mod verify # 验证依赖项是否正确。
+go mod download # 下载依赖项到本地缓存。
+go build       # 构建项目以测试依赖项是否正确。
+go test        # 运行测试以确保一切正常。
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app main.go
+

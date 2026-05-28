@@ -1,0 +1,22 @@
+@import url(../../config/index.less);
+
+// .@{className}-column-container {
+//     border: 1px solid #0B120E24;
+// }
+
+// .@{className}-column-content {
+//     // background: #eee;
+// }
+.@{className}-column-resizer-handle {
+    width: 10px;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    z-index: 10;
+    cursor: col-resize;
+    background: #000;
+    opacity: 0;
+    &:hover {
+        opacity: 1;
+    }
+}

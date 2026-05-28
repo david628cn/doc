@@ -1,0 +1,52 @@
+/* index.less */
+:root {
+  --bg-layout: #ffffff;
+  --bg-sider: #f7f7f5;
+  --bg-card: #ffffff;
+  --text-main: rgba(0, 0, 0, 0.88);
+  --border-color: #f0f0f0;
+  --skeleton-bg: #f2f2f2;
+  --skeleton-shimmer: linear-gradient(90deg, #f2f2f2 25%, #e6e6e6 37%, #f2f2f2 63%);
+}
+
+[data-theme='dark'] {
+  --bg-layout: #141414;
+  --bg-sider: #1f1f1f;
+  --bg-card: #262626;
+  --text-main: rgba(255, 255, 255, 0.85);
+  --border-color: #303030;
+  --skeleton-bg: #303030;
+  --skeleton-shimmer: linear-gradient(90deg, #303030 25%, #3d3d3d 37%, #303030 63%);
+}
+
+/* 全局盒模型修復 */
+/* 核心：過渡動畫 */
+body {
+  margin: 0;
+  padding: 0;
+  /* 讓背景和文字變換時有 0.3s 的淡入淡出 */
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 確保所有繼承這些屬性的 Box 組件也能享受過渡 */
+/* 如果你希望所有使用了變量的容器都平滑切換，可以這樣寫： */
+// div, aside, main, header, section, span, h1, h2, h3, h4, h5, h6 {
+//   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+// }
+
+/* 如果不想影響所有元素（性能考慮），也可以只針對你的 layout 類名 */
+// [className*='layout-'] {
+//   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+// }
+* { box-sizing: border-box; }
+
+@keyframes skeleton-loading {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+.skeleton-animate {
+  background: var(--skeleton-shimmer);
+  background-size: 400% 100%;
+  animation: skeleton-loading 1.4s ease infinite;
+}

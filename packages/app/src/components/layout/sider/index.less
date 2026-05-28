@@ -1,0 +1,13 @@
+@import url('@/config/index.less');
+
+.carve-ui-tree-node {
+    .@{className}-sider-tree-node-oper {
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out;
+    }
+    &:hover {
+        .@{className}-sider-tree-node-oper {
+            opacity: 1;
+        }
+    }
+}

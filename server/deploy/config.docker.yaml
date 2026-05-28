@@ -1,0 +1,43 @@
+# Docker Compose 默认挂载为 /app/config.yaml
+# 数据库主机名 db、Redis 主机名 redis 与 docker-compose 服务名一致。
+server:
+  port: 9000
+  env: production
+proxy:
+  allow_origins:
+    - "http://localhost:3000"
+    - "http://127.0.0.1:3000"
+    - "http://localhost:8080"
+    - "http://127.0.0.1:8080"
+    - "*"
+  allow_methods: ["*"]
+  allow_headers: ["*"]
+  trusted_proxies: ["127.0.0.1", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+database:
+  dsn: "postgres://postgres:postgres@db:5432/doc?sslmode=disable"
+# 与 collab-server 可共用同一 Redis；Hocuspocus 使用 REDIS_PREFIX，Gin 使用下方 key_prefix，键空间互不重叠。
+redis:
+  addr: "redis:6379"
+  password: ""
+  db: 0
+  key_prefix: "gin:"
+  # 留空则自动为 {key_prefix}ws:broadcast（也可用 GIN_WS_REDIS_CHANNEL 覆盖）
+  ws_pubsub_channel: ""
+  # verify QPS 高时可设为 30–120；0 表示禁用短缓存
+  verify_cache_ttl_seconds: 60
+jwt:
+  secret_key: "docker-change-me-use-long-random-secret"
+  access_token_expire_minutes: 10080
+zap:
+  level: info
+  file_path: "./logs/app.log"
+  max_size: 100
+  max_backups: 7
+  max_age: 30
+  compress: true
+  console_output: true
+upload:
+  path: "./uploads"
+web:
+  static: ["./web/static"]
+  index_html: "./web/index.html"

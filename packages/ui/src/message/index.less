@@ -1,0 +1,71 @@
+@import url(../config/index.less);
+
+:root {
+    --z-index-message: 2010;
+}
+
+.@{className}-message-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: var(--z-index-message);
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .@{className}-message-item {
+        pointer-events: all;
+        background: #fff;
+        margin-bottom: 12px;
+        padding: 10px 16px;
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+        display: flex;
+        /* justify-content: start; */
+        align-items: start;
+        // min-width: 150px;
+        
+        // 动画基础配置
+        // max-height: 100px;
+        opacity: 1;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: message-move-in 0.3s ease-out;
+
+        &.@{className}-message-success { border-left: 4px solid #52c41a; color: #52c41a;}
+        &.@{className}-message-error { border-left: 4px solid #ff4d4f; color: #ff4d4f;}
+        &.@{className}-message-info { border-left: 4px solid #1677ff; color: #1677ff;}
+        &.@{className}-message-warning { border-left: 4px solid #faad14; color: #faad14;}
+
+        // 退出状态：高度和间距同时归零实现“缩回”
+        &.@{className}-message-leaving {
+            opacity: 0;
+            max-height: 0;
+            margin-bottom: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            transform: translateY(-20px);
+            overflow: hidden;
+        }
+
+        .@{className}-message-icon { margin-right: 8px; font-size: 16px; }
+        .@{className}-message-content { 
+            color: #333; 
+            font-size: 14px; 
+            // 关键属性：强制在任意字符间换行
+            word-break: break-all; 
+            // 或者使用这个，对中文和英文都比较友好
+            overflow-wrap: break-word; 
+        }
+    }
+}
+
+@keyframes message-move-in {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}

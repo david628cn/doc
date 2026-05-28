@@ -1,0 +1,36 @@
+@import url(../../config/index.less);
+
+.@{className}-toolbar-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .@{className}-button {
+        font-size: 16px;
+    }
+    // 垂直分割线核心样式
+    .@{className}-toolbar-separator {
+        display: inline-block;
+        box-sizing: border-box;
+        
+        // 1. 物理几何尺寸
+        width: 1px;
+        height: 16px; // 高度为 16px，与 32px 的按钮垂直居中对称
+        margin: 0 4px; // 左右各空出 4px 的安全间距，保持呼吸感
+
+        // 2. 干净精致的色彩（使用现代 slate-200 / slate-300 色阶）
+        background-color: #cbd5e1; 
+        
+        // 3. 增强防错：如果分隔线因为不可控原因被挤压，保持 1px 不缩水
+        flex-shrink: 0;
+
+        // 4. 高级联动：如果分割线紧邻一个被禁用的按钮，可以降低透明度淡化存在感（选填）
+        // &.@{prefix}-toolbar-separator-dimmed {
+        //   background-color: #e2e8f0;
+        // }
+    }
+}
+
+.@{className}-toolbar-dropdown-inner {
+    border-radius: 18px;
+    padding: 0 10px;
+}

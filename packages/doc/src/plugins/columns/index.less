@@ -1,0 +1,25 @@
+@import url(../../config/index.less);
+
+// .@{className}-column-container {
+//     border: 1px solid #0B120E24;
+// }
+
+// .@{className}-column-content {
+//     // background: #eee;
+// }
+.@{className}-column-resizer-handle {
+    width: 6px;
+    // height: 100%;
+    position: relative;
+    cursor: col-resize;
+    display: flex;
+    flex-shrink: 0;
+    background: #000;
+    transition-property: opacity;
+    transition-duration: .2s;
+    transition-timing-function: ease-out;
+    opacity: 0;
+    // &:hover {
+    //     opacity: 1;
+    // }
+}

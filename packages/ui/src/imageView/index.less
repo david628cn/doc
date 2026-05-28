@@ -1,0 +1,54 @@
+@import url(../config/index.less);
+
+.@{className}-image-view {
+    // width: 100%;
+    // height: 100%;
+    position: relative;
+    // display: inline-flex;
+    /* text-align: center; */
+    // align-items: center;
+    // align-items: center;
+    // justify-content: center;
+    // background: #f5f5f5;
+    .@{className}-image-view-placeholder {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+       .@{className}-image-view-placeholder-inner {
+            width: 80px;
+            height: 62px;
+            position: relative;
+            border-radius: 4px;
+            background: #dfdfdf;
+            &::before {
+                border-bottom: 22px solid #fff;
+                border-left: 16px solid transparent;
+                border-right: 16px solid transparent;
+                bottom: 10px;
+                content: "";
+                height: 0;
+                inset-inline-start: 40px;
+                position: absolute;
+                width: 0;
+            }
+            &::after {
+                border-bottom: 36px solid #fff;
+                border-left: 20px solid transparent;
+                border-right: 30px solid transparent;
+                bottom: 10px;
+                content: "";
+                height: 0;
+                inset-inline-start: 10px;
+                position: absolute;
+                width: 0;
+            }
+       }
+    }
+}

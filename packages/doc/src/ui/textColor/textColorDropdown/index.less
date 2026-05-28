@@ -1,0 +1,118 @@
+@import url(../../../config/index.less);
+
+.@{className}-text-color-dropdown-container {
+    min-height: 32px;
+    line-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    // gap: 4px;
+    padding: 0 6px;
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all .2s cubic-bezier(.645, .045, .355, 1);
+    color: #1c2024;
+    border: 1px solid transparent;
+    background-color: transparent;
+    &:hover {
+        // color: #1677ff;
+        background-color: rgba(0, 0, 0, 0.02); // 淡淡的灰色背景反馈
+    }
+
+    // 点击（Active）瞬间的视觉压下回馈
+    &:active {
+        transform: scale(0.98);
+    }
+    .@{className}-text-color-dropdown {
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        border-radius: 6px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: var(--highlight-color, rgba(28, 19, 1, .11));
+        transition-property: all;
+        transition-duration: 0.2s;
+        transition-timing-function: ease-out;
+        position: relative;
+        &::after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            // filter: brightness(95%);
+            // mix-blend-mode: multiply;
+            opacity: .5;
+            background-color: var(--highlight-color, transparent);
+        }
+    
+        .@{className}-text-color-dropdown-text {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+    }
+    // .@{className}-text-color-dropdown-line {
+    //     width: 1px;
+    //     height: 16px;
+    //     margin: 0 4px;
+    //     background-color: #e5e5e5;
+    // }
+    .@{className}-text-color-dropdown-inner {
+        .@{className}-text-color-dropdown-icon {
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            svg {
+                width: 12px;
+                height: 12px;
+            }
+            &:hover {
+                background-color: #eaeaeb;
+            }
+        }
+    }
+}
+
+.@{className}-text-color-dropdown-popuover {
+    position: absolute;
+    z-index: 1010;
+    left: 0;
+    top: 0;
+    display: none;
+    .@{className}-text-color-dropdown-popuover-inner {
+        width: 100%;
+        color: #0a0a0a;
+        font-size: 14px;
+        border-radius: 10px;
+        box-sizing: border-box;
+        background: #fff;
+        border: 1px solid #ddd;
+        transition-property: opacity;
+        transition-duration: 0.3s;
+        transition-timing-function: ease-out;
+        // box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        animation-name: slideDownIn;
+        -webkit-animation-duration: 0.2s;
+        animation-duration: 0.2s;
+        -webkit-animation-fill-mode: both;
+        animation-fill-mode: both;
+    }
+}
+
+.@{className}-text-color-dropdown-popuover.@{className}-text-color-dropdown-popuover-open {
+    display: block;
+}

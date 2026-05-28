@@ -1,0 +1,117 @@
+@import url(../../config/index.less);
+
+.@{className}-block-wrapper {
+    position: relative;
+
+    // 1. 默认状态下的手柄容器：只保留定位与动画基准，不在这里做绝对的 display 控制
+    .@{className}-drag-handle-container {
+        height: 24px;
+        height: 24px;
+        position: absolute;
+        z-index: 100;
+        font-size: 16px;
+        left: -16px; // 靠齐容器左侧基准线
+        top: 0;
+        // transform: translate(-100%, 0); // 整体向左位移自身 100% 的宽度
+        // 如果想让它与文本块之间留一点间距（比如 8px），可以加上 margin-left：
+        // margin-right: 16px; 
+        // padding-right: 8px; // 这样手柄和文本块在鼠标轨迹上是 100% 物理连接的
+        box-sizing: content-box;
+        // transition: opacity .3s ease-out;
+        opacity: 0;
+        // pointer-events: none; 
+        display: flex; 
+        // 隐藏时：完全透明，且往左多偏移 6px (即 -100% 宽度再往左 6px)
+        transform: translate(calc(-100% - 6px), 0);
+        visibility: hidden; 
+        display: none;
+        // transition: opacity, visibility 0.3s;
+        transition: transform 0.3s cubic-bezier(0.215, 0.61, 0.355, 1), 
+                    opacity 0.3s linear, 
+                    visibility 0.3s linear;
+        // &::after {
+        //     content: "";
+        //     position: absolute;
+        //     top: 0;
+        //     right: -12px;       // 向右延伸 12px，完美覆盖 8px 间距并稍微溢出一点作为缓冲
+        //     width: 12px;        // 空气墙宽度
+        //     height: 100%;       // 和手柄等高
+        //     background: transparent; // 100% 透明，肉眼完全不可见
+        //     pointer-events: auto;    // 确保可以捕捉鼠标事件
+        // }
+    }
+
+    &:hover {
+        >.@{className}-drag-handle-container {
+            transform: translate(-100%, 0);
+            opacity: 1;
+            visibility: visible; // 恢复可见，允许鼠标交互
+            // transition: transform 0.3s cubic-bezier(0.215, 0.61, 0.355, 1), 
+            //         opacity 0.3s linear, 
+            //         visibility 0.3s linear;
+        }
+        
+    }
+
+    .@{className}-drag-handle-button-group {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        background: #fff;
+        border-radius: 4px;
+        padding: 0 3px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .@{className}-drag-handle-button {
+        width: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        background: #fff;
+        border-radius: 4px;
+        padding: 2px 0;
+        cursor: grab;
+
+        &:hover {
+            opacity: 0.8;
+            background-color: #f0f0f0;
+        }
+    }
+
+    /* ==========================================================================
+       🔥 核心无限嵌套互斥逻辑
+       ========================================================================== */
+    
+    // 场景 A：当前块被 hover，且其内部【没有任何一个更深层】的块正处于 hover 状态
+    // 去掉了 > 子代限制，改用后代检查，这样即使隔着 table/tr/td 也能精准阻断父级
+    // &:hover:not(:has(.@{className}-block-wrapper:hover)) {
+    // //     // 1. 只有当前最内层的块，其直属的手柄容器才会显示并允许交互
+    //     > .@{className}-drag-handle-container,
+    //     > .@{className}-block-type-paragraph > .@{className}-drag-handle-container {
+    //         transform: translate(-100%, 0);
+    //         opacity: 1;
+    //         visibility: visible; // 恢复可见，允许鼠标交互
+    //         transition: transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1), 
+    //                 opacity 0.2s linear, 
+    //                 visibility 0.2s linear;
+    //     }
+
+    //     // 2. 如果你以后想给当前激活的 block 加一个精致的边框或背景高亮，在这里写：
+    //     // background-color: rgba(0, 122, 255, 0.02);
+    // }
+}
+
+.@{className}-block-wrapper.@{className}-block-type-blockquote,
+.@{className}-block-wrapper.@{className}-block-type-table,
+.@{className}-block-wrapper.@{className}-block-type-bullet_list,
+.@{className}-block-wrapper.@{className}-block-type-ordered_list
+{
+    >.@{className}-drag-handle-container {
+        top: -24px;
+        left: 0;
+        margin-right: 0;
+    }
+}

@@ -1,0 +1,64 @@
+@import url('@/config/index.less');
+
+.@{className}-received-msg-list {
+    width: 100%;
+    overflow: hidden;
+    .@{className}-received-msg-list-header {
+        padding: 16px 20px;
+        line-height: 24px;
+        border-bottom: 1px solid #e6e6e6;
+        color: #29303b;
+    }
+
+    .@{className}-received-msg-list-center {
+        height: 322px;
+        overflow: auto;
+    }
+
+    .@{className}-received-msg-list-footer {
+        padding: 8px 20px;
+        font-size: 12px;
+        border-top: 1px solid #e6e6e6;
+        color: #29303b;
+        text-align: center;
+        cursor: pointer;
+        &:hover {
+            background-color: #f7f8fa;
+        }
+    }
+
+    .@{className}-received-msg-list-items {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+        .@{className}-received-msg-list-item {
+            border-bottom: 1px solid #f3f3f3;
+            transition: 0.25s;
+            margin-right: 0;
+            position: relative;
+            cursor: pointer;
+            padding: 18px 17px;
+            &:hover {
+                background-color: #f7f8fa;
+            }
+            &:last-child {
+                border-bottom: 1px solid transparent;
+            }
+        }
+
+        .@{className}-received-msg-list-item-unread {
+            background-color: rgba(55, 125, 255, 0.04);
+            &::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 14px;
+                bottom: 14px;
+                width: 3px;
+                background: #377dff;
+                border-radius: 0 2px 2px 0;
+            }
+        }
+
+    }
+}

@@ -1,0 +1,131 @@
+@import url(../../config/index.less);
+
+// .@{className}-column-container {
+//     border: 1px solid #0B120E24;
+// }
+
+// .@{className}-column-content {
+//     // background: #eee;
+// }
+.@{className}-image-view {
+    position: relative;
+    // white-space: nowrap;
+    display: inline-block;
+    user-select: text;
+    -webkit-user-select: text;
+
+    .@{className}-image-view-content {
+        display: inline-block;
+        pointer-events: auto;
+        position: relative;
+
+        // img {
+        //     // display: block;
+        //     // width: auto;
+        //     // height: auto;
+        //     // max-width: none; // 👈 必须解除 100% 限制，否则图片无法放大移动
+        //     // max-height: none;
+        //     // transition: none;
+        //     height: 300px;
+        // }
+    }
+
+    .@{className}-image-view-ctrol-panel {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 10;
+        pointer-events: none;
+        display: none;
+    }
+
+    &:hover {
+        .@{className}-image-view-ctrol-panel {
+            display: block;
+        }
+
+    }
+
+    .@{className}-image-view-crop-panel {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 10;
+        // pointer-events: none;
+        // display: none;
+    }
+
+    .@{className}-image-view-placeholder {
+        width: 100%;
+        height: 100%;
+        // overflow: hidden;
+        // position: absolute;
+        // top: 0;
+        // left: 0;
+        // z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .@{className}-image-view-placeholder-inner {
+            width: 80px;
+            height: 62px;
+            position: relative;
+            border-radius: 4px;
+            background: #dfdfdf;
+
+            &::before {
+                border-bottom: 22px solid #fff;
+                border-left: 16px solid transparent;
+                border-right: 16px solid transparent;
+                bottom: 10px;
+                content: "";
+                height: 0;
+                inset-inline-start: 40px;
+                position: absolute;
+                width: 0;
+            }
+
+            &::after {
+                border-bottom: 36px solid #fff;
+                border-left: 20px solid transparent;
+                border-right: 30px solid transparent;
+                bottom: 10px;
+                content: "";
+                height: 0;
+                inset-inline-start: 10px;
+                position: absolute;
+                width: 0;
+            }
+        }
+        
+    }
+}
+
+.@{className}-image-view.ProseMirror-selectednode {
+    .@{className}-image-view-ctrol-panel {
+        display: block;
+    }
+}
+
+.@{className}-image-cursor {
+    display: inline-block;
+    /* 负边距防止光标占据实际字符宽度，导致文字抖动 */
+    margin-top: -0.3em;
+    width: 1px;
+    /* 使用 em 单位，确保高度随字号自动缩放 */
+    height: 1.2em;
+
+    background: #000;
+    /* 垂直对齐，确保光标在行内居中 */
+    vertical-align: middle;
+    /* 关键：防止模拟光标被点击或选中 */
+    pointer-events: none;
+    opacity: 1;
+    /* 闪烁动画 */
+    // animation: blink-animation 1s steps(1) infinite;
+}

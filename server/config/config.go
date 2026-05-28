@@ -35,6 +35,12 @@ type Redis struct {
 	Addr     string `mapstructure:"addr" json:"addr" yaml:"addr"`
 	Password string `mapstructure:"password" json:"password" yaml:"password"`
 	DB       int    `mapstructure:"db" json:"db" yaml:"db"`
+	// KeyPrefix Gin 侧 Redis 键命名空间，与 collab-server 的 REDIS_PREFIX（Hocuspocus）区分；verify 缓存等为 {key_prefix}verify:v1:...
+	KeyPrefix string `mapstructure:"key_prefix" json:"key_prefix" yaml:"key_prefix"`
+	// WsPubSubChannel 非空且 Redis 可用时，通过 Pub/Sub 将 Emit 同步到其他 Gin 副本。留空且 key_prefix 非空时默认为 {key_prefix}ws:broadcast。
+	WsPubSubChannel string `mapstructure:"ws_pubsub_channel" json:"ws_pubsub_channel" yaml:"ws_pubsub_channel"`
+	// VerifyCacheTTLSeconds > 0 且 Redis 可用时，缓存 /internal/collab/verify 成功结果（秒；权限变更最长延迟 TTL）。
+	VerifyCacheTTLSeconds int `mapstructure:"verify_cache_ttl_seconds" json:"verify_cache_ttl_seconds" yaml:"verify_cache_ttl_seconds"`
 }
 
 type Jwt struct {
@@ -68,6 +74,14 @@ type Templates struct {
 	Path string `mapstructure:"path" json:"path" yaml:"path"`
 }
 
+// Collab 協作：與 collab-server（Hocuspocus）共用 internal_secret，對齊 X-Collab-Internal-Secret。
+type Collab struct {
+	InternalSecret string `mapstructure:"internal_secret" json:"internal_secret" yaml:"internal_secret"`
+	// ExpandYdocURL 可选：collab-server 上 expand-ydoc HTTP 根地址（如 http://127.0.0.1:1235），
+	// 用于 webhook 仅收到 ydoc 字节时反解 PM JSON + content_text。也可用环境变量 COLLAB_EXPAND_YDOC_URL。
+	ExpandYdocURL string `mapstructure:"expand_ydoc_url" json:"expand_ydoc_url" yaml:"expand_ydoc_url"`
+}
+
 type Config struct {
 	Server    Server    `mapstructure:"server"`
 	Proxy     Proxy     `mapstructure:"proxy"`
@@ -78,6 +92,7 @@ type Config struct {
 	Upload    Upload    `mapstructure:"upload"`
 	Web       Web       `mapstructure:"web"`
 	Templates Templates `mapstructure:"templates"`
+	Collab    Collab    `mapstructure:"collab"`
 }
 
 func Init(configPath string) error {

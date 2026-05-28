@@ -1,0 +1,185 @@
+@import url(../config/index.less);
+
+.@{className}-button {
+    // 1. 基础属性与默认变量
+    // min-width: 32px;
+    // min-height: 32px;
+    line-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    gap: 6px;
+    padding: 0 15px;
+    cursor: pointer;
+    border-radius: 10px;
+    font-size: 14px;
+    // 简化 transition，去掉不需要的 shadow 动画
+    transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+
+    --btn-text: #1c2024;
+    --btn-bg: transparent;
+    --btn-border: rgba(2, 9, 16, 0.13);
+    --btn-hover-bg: rgba(234, 234, 235, 1);
+
+    color: var(--btn-text);
+    background-color: var(--btn-bg);
+    border: 1px solid var(--btn-border);
+
+    // &:disabled {
+    //     cursor: not-allowed;
+    //     opacity: 0.6;
+    //     // pointer-events: none;
+    // }
+
+    &[disabled], &.@{className}-button-disabled {
+        opacity: 0.4;             // 半透明置灰
+        cursor: not-allowed;      // 禁用箭头指针
+        background-color: transparent; // 强行拦截 hover 背景
+        color: #94a3b8; // 恢复到浅灰字色（slate-400）
+        pointer-events: none;     // 彻底断绝一切底层的指针悬浮、点击响应
+
+        // 如果禁用的是处于激活高亮状态的按钮，把强烈的激活色洗淡
+        &.@{className}-button-active {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+    }
+
+    .@{className}-button-loading-spin {
+        animation: btnloading 1s infinite linear;
+    }
+
+    @keyframes btnloading {
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    &:focus {
+        outline: none;
+    }
+
+    &:hover {
+        background-color: var(--btn-hover-bg);
+    }
+
+    // --- 这里的 ::after 和 .clicked 逻辑全部删掉 ---
+
+    // 2. 颜色定义
+    // 2. 颜色定义 (新增常用色)
+    &.@{className}-button-color-purple {
+        --btn-text: #fff;
+        --btn-bg: #7e51ff;
+        --btn-border: #7e51ff;
+        --btn-hover-bg: #6229ff;
+    }
+
+    &.@{className}-button-color-yellow {
+        --btn-text: #85461d;
+        --btn-bg: #fffbe6;
+        --btn-border: #ffe58f;
+        --btn-hover-bg: #fff1b8;
+    }
+
+    &.@{className}-button-color-orange {
+        --btn-text: #fff; // 或者保持之前的 #cc4e00
+        --btn-bg: #fa8c16;
+        --btn-border: #fa8c16;
+        --btn-hover-bg: #d46b08;
+    }
+
+    &.@{className}-button-color-cyan {
+        --btn-text: #fff;
+        --btn-bg: #13c2c2;
+        --btn-border: #13c2c2;
+        --btn-hover-bg: #08979c;
+    }
+
+    &.@{className}-button-color-dark {
+        --btn-text: #fff;
+        --btn-bg: #2d3436;
+        --btn-border: #2d3436;
+        --btn-hover-bg: #000000;
+    }
+
+    &.@{className}-button-color-black {
+        --btn-text: #fff;
+        --btn-bg: #000000;
+        --btn-border: #000000;
+        --btn-hover-bg: #262626;
+    }
+
+    // 特殊：文本/幽灵按钮颜色（仅文字变色）
+    &.@{className}-button-color-text {
+        --btn-text: #636e72;
+        --btn-bg: transparent;
+        --btn-border: transparent;
+        --btn-hover-bg: rgba(0, 0, 0, 0.04);
+    }
+
+    &.@{className}-button-color-blue {
+        --btn-text: #fff;
+        --btn-bg: #377dff;
+        --btn-border: #377dff;
+        --btn-hover-bg: #1a73e8;
+
+    }
+
+    &.@{className}-button-color-green {
+        --btn-text: #fff;
+        --btn-bg: #52c41a;
+        --btn-border: #52c41a;
+        --btn-hover-bg: #389e0d;
+    }
+    
+    &.@{className}-button-color-red {
+        --btn-text: #fff;
+        --btn-bg: #ff4d4f;
+        --btn-border: #ff4d4f;
+        --btn-hover-bg: #cf1322;
+    }
+
+    // 3. 变体定义
+    &.@{className}-button-variant-link {
+        border-color: transparent !important;
+        background-color: transparent;
+
+        &:hover {
+            background-color: var(--btn-hover-bg);
+        }
+    }
+
+    &.@{className}-button-variant-soft {
+        border-color: transparent;
+        background-color: var(--btn-bg);
+
+        &:hover {
+            background-color: var(--btn-hover-bg);
+        }
+    }
+
+    &.@{className}-button-variant-outline {
+        background-color: transparent;
+        border-color: var(--btn-border);
+        color: var(--btn-border);
+        &:hover {
+            // background-color: var(--btn-bg);
+            opacity: 0.8;
+        }
+    }
+
+    // 4. 其他状态
+    &.@{className}-button-active {
+        background-color: rgba(15, 22, 36, 0.05);
+        border-color: rgba(98, 41, 255, 0.3);
+
+        svg {
+            color: #6229ff;
+        }
+    }
+
+    &:where(.@{className}-button-radius-none) {
+        border-radius: 0;
+    }
+}

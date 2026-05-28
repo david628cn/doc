@@ -1,0 +1,140 @@
+@import url(../../config/index.less);
+
+.@{className}-table-view {
+    position: relative;
+    // margin: 16px;
+    // margin-top: 28px;
+    // overflow-x: auto;
+    // padding: 12px;
+    // overflow: auto;
+    // overscroll-behavior: none; /* 禁用 Mac 系统的弹性拉伸 */
+    // -webkit-overflow-scrolling: touch; /* 保证平滑滚动 */
+    .@{className}-table-view-inner {
+        position: relative;
+        // overflow: auto;
+        // display: inline-block;
+    }
+    .column-resize-handle {
+        background: rgba(79, 70, 229, 1);
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        // overflow: hidden;
+        border-spacing: 0;
+        word-break: break-word;
+        // cursor: text;
+        table-layout: fixed;
+        position: relative;
+        margin: 8px 0;
+    }
+
+    tr {
+        height: 40px;
+    
+        &:first-child {
+    
+            th,
+            td {
+                border-top: 1px solid #dee0e3;
+            }
+        }
+    }
+    
+    td, th {
+        padding: 8px 16px;
+        margin: 0;
+        min-height: 39px;
+        min-width: 50px;
+        font-size: 14px;
+        word-break: break-word;
+        line-height: 1.8;
+        position: relative;
+        height: 1px;
+        vertical-align: top;
+        // overflow: hidden;
+        display: table-cell;
+        border-right: 1px solid #dee0e3;
+        border-bottom: 1px solid #dee0e3;
+        background-color: #fff;
+        overflow: auto;
+    
+        &:first-child {
+            border-left: 1px solid #dee0e3;
+            // border-top: 1px solid #dee0e3;
+        }
+        p {
+            margin: 0 !important;
+        }
+    }
+    
+    td:not([data-colwidth]):not(.column-resize-dragging),
+    th:not([data-colwidth]):not(.column-resize-dragging) {
+        /* if there's no explicit width set and the column is not being resized, set a default width */
+        min-width: var(--default-cell-min-width);
+    }
+
+    th {
+        background: rgba(15,22,36,0.05);
+        font-weight: 700;
+    }
+    
+    .column-resize-handle {
+        // height: calc(100% + 2px);
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        z-index: 1;
+        border-right: 1px dashed #777;
+        background: transparent;
+        pointer-events: none;
+    }
+
+    /* Give selected cells a blue overlay */
+    .selectedCell {
+        &::after {
+            z-index: 2;
+            position: absolute;
+            content: '';
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            background: rgba(200, 200, 255, 0.4);
+            pointer-events: none;
+        }
+        
+    }
+
+    // .@{className}-table-view-col-toolbar {
+    //     width: 100%;
+    //     height: 10px;
+    //     position: absolute;
+    //     top: -10px;
+    //     left: 0;
+    //     z-index: 4;
+    //     border-radius: 4px 4px 0 0;
+    //     // overflow: hidden;
+    //     background: #eff0f1;
+    // }
+
+    // .@{className}-table-view-row-toolbar {
+    //     width: 10px;
+    //     height: 100%;
+    //     position: absolute;
+    //     top: 0;
+    //     left: -10px;
+    //     z-index: 4;
+    //     border-radius: 4px 0 0 4px;
+    //     // overflow: hidden;
+    //     background: #eff0f1;
+    // }
+    
+}
+
+.ProseMirror.resize-cursor {
+    cursor: ew-resize;
+    cursor: col-resize;
+}

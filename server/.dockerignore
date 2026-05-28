@@ -1,0 +1,16 @@
+.git
+.gitignore
+*.md
+.env
+.env.*
+!.env.example
+deploy/.env
+logs
+uploads
+tmp
+*.log
+*.test
+.idea
+.vscode
+coverage.out
+__debug_bin*

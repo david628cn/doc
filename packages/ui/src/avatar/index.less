@@ -1,0 +1,219 @@
+@import url(../config/index.less);
+
+.@{className}-avatar {
+    position: relative;
+    cursor: pointer;
+    display: inline-flex;
+    position: relative;
+    flex-shrink: 0;
+    // 必須為 visible，否則 box-shadow 和 status 小圓點會被裁切
+    overflow: visible; 
+    background-color: rgba(0, 0, 0, 0.05); 
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.2s ease,
+                z-index 0s; // z-index 不需要過渡
+
+    &:hover {
+        // 1. 提升層級，確保擴散動畫和邊框不被遮擋
+        z-index: 10;
+        // 4. 輕微放大效果（可選，增加動感）
+        // transform: translateY(-2px);
+        // background-color: rgba(0, 0, 0, 0.05); 
+        .@{className}-avatar-content {
+            // 2. 補回背景色的 hover 效果
+            &::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background-color: rgba(0, 0, 0, 0.1); // 淡淡的黑影
+                pointer-events: none;
+            }
+            // img {
+            //     transform: scale(1.08); 
+            // }
+        }
+    }
+
+    &.@{className}-avatar-count {
+        cursor: default;
+        .@{className}-avatar-content {
+            &::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background-color: rgba(0, 0, 0, 0.1); // 淡淡的黑影
+                pointer-events: none;
+            }
+        }
+    }
+
+    // &:active {
+    //     transform: scale(0.92);
+    //     transition: transform 0.1s; // 點擊回彈要快
+    // }
+
+    .@{className}-avatar-content {
+        width: 100%;
+        height: 100%;
+        position: relative; // 確保偽元素定位正確
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: inherit; // 繼承 View 的圓角
+        overflow: hidden; // 確保內部圖片不超出圓角
+        transition: background-color 0.3s ease, filter 0.3s ease;
+
+        img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            transition: filter 0.3s ease, transform 0.3s ease;
+        }
+    }
+
+    .@{className}-avatar-number {
+        width: 24px;
+        height: 24px;
+        position: absolute;
+        top: 0;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: #ff4d4f; 
+        color: #fff;
+        font-size: 10px;
+        font-weight: bold;
+        overflow: hidden;
+        transform: translate(30%, -30%);
+        transform-origin: 100% 0%;
+        inset-inline-end: 0;
+        box-shadow: 0 0 0 1px #fff;
+        transition: background-color 0.3s ease, filter 0.3s ease;
+    }
+
+    // 狀態：離線模式濾鏡 (修正類名路徑)
+    &.@{className}-avatar-offline-mode {
+        .@{className}-avatar-content {
+            filter: grayscale(1);
+            opacity: 0.6;
+        }
+    }
+
+    // 狀態：在線/離線小圓點
+    .@{className}-avatar-status {
+        position: absolute;
+        z-index: 2;
+        width: 25%;
+        height: 25%;
+        min-width: 8px;
+        min-height: 8px;
+        border-radius: 50%;
+        // 這裡的 border 要跟隨背景色，防止與頭像混在一起
+        border: 2px solid #fff; 
+        // 默認位置在右下角
+        bottom: 0;
+        right: 0;
+        transform: translate(25%, 25%) scale(1.1); // 稍微向外偏移，讓它壓在邊界上
+
+        &-online {
+            background: #52c41a;
+            &::after {
+                content: "";
+                position: absolute;
+                inset: -2px;
+                border: 1.5px solid #52c41a;
+                border-radius: 50%;
+                // animation: avatar-pulse 1.5s infinite;
+            }
+        }
+
+        &-offline {
+            background: #bfbfbf;
+        }
+    }
+
+    // 針對圓形頭像的狀態點優化（防止離圓心太遠）
+    &.@{className}-avatar-circle {
+        .@{className}-avatar-status {
+            right: 14%;
+            bottom: 14%;
+        }
+    }
+}
+
+// 頭像組
+.@{className}-avatar-group {
+    display: flex;
+    align-items: center; // 確保垂直居中
+    // 增加一個 padding，防止第一個頭像的 box-shadow 被父容器裁切
+    padding-left: 2px; 
+
+    .@{className}-avatar {
+        box-shadow: 0 0 0 2px #fff; 
+        margin-left: -10px; // 負邊距
+        position: relative; // 必須
+        background-color: #fff; // 確保背景不透明
+
+        &:first-child {
+            margin-left: 0;
+            // z-index: 1; // 第一個層級最低
+        }
+
+        // 為了讓頭像從左到右依次重疊，後面的 z-index 要更高
+        // 如果你的代碼是循環生成的，React 的 key 順序會影響渲染
+        // 這裡可以透過 hover 提升層級
+        &:hover {
+            z-index: 100 !important; 
+            box-shadow: 0 0 0 2px #fff, 0 4px 12px rgba(0,0,0,0.15);
+        }
+    }
+    .@{className}-avatar-count {
+        box-shadow: 0 0 0 2px #fff; 
+        margin-left: -10px; // 負邊距
+        position: relative; // 必須
+        background-color: #fff; // 確保背景不透明
+
+        &:first-child {
+            margin-left: 0;
+            // z-index: 1; // 第一個層級最低
+        }
+
+        // 為了讓頭像從左到右依次重疊，後面的 z-index 要更高
+        // 如果你的代碼是循環生成的，React 的 key 順序會影響渲染
+        // 這裡可以透過 hover 提升層級
+        &:hover {
+            z-index: 100 !important; 
+            box-shadow: 0 0 0 2px #fff, 0 4px 12px rgba(0,0,0,0.15);
+        }
+    }
+}
+
+// 動畫
+// @keyframes avatar-pulse {
+//     0% { transform: scale(1); opacity: .8; }
+//     100% { transform: scale(2.5); opacity: 0; }
+// }
+
+// @keyframes switch-spin {
+//     from {
+//         transform: rotate(0deg);
+//     }
+
+//     to {
+//         transform: rotate(360deg);
+//     }
+// }
+
+// @keyframes avatar-pulse {
+//     0% {
+//         transform: scale(1);
+//         opacity: .8;
+//     }
+
+//     100% {
+//         transform: scale(2.5);
+//         opacity: 0;
+//     }
+// }

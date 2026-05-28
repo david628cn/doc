@@ -1,29 +1,41 @@
-# 第一阶段：构建环境
-FROM golang:1.24.6 AS builder
-WORKDIR /app
+# syntax=docker/dockerfile:1
+# 构建（在 editor/server 目录）：docker build -t doc-space-server .
+# 运行需 config.yaml：compose 默认挂载 deploy/config.docker.yaml
+
+FROM golang:1.24-bookworm AS builder
+ENV GOTOOLCHAIN=auto
+WORKDIR /src
+
 COPY go.mod go.sum ./
 RUN go mod download
+
 COPY . .
-ARG APP_ENV=development
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-X main.buildEnv=${APP_ENV}" -o main .
 
-# 第二阶段：运行环境
-FROM alpine:latest
+# main.go 引用 web/dist 下静态文件；仓库若仅有 web/ 根目录资源则补齐占位
+RUN mkdir -p templates static web/dist && \
+    if [ -f web/manifest.json ]; then cp web/manifest.json web/dist/manifest.json; else echo '{"name":"doc-space"}' > web/dist/manifest.json; fi && \
+    echo '{}' > web/dist/favicon.json && \
+    printf '%s' 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAukBY4lXwX0AAAAASUVORK5CYII=' | base64 -d > web/dist/logo192.png
+
+RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o /out/app .
+
+# --- runtime ---
+FROM alpine:3.20
+RUN apk add --no-cache ca-certificates tzdata
+
 WORKDIR /app
-COPY --from=builder /app/main .
-COPY --from=builder /app/templates ./templates
-COPY --from=builder /app/static ./static
-ENV GIN_MODE=release \
-    PORT=8080
-EXPOSE 8080
+
+COPY --from=builder /out/app ./main
+COPY deploy/config.docker.yaml ./config.yaml
+COPY --from=builder /src/templates ./templates
+COPY --from=builder /src/static ./static
+COPY --from=builder /src/web ./web
+
+RUN adduser -D -u 65532 app && mkdir -p uploads logs && chown -R app:app /app
+
+USER app
+
+ENV GIN_MODE=release
+EXPOSE 9000
+
 CMD ["./main"]
-
-
-## 开发环境构建
-#docker build -t app .
-#
-## 生产环境构建（带自定义参数）
-#docker build --build-arg APP_ENV=production -t app .
-#
-## 运行容器（覆盖环境变量）
-#docker run -e PORT=8000 -p 8000:8000 app

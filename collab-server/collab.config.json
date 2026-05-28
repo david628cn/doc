@@ -1,0 +1,4 @@
+{
+	"ginBaseUrl": "http://127.0.0.1:9000",
+	"internalSecret": "doc-space-dev-collab-internal"
+}

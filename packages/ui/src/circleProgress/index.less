@@ -1,0 +1,92 @@
+@import url(../config/index.less);
+
+.@{className}-circle-progress {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    /* text-align: center; */
+    font-size: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.5);
+
+    .@{className}-circle-progress-inner {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .@{className}-circle-progress-circle-bg {
+        fill: none;
+        stroke: #dedede;
+    }
+
+    .@{className}-circle-progress-svg {
+        border-radius: 8px;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .@{className}-circle-progress-active {
+        fill: none;
+        stroke-linecap: round;
+        // stroke-dasharray: 283;
+        transition: stroke-dashoffset 0.3s, stroke 0.3s;
+    }
+
+    .@{className}-circle-progress-status-hash {
+        stroke: #108ee9;
+    }
+
+    .@{className}-circle-progress-status-upload {
+        stroke: #07c160;
+    }
+
+    .@{className}-circle-progress-status-pause {
+        stroke: #999;
+    }
+
+    .@{className}-circle-progress-status-error {
+        stroke: #fa5151;
+    }
+
+    .@{className}-circle-progress-content {
+        // position: absolute;
+        // top: 40px;
+        // left: 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 12px;
+        font-weight: bold;
+        color: #dedede;
+        padding: 3px;
+    }
+
+    .@{className}-circle-progress-success-tick {
+        width: 40px;
+        height: 40px;
+        display: none;
+        background: #07c160;
+        border-radius: 50%;
+        padding: 5px;
+    }
+
+    .@{className}-circle-progress-completed .@{className}-circle-progress-success-tick {
+        display: block;
+        animation: zoomIn 0.3s ease-out forwards;
+    }
+
+    @keyframes zoomIn {
+        from {
+            transform: scale(0);
+            opacity: 0;
+        }
+
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+}

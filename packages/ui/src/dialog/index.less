@@ -1,0 +1,67 @@
+@import url(../config/index.less);
+
+// 建议在这里也保留 root 定义，或者确保全局已加载
+:root {
+    --z-index-dialog: 1000; // 对应你之前的 --z-index-modal
+}
+
+.@{className}-dialog-container {
+    position: absolute;
+    inset: 0;
+    // display: flex;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: var(--z-index-dialog);
+    display: none;
+    .@{className}-dialog-inner {
+        // flex-grow: 1;
+        margin: 0 auto;
+        position: relative;
+        // top: 100px;
+        width: 450px;
+        height: 100%;
+    }
+    .@{className}-dialog {
+        width: 100%;
+        margin: auto;
+        padding: 0;
+        position: relative;
+        border-radius: 10px;
+        overflow: hidden;
+        top: 100px;
+        background: #fff;
+        box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
+        /* margin: auto; */
+    }
+    .@{className}-dialog-center {
+        transform: translate(-50%, -50%);
+        left: 50%;
+        top: 50%;
+    }
+    .@{className}-dialog-title {
+        font-size: 20px;
+        font-weight: bold;
+        padding: 20px 20px 8px;
+    }
+    .@{className}-dialog-footer {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 16px 20px 20px;
+        box-sizing: border-box;
+        // border-top: 1px solid rgba(0, 0, 0, 0.06);
+    }
+    .@{className}-dialog-close {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        padding: 0;
+    }
+}
+.@{className}-dialog-container-open {
+    display: block;
+}

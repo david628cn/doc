@@ -1,0 +1,23 @@
+.carvy-doc {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+
+	&--preview {
+		/* 预览：可选弱化编辑区边框等 */
+	}
+
+	&--collab {
+		/* 协同编辑 */
+		min-height: 0;
+
+		.carve-doc-container {
+			flex: 1;
+			min-height: 0;
+			display: flex;
+			flex-direction: column;
+		}
+	}
+
+}

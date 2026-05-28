@@ -1,0 +1,100 @@
+@import url('@/config/index.less');
+
+.@{className}-home-page {
+	box-sizing: border-box;
+	padding: 24px 32px 48px;
+	max-width: 1200px;
+
+	&__actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px;
+		margin-bottom: 24px;
+	}
+
+	&__action-card {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		padding: 10px 18px;
+		border: 1px solid rgba(0, 0, 0, 0.08);
+		border-radius: 8px;
+		background: #fff;
+		cursor: pointer;
+		font-size: 14px;
+		color: rgba(0, 0, 0, 0.85);
+	}
+
+	&__action-card:hover {
+		background: rgba(0, 0, 0, 0.02);
+	}
+
+	&__table-head {
+		display: flex;
+		align-items: center;
+		padding: 10px 12px;
+		border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+		font-size: 12px;
+		font-weight: 600;
+		color: rgba(0, 0, 0, 0.45);
+	}
+
+	&__table-row {
+		display: flex;
+		align-items: center;
+		padding: 12px;
+		border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+		cursor: pointer;
+		font-size: 14px;
+	}
+
+	&__table-row:hover {
+		background: rgba(0, 0, 0, 0.02);
+	}
+
+	&__table-row--fav {
+		cursor: default;
+	}
+
+	&__table-row-main {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		align-items: center;
+		cursor: pointer;
+		text-align: left;
+		border: none;
+		background: transparent;
+		font: inherit;
+		padding: 0;
+	}
+
+	&__col-fav {
+		width: 52px;
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	&__col-title {
+		flex: 1;
+		min-width: 0;
+	}
+
+	&__col-meta {
+		width: 100px;
+		flex-shrink: 0;
+		text-align: right;
+		color: rgba(0, 0, 0, 0.45);
+		font-size: 12px;
+	}
+
+	&__col-time {
+		width: 160px;
+		flex-shrink: 0;
+		text-align: right;
+		color: rgba(0, 0, 0, 0.45);
+		font-size: 12px;
+	}
+}

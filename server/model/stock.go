@@ -35,8 +35,8 @@ type Stock struct {
 	MinIn      float64   `gorm:"column:min_in;type:double(30,2)" json:"min_in"`
 	MinOut     float64   `gorm:"column:min_out;type:double(30,2)" json:"min_out"`
 	MinDelta   float64   `gorm:"column:min_delta;type:double(30,2)" json:"min_delta"`
-	CreateDate time.Time `gorm:"type:date;column:create_date" json:"create_date"`
-	UpdateDate time.Time `gorm:"type:date;column:update_date" json:"update_date"`
+	CreateTime time.Time `gorm:"column:create_time;autoCreateTime" json:"create_time"`
+	UpdateTime time.Time `gorm:"column:update_time;autoCreateTime;autoUpdateTime" json:"update_time"`
 }
 
 func (Stock) TableName() string {

@@ -1,0 +1,79 @@
+@import url(../../config/index.less);
+
+// .@{className}-column-container {
+//     border: 1px solid #0B120E24;
+// }
+
+// .@{className}-column-content {
+//     // background: #eee;
+// }
+.@{className}-video-view {
+    // position: relative;
+    // white-space: nowrap;
+    video {
+        width: 100%;
+    }
+    .@{className}-video-view-ctrol-panel {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 10;
+        pointer-events: none;
+        display: none;
+    }
+    &:hover {
+        .@{className}-video-view-ctrol-panel {
+            display: block;
+        }
+        
+    }
+}
+
+.@{className}-video-cursor {
+    display: inline-block;
+    /* 负边距防止光标占据实际字符宽度，导致文字抖动 */
+    margin-top: -0.3em;
+    width: 1px;
+    /* 使用 em 单位，确保高度随字号自动缩放 */
+    height: 1.2em;
+
+    background: #000;
+    /* 垂直对齐，确保光标在行内居中 */
+    vertical-align: middle;
+    /* 关键：防止模拟光标被点击或选中 */
+    pointer-events: none;
+    opacity: 1;
+    /* 闪烁动画 */
+    // animation: blink-animation 1s steps(1) infinite;
+}
+
+// @keyframes blink-animation {
+//     0% {
+//         opacity: 1;
+//     }
+
+//     50% {
+//         opacity: 0;
+//     }
+
+//     100% {
+//         opacity: 1;
+//     }
+// }
+
+// /* 兼容旧版 Webkit 浏览器 */
+// @-webkit-keyframes blink-animation {
+//     0% {
+//         opacity: 1;
+//     }
+
+//     50% {
+//         opacity: 0;
+//     }
+
+//     100% {
+//         opacity: 1;
+//     }
+// }
